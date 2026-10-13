@@ -3,7 +3,9 @@
 A Next.js, FastAPI, and PostgreSQL foundation for evidence-based interview
 preparation. The current phase provides a public product site, a responsive ten-section
 workspace, typed contracts, a normalized relational model, Clerk account integration
-and an isolated fictional recruiter demo. Learning workflows
+and an isolated fictional recruiter demo. Accounts can save preparation profiles,
+manage target jobs, upload PDF resumes and review editable candidate evidence.
+Learning workflows
 and AI integrations are planned; they are not implemented or represented as working
 features.
 
@@ -47,6 +49,10 @@ and [engineering rules](AGENTS.md) define later phases. See the
 [relational model, seed command and migration recovery](docs/DATA_MODEL.md).
 The [UI foundation guide](docs/UI_FOUNDATION.md) maps routes, reusable components,
 interaction patterns and the boundary between available and planned features.
+The [candidate context guide](docs/CANDIDATE_CONTEXT.md) describes the implemented
+profile and target-job CRUD, optional data, validation, authorization and retention.
+The [resume privacy guide](docs/RESUME_PRIVACY.md) describes secure PDF ingestion,
+deterministic evidence, review/deletion, API limits and migration 0004.
 
 V1's `app.py`, `questions.json`, and `requirements.txt` remain unchanged at the root
 and in Git history (baseline `48fcd90`). They are archival source, outside the V2

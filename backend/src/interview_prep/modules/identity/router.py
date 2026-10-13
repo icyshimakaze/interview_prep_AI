@@ -1,22 +1,22 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_prep.core.errors import ErrorResponse
 from interview_prep.db.session import get_session
+from interview_prep.modules.identity import profiles
 from interview_prep.modules.identity.dependencies import require_account, verified_identity
-from interview_prep.modules.identity.models import PrincipalKind, PrincipalStatus, Profile, User
-from interview_prep.modules.identity.queries import dashboard, owned_resume, owned_target
+from interview_prep.modules.identity.models import PrincipalKind, PrincipalStatus, User
+from interview_prep.modules.identity.queries import dashboard, owned_target
 from interview_prep.modules.identity.schemas import (
     DashboardView,
     EmptyRequest,
     ProfileInput,
     ProfileView,
-    ResumeView,
     SessionView,
     TargetView,
 )
@@ -56,11 +56,6 @@ async def account_dashboard(user: Account, session: Session) -> DashboardView:
     return await dashboard(session, user)
 
 
-@router.get("/resumes/{resource_id}", response_model=ResumeView)
-async def get_resume(resource_id: UUID, user: Account, session: Session) -> ResumeView:
-    return await owned_resume(session, user.id, resource_id)
-
-
 @router.get("/targets/{resource_id}", response_model=TargetView)
 async def get_target(resource_id: UUID, user: Account, session: Session) -> TargetView:
     return await owned_target(session, user.id, resource_id)
@@ -68,23 +63,24 @@ async def get_target(resource_id: UUID, user: Account, session: Session) -> Targ
 
 @router.put("/profile", response_model=ProfileView, responses={409: {"model": ErrorResponse}})
 async def save_profile(body: ProfileInput, user: Account, session: Session) -> ProfileView:
-    # Serializes first creation as well as updates from two browser tabs.
-    await session.scalar(select(User).where(User.id == user.id).with_for_update())
-    profile = await session.scalar(select(Profile).where(Profile.owner_id == user.id))
-    if profile is None:
-        if body.expected_revision is not None:
-            raise HTTPException(status_code=409)
-        profile = Profile(owner_id=user.id, revision=1)
-        session.add(profile)
-    elif body.expected_revision != profile.revision:
-        raise HTTPException(status_code=409)
-    else:
-        profile.revision += 1
-    profile.display_name = body.display_name
-    profile.target_role = body.target_role.strip()
-    profile.experience_band = body.experience_band
-    profile.timezone = body.timezone
-    profile.weekly_minutes = body.weekly_minutes
-    await session.commit()
-    await session.refresh(profile)
-    return ProfileView.model_validate(profile)
+    return await profiles.save_profile(session, user.id, body)
+
+
+@router.get("/profile", response_model=ProfileView | None)
+async def get_profile(user: Account, session: Session) -> ProfileView | None:
+    return await profiles.read_profile(session, user.id)
+
+
+@router.delete(
+    "/profile",
+    status_code=204,
+    responses={409: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+)
+async def remove_profile(
+    user: Account,
+    session: Session,
+    expected_id: UUID,
+    expected_revision: Annotated[int, Query(ge=1)],
+) -> Response:
+    await profiles.delete_profile(session, user.id, expected_id, expected_revision)
+    return Response(status_code=204)

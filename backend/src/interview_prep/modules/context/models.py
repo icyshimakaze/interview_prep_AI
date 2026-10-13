@@ -29,9 +29,38 @@ class ReviewStatus(StrEnum):
     REJECTED = "rejected"
 
 
+class EvidenceCategory(StrEnum):
+    LANGUAGE = "language"
+    FRAMEWORK = "framework"
+    DATABASE = "database"
+    TOOL = "tool"
+    PROJECT = "project"
+    EDUCATION = "education"
+    EXPERIENCE = "experience"
+    OTHER = "other"
+
+
+class EvidenceOrigin(StrEnum):
+    RESUME = "resume"
+    USER = "user"
+
+
 class RequirementPriority(StrEnum):
     ESSENTIAL = "essential"
     DESIRABLE = "desirable"
+
+
+class TargetPriority(StrEnum):
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+
+
+class TargetStatus(StrEnum):
+    SAVED = "saved"
+    APPLIED = "applied"
+    INTERVIEWING = "interviewing"
+    ARCHIVED = "archived"
 
 
 class Skill(Record):
@@ -57,10 +86,29 @@ class SkillAlias(Record):
 class TargetJob(OwnedRecord):
     __tablename__ = "job_targets"
     __table_args__ = owned_args(
-        __tablename__, CheckConstraint("length(trim(title)) > 0", name="title")
+        __tablename__,
+        CheckConstraint("length(trim(title)) > 0", name="title"),
+        CheckConstraint("revision > 0", name="revision"),
+        CheckConstraint("notes IS NULL OR length(notes) <= 5000", name="notes_length"),
+        CheckConstraint(
+            "source_url IS NULL OR length(source_url) <= 2000", name="source_url_length"
+        ),
     )
     title: Mapped[str] = mapped_column(String(200))
     organization: Mapped[str | None] = mapped_column(String(200))
+    source_url: Mapped[str | None] = mapped_column(String(2000))
+    notes: Mapped[str | None] = mapped_column(Text)
+    priority: Mapped[TargetPriority] = mapped_column(
+        enum_column(TargetPriority, "target_priority"),
+        default=TargetPriority.NORMAL,
+        server_default="normal",
+    )
+    status: Mapped[TargetStatus] = mapped_column(
+        enum_column(TargetStatus, "target_status"),
+        default=TargetStatus.SAVED,
+        server_default="saved",
+    )
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     versions: Mapped[list["TargetJobVersion"]] = relationship(viewonly=True, lazy="raise")
 
 
@@ -106,9 +154,12 @@ class JobSkillRequirement(OwnedRecord):
 class Resume(OwnedRecord):
     __tablename__ = "resumes"
     __table_args__ = owned_args(
-        __tablename__, CheckConstraint("length(trim(label)) > 0", name="label")
+        __tablename__,
+        CheckConstraint("length(trim(label)) > 0", name="label"),
+        CheckConstraint("revision > 0", name="revision"),
     )
     label: Mapped[str] = mapped_column(String(200))
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     versions: Mapped[list["ResumeVersion"]] = relationship(viewonly=True, lazy="raise")
 
 
@@ -134,6 +185,7 @@ class ResumeVersion(OwnedRecord):
     upload_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     upload_deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     extraction_version: Mapped[str | None] = mapped_column(String(100))
+    extraction_note: Mapped[str | None] = mapped_column(String(100))
     status: Mapped[ProcessingStatus] = mapped_column(enum_column(ProcessingStatus, "resume_status"))
     evidence: Mapped[list["ResumeSkillEvidence"]] = relationship(viewonly=True, lazy="raise")
 
@@ -143,21 +195,36 @@ class ResumeSkillEvidence(OwnedRecord):
     __table_args__ = owned_args(
         __tablename__,
         owned_fk("resume_version_id", "resume_versions"),
-        CheckConstraint("source_start >= 0 AND source_end > source_start", name="source_span"),
-        CheckConstraint("source_page IS NULL OR source_page BETWEEN 1 AND 20", name="source_page"),
         CheckConstraint(
-            "length(trim(claim)) > 0 AND length(trim(source_excerpt)) > 0", name="claim_and_excerpt"
+            "(origin = 'resume' AND source_start IS NOT NULL AND source_end IS NOT NULL "
+            "AND source_start >= 0 AND source_end > source_start AND source_excerpt IS NOT NULL "
+            "AND length(trim(source_excerpt)) > 0) OR "
+            "(origin = 'user' AND source_start IS NULL AND source_end IS NULL "
+            "AND source_excerpt IS NULL AND source_page IS NULL)",
+            name="source_span",
         ),
+        CheckConstraint("source_page IS NULL OR source_page BETWEEN 1 AND 20", name="source_page"),
+        CheckConstraint("length(trim(claim)) > 0", name="claim_and_excerpt"),
     )
     resume_version_id: Mapped[UUID] = mapped_column(index=True)
     skill_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("skills.id", ondelete="RESTRICT"), index=True
     )
     claim: Mapped[str] = mapped_column(String(2000))
-    source_excerpt: Mapped[str] = mapped_column(String(2000))
+    category: Mapped[EvidenceCategory] = mapped_column(
+        enum_column(EvidenceCategory, "evidence_category"),
+        default=EvidenceCategory.OTHER,
+        server_default="other",
+    )
+    origin: Mapped[EvidenceOrigin] = mapped_column(
+        enum_column(EvidenceOrigin, "evidence_origin"),
+        default=EvidenceOrigin.RESUME,
+        server_default="resume",
+    )
+    source_excerpt: Mapped[str | None] = mapped_column(String(2000))
     source_page: Mapped[int | None] = mapped_column(Integer)
-    source_start: Mapped[int] = mapped_column(Integer)
-    source_end: Mapped[int] = mapped_column(Integer)
+    source_start: Mapped[int | None] = mapped_column(Integer)
+    source_end: Mapped[int | None] = mapped_column(Integer)
     user_correction: Mapped[str | None] = mapped_column(String(2000))
     review_status: Mapped[ReviewStatus] = mapped_column(
         enum_column(ReviewStatus, "evidence_review")

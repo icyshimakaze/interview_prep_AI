@@ -23,7 +23,7 @@ def main() -> None:
             payload = readiness.json()
             if (
                 payload.get("database") != "connected"
-                or payload.get("schema_revision") != "0002_relational_model"
+                or payload.get("schema_revision") != "0004_resume_evidence"
             ):
                 raise ValueError("Database/schema readiness failed")
     print("PASS: frontend HTTP, backend /health, PostgreSQL/schema, and same-origin connectivity.")

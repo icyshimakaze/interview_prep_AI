@@ -23,11 +23,23 @@ export default function PrivacyPage() {
             ],
             [
               "Your account and profile",
-              "When account access is configured, Clerk handles sign-in. The app stores your optional display name, target role, experience band, timezone, and weekly study budget in its database, associated with your account. This preparation data is retained until an explicit deletion process is implemented; there is no automatic account retention period in this preview.",
+              "When account access is configured, Clerk handles sign-in. The app stores your target role, experience level, timezone, and study budget. You may also supply a display name, short education description, graduation year, technologies/interests, and interview date. Those details are optional. Delete your preparation profile in Settings to remove its details; this preserves your account and other saved work.",
             ],
             [
-              "Files and AI services",
-              "Real resume uploads, repository imports, and AI evaluation are not enabled. The demo’s authored feedback is a simulation. Your profile and sample task changes are not sent to an AI provider by this application.",
+              "Your target jobs",
+              "Job titles, descriptions, and your optional company, notes, and source link are stored in your account workspace. Source links are never fetched by the application, and no skills are inferred. Description edits retain prior versions for preparation history. You can delete unreferenced jobs, including their versions; jobs used by retained history can be archived. There is no automatic retention period for account preparation data in this preview.",
+            ],
+            [
+              "Your resume and evidence",
+              "Signed-in accounts can upload PDF resumes up to 5 MiB and 20 pages. Remove contact details and other private information before uploading. The server extracts selectable text in memory, then discards the raw PDF and full extracted text after the request. It stores the validated filename as a label, a content checksum, page/size metadata, and selected evidence excerpts and your corrections. No raw PDF download or permanent file storage is provided. Excerpts may still contain personal information from your resume, so review them.",
+            ],
+            [
+              "Review and deletion",
+              "Detected mentions are proposed preparation context, not verified competence. You can correct, reject, add, or delete evidence. No evidence detected never means you do not know something. Delete a resume to remove its versions, excerpts, and corrections; retained preparation history may prevent record deletion, but individual evidence can still be deleted. Account evidence has no automatic expiry in this preview. Deletion removes active database records; operator backups, if configured, follow their own retention policy and are not erased by this control.",
+            ],
+            [
+              "AI and external services",
+              "Resume parsing runs on this application's server without OCR, external document services, or AI providers. The application does not log full resume text or send it to an AI provider. Repository imports and AI evaluation remain unavailable. The demo’s authored feedback is a simulation.",
             ],
             [
               "Access and storage",
@@ -35,7 +47,7 @@ export default function PrivacyPage() {
             ],
             [
               "Controls and current limits",
-              "You can edit your preparation profile and sign out from Settings. Demo deletion is available now. Self-service account export, account deletion, and identity-provider deletion reconciliation are not yet available. Avoid adding sensitive information to this development preview.",
+              "You can edit or delete your preparation profile, manage target jobs and resume evidence, and sign out from Settings. Demo deletion is available now. Self-service account export, account deletion, and identity-provider deletion reconciliation are not yet available. Avoid adding sensitive information to this development preview.",
             ],
           ].map(([title, text]) => (
             <section key={title} className="section-rule">

@@ -12,6 +12,8 @@ import { PlannedView } from "./workspace/planned-view";
 import { SettingsView } from "./workspace/settings-view";
 import type { WorkspaceContextValue } from "./workspace/workspace-context";
 import type { WorkspaceSection } from "./workspace/navigation";
+import { TargetJobsView } from "./workspace/target-jobs-view";
+import { ResumeView } from "./workspace/resume-view";
 
 export function WorkspaceView({
   section = "dashboard",
@@ -22,8 +24,17 @@ export function WorkspaceView({
     case "dashboard":
       return <Overview data={data} />;
     case "targets":
+      return data.mode === "account" && workspace.targetApi ? (
+        <TargetJobsView api={workspace.targetApi} />
+      ) : (
+        <EvidenceView data={data} section="targets" />
+      );
     case "resume":
-      return <EvidenceView data={data} section={section} />;
+      return data.mode === "account" && workspace.resumeApi ? (
+        <ResumeView api={workspace.resumeApi} />
+      ) : (
+        <EvidenceView data={data} section={section} />
+      );
     case "assessments":
       return <AssessmentsView data={data} />;
     case "interviews":

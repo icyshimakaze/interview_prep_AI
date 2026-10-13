@@ -4,6 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AccountWorkspace } from "@/components/account-workspace";
 import { WorkspaceScreen } from "@/components/workspace/workspace-context";
 import { emptyAccount, workspaceFixture } from "./workspace-fixture";
+import type { Target } from "@/lib/api/workspace";
+import { resumeFixture } from "./resume-fixture";
+import type { Resume } from "@/lib/api/resumes";
 
 const auth = vi.hoisted(() => ({
   subject: "account-one",
@@ -33,6 +36,155 @@ beforeEach(() => {
 });
 
 describe("account workspace integration", () => {
+  it("uploads, corrects and deletes a resume using SDK authentication and owned revisions", async () => {
+    let resume: Resume | null = null;
+    const fetchMock = vi.fn(async (url: string, init: RequestInit) => {
+      expect(new Headers(init.headers).get("Authorization")).toBe(
+        "Bearer test-sdk-token",
+      );
+      if (url.endsWith("/resumes") && init.method === "POST") {
+        expect(init.body).toBeInstanceOf(File);
+        expect(new Headers(init.headers).get("Content-Type")).toBe(
+          "application/pdf",
+        );
+        expect(new Headers(init.headers).get("X-Resume-Filename")).toBe(
+          "candidate.pdf",
+        );
+        resume = resumeFixture;
+        return Response.json(resume);
+      }
+      if (url.includes("/evidence/") && init.method === "PUT") {
+        const body: Record<string, unknown> = JSON.parse(String(init.body));
+        expect(body.expected_revision).toBe(1);
+        expect(body).not.toHaveProperty("owner_id");
+        expect(body).not.toHaveProperty("source_excerpt");
+        resume = {
+          ...resumeFixture,
+          revision: 2,
+          evidence: resumeFixture.evidence.map((item) => ({
+            ...item,
+            user_correction: String(body.claim),
+            review_status: "confirmed",
+          })),
+        };
+        return Response.json(resume);
+      }
+      if (url.includes("/resumes/owned-resume") && init.method === "DELETE") {
+        expect(url).toContain("expected_revision=2");
+        resume = null;
+        return new Response(null, { status: 204 });
+      }
+      if (url.endsWith("/resumes"))
+        return Response.json({ items: resume ? [resume] : [] });
+      return Response.json(url.endsWith("/session") ? {} : emptyAccount);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(
+      <AccountWorkspace>
+        <WorkspaceScreen section="resume" />
+      </AccountWorkspace>,
+    );
+    const user = userEvent.setup();
+    await screen.findByText("Your experience starts with your evidence.");
+    await user.upload(
+      screen.getByLabelText("PDF resume"),
+      new File(["%PDF-1.7\nfixture"], "candidate.pdf", {
+        type: "application/pdf",
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: "Upload PDF" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Review Python" }),
+    );
+    await user.type(screen.getByLabelText("Evidence or correction"), " basics");
+    await user.selectOptions(
+      screen.getByLabelText("Review status"),
+      "confirmed",
+    );
+    await user.click(screen.getByRole("button", { name: "Save evidence" }));
+    await screen.findByText("Evidence saved.");
+    await user.click(screen.getByRole("button", { name: "Delete resume" }));
+    await user.click(
+      screen.getByRole("button", { name: "Confirm resume deletion" }),
+    );
+    expect(
+      await screen.findByText("Your experience starts with your evidence."),
+    ).toBeVisible();
+  });
+  it("creates, edits and deletes target jobs through authenticated requests", async () => {
+    const sample = workspaceFixture.targets[0];
+    if (!sample) throw new Error("Missing target fixture");
+    let job: Target | null = null;
+    const fetchMock = vi.fn(async (url: string, init: RequestInit) => {
+      expect(new Headers(init.headers).get("Authorization")).toBe(
+        "Bearer test-sdk-token",
+      );
+      if (url.includes("/targets?") && init.method !== "DELETE")
+        return Response.json({
+          items: job ? [job] : [],
+          total: job ? 1 : 0,
+          offset: 0,
+          limit: 20,
+        });
+      if (url.endsWith("/targets") && init.method === "POST") {
+        const body: Record<string, unknown> = JSON.parse(String(init.body));
+        expect(body).toEqual(
+          expect.objectContaining({
+            title: "Frontend job",
+            description: "Supplied context",
+          }),
+        );
+        expect(body).not.toHaveProperty("owner_id");
+        job = {
+          ...sample,
+          title: String(body.title),
+          description: String(body.description),
+          id: "owned-job",
+        };
+        return Response.json(job);
+      }
+      if (url.includes("/targets/owned-job") && init.method === "PUT") {
+        const body: Record<string, unknown> = JSON.parse(String(init.body));
+        expect(body.expected_revision).toBe(1);
+        if (!job) throw new Error("Job was not created");
+        job = { ...job, title: String(body.title), revision: 2 };
+        return Response.json(job);
+      }
+      if (url.includes("/targets/owned-job") && init.method === "DELETE") {
+        expect(url).toContain("expected_revision=2");
+        job = null;
+        return new Response(null, { status: 204 });
+      }
+      return Response.json(url.endsWith("/session") ? {} : emptyAccount);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(
+      <AccountWorkspace>
+        <WorkspaceScreen section="targets" />
+      </AccountWorkspace>,
+    );
+    const user = userEvent.setup();
+    await screen.findByText("Start with a job you are considering.");
+    await user.click(screen.getByRole("button", { name: "Add target job" }));
+    await user.type(screen.getByLabelText("Job title"), "Frontend job");
+    await user.type(
+      screen.getByLabelText("Job description"),
+      "Supplied context",
+    );
+    await user.click(screen.getByRole("button", { name: "Save job" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Edit Frontend job" }),
+    );
+    await user.type(screen.getByLabelText("Job title"), " II");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Delete Frontend job II" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Delete target job" }));
+    expect(
+      await screen.findByText("Start with a job you are considering."),
+    ).toBeVisible();
+  });
   it("bootstraps with SDK credentials, retries a failed read, and renders no fake activity", async () => {
     let reads = 0;
     const fetchMock = vi.fn(async (url: string, init: RequestInit) => {
@@ -164,6 +316,11 @@ describe("account workspace integration", () => {
           timezone: "Asia/Kolkata",
           weekly_minutes: 240,
           expected_revision: null,
+          expected_id: null,
+          education: null,
+          graduation_year: null,
+          interests: [],
+          interview_date: null,
         });
         saved = true;
         return Response.json({});

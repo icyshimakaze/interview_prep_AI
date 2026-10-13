@@ -27,7 +27,7 @@ async def test_postgres_and_migration_readiness(integration_client: AsyncClient)
     response = await integration_client.get("/api/v1/health/ready")
     assert response.status_code == 200
     assert response.json()["database"] == "connected"
-    assert response.json()["schema_revision"] == "0002_relational_model"
+    assert response.json()["schema_revision"] == "0004_resume_evidence"
 
 
 async def test_foreign_origin_has_no_cors_permission(client: AsyncClient) -> None:
@@ -64,5 +64,19 @@ async def test_schema_mismatch_returns_503(
     finally:
         async with database.begin() as connection:
             await connection.execute(
-                text("UPDATE alembic_version SET version_num = '0002_relational_model'")
+                text("UPDATE alembic_version SET version_num = '0004_resume_evidence'")
             )
+
+
+async def test_database_timeout_is_recoverable_without_exposing_details(app: FastAPI) -> None:
+    async def timed_out_session() -> AsyncSession:
+        raise TimeoutError("sensitive connection details")
+
+    app.dependency_overrides[get_session] = timed_out_session
+    async with app.router.lifespan_context(app):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as http:
+            response = await http.get("/api/v1/health/ready")
+    assert response.status_code == 503 and response.json()["code"] == "unavailable"
+    assert "sensitive" not in response.text
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["x-request-id"] == response.json()["request_id"]

@@ -3,7 +3,7 @@
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_prep.modules.assessments.models import Assessment, AssessmentAttempt, QuestionAttempt
@@ -11,15 +11,16 @@ from interview_prep.modules.context.models import (
     Resume,
     ResumeSkillEvidence,
     ResumeVersion,
+    ReviewStatus,
     TargetJob,
     TargetJobVersion,
 )
 from interview_prep.modules.identity.models import PrincipalKind, Profile, User
+from interview_prep.modules.identity.profiles import profile_view
 from interview_prep.modules.identity.schemas import (
     AssessmentView,
     DashboardView,
     InterviewView,
-    ProfileView,
     ProgressView,
     ResumeView,
     RoadmapItemView,
@@ -42,33 +43,57 @@ async def owned_resume(session: AsyncSession, owner: UUID, resource_id: UUID) ->
         raise HTTPException(status_code=404)
     evidence = (
         await session.scalars(
-            select(ResumeSkillEvidence.source_excerpt)
+            select(ResumeSkillEvidence)
             .join(ResumeVersion, ResumeVersion.id == ResumeSkillEvidence.resume_version_id)
             .where(
                 ResumeVersion.resume_id == resource_id,
                 ResumeVersion.owner_id == owner,
                 ResumeSkillEvidence.owner_id == owner,
+                ResumeSkillEvidence.review_status != ReviewStatus.REJECTED,
             )
             .limit(20)
         )
     ).all()
-    return ResumeView(id=resume.id, label=resume.label, evidence=list(evidence))
+    return ResumeView(
+        id=resume.id,
+        label=resume.label,
+        evidence=[item.user_correction or item.source_excerpt or item.claim for item in evidence],
+    )
 
 
 async def owned_target(session: AsyncSession, owner: UUID, resource_id: UUID) -> TargetView:
-    target = await session.scalar(
-        select(TargetJob).where(TargetJob.id == resource_id, TargetJob.owner_id == owner)
-    )
-    if target is None:
-        raise HTTPException(status_code=404)
-    description = await session.scalar(
-        select(TargetJobVersion.description)
+    latest_version = (
+        select(func.max(TargetJobVersion.version))
         .where(TargetJobVersion.target_job_id == resource_id, TargetJobVersion.owner_id == owner)
-        .order_by(TargetJobVersion.version.desc())
-        .limit(1)
+        .scalar_subquery()
+        .correlate(None)
     )
+    row = (
+        await session.execute(
+            select(TargetJob, TargetJobVersion.description)
+            .outerjoin(
+                TargetJobVersion,
+                (TargetJobVersion.target_job_id == TargetJob.id)
+                & (TargetJobVersion.owner_id == owner)
+                & (TargetJobVersion.version == latest_version),
+            )
+            .where(TargetJob.id == resource_id, TargetJob.owner_id == owner)
+            .execution_options(populate_existing=True)
+        )
+    ).first()
+    if row is None:
+        raise HTTPException(status_code=404)
+    target, description = row
     return TargetView(
-        id=target.id, title=target.title, organization=target.organization, description=description
+        id=target.id,
+        title=target.title,
+        organization=target.organization,
+        description=description,
+        source_url=target.source_url,
+        notes=target.notes,
+        priority=target.priority,
+        status=target.status,
+        revision=target.revision,
     )
 
 
@@ -181,7 +206,7 @@ async def dashboard(session: AsyncSession, user: User) -> DashboardView:
         if is_demo
         else "Your preparation workspace",
         expires_at=user.expires_at,
-        profile=ProfileView.model_validate(profile) if profile else None,
+        profile=await profile_view(session, profile) if profile else None,
         targets=[await owned_target(session, owner, resource_id) for resource_id in target_ids],
         resumes=[await owned_resume(session, owner, resource_id) for resource_id in resume_ids],
         assessments=assessments,

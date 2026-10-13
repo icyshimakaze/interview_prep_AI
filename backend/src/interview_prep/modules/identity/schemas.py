@@ -1,9 +1,10 @@
-from datetime import datetime
-from typing import Literal
+from datetime import date, datetime
+from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from interview_prep.modules.context.models import TargetPriority, TargetStatus
 from interview_prep.modules.identity.models import ExperienceBand
 
 
@@ -22,17 +23,52 @@ class ProfileInput(StrictModel):
     target_role: str = Field(min_length=1, max_length=200)
     experience_band: ExperienceBand
     timezone: str = Field(min_length=1, max_length=100)
-    weekly_minutes: int = Field(ge=15, le=10080)
-    expected_revision: int | None = Field(default=None, ge=1)
+    weekly_minutes: int = Field(ge=15, le=10080, strict=True)
+    expected_revision: int | None = Field(default=None, ge=1, strict=True)
+    expected_id: UUID | None = None
+    education: str | None = Field(default=None, max_length=300)
+    graduation_year: int | None = Field(default=None, ge=1900, le=2100, strict=True)
+    interests: list[Annotated[str, Field(min_length=1, max_length=80)]] = Field(
+        default_factory=list, max_length=20
+    )
+    interview_date: date | None = None
+
+    @field_validator("interview_date", mode="before")
+    @classmethod
+    def calendar_date(cls, value: object) -> object:
+        if value is not None:
+            if not isinstance(value, (str, date)):
+                raise ValueError("Use a calendar date")
+            parsed = date.fromisoformat(value) if isinstance(value, str) else value
+            if not 1900 <= parsed.year <= 2100:
+                raise ValueError("Date is out of range")
+        return value
+
+    @field_validator("display_name", "education", mode="before")
+    @classmethod
+    def optional_text(cls, value: object) -> object:
+        return value.strip() or None if isinstance(value, str) else value
+
+    @field_validator("interests")
+    @classmethod
+    def supplied_interests(cls, value: list[str]) -> list[str]:
+        if len({label.casefold() for label in value}) != len(value):
+            raise ValueError("Interests must be distinct")
+        return value
 
 
 class ProfileView(StrictModel):
+    id: UUID
     display_name: str | None
     target_role: str
     experience_band: ExperienceBand
     timezone: str
     weekly_minutes: int
     revision: int
+    education: str | None
+    graduation_year: int | None
+    interests: list[str]
+    interview_date: date | None
 
 
 class SessionView(StrictModel):
@@ -50,6 +86,11 @@ class TargetView(StrictModel):
     title: str
     organization: str | None
     description: str | None
+    source_url: str | None
+    notes: str | None
+    priority: TargetPriority
+    status: TargetStatus
+    revision: int
 
 
 class AssessmentView(StrictModel):

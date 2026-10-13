@@ -93,7 +93,7 @@ async def test_downgrade_refuses_domain_data_without_losing_it(database: AsyncEn
                 assert await connection.scalar(text("SELECT count(*) FROM questions")) == 15
                 assert (
                     await connection.scalar(text("SELECT version_num FROM alembic_version"))
-                    == "0002_relational_model"
+                    == "0004_resume_evidence"
                 )
         finally:
             await engine.dispose()

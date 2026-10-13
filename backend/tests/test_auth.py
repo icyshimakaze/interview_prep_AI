@@ -97,7 +97,10 @@ async def test_valid_signed_account_session_and_owner_scoped_profile(
     assert saved.status_code == 200 and saved.json()["revision"] == 1
     assert (await account_client.put("/api/v1/account/profile", json=body)).status_code == 409
     assert (
-        await account_client.put("/api/v1/account/profile", json={**body, "expected_revision": 1})
+        await account_client.put(
+            "/api/v1/account/profile",
+            json={**body, "expected_revision": 1, "expected_id": saved.json()["id"]},
+        )
     ).json()["revision"] == 2
     async with async_sessionmaker(database)() as session:
         users = (await session.scalars(select(User).where(User.kind == "account"))).all()

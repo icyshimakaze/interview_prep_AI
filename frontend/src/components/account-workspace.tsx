@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -19,6 +20,12 @@ import {
   type Dashboard,
   type ProfileInput,
 } from "@/lib/api/workspace";
+import { createTargetApi, type TargetApi } from "@/lib/api/targets";
+import {
+  createResumeApi,
+  type ResumeApi,
+  type Resume,
+} from "@/lib/api/resumes";
 
 export function AccountWorkspace({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, userId } = useAuth();
@@ -81,6 +88,106 @@ function AccountSession({ children }: { children: ReactNode }) {
     },
     [authenticatedRequest],
   );
+  const targetApi = useMemo<TargetApi>(() => {
+    return {
+      list: (offset, status, signal) =>
+        createTargetApi(authenticatedRequest).list(offset, status, signal),
+      read: (id) => createTargetApi(authenticatedRequest).read(id),
+      save: async (input, target) => {
+        const result = await createTargetApi(authenticatedRequest).save(
+          input,
+          target,
+        );
+        setData((current) =>
+          current
+            ? {
+                ...current,
+                targets: [
+                  result,
+                  ...current.targets.filter((item) => item.id !== result.id),
+                ].slice(0, 10),
+              }
+            : current,
+        );
+        return result;
+      },
+      remove: async (target) => {
+        await createTargetApi(authenticatedRequest).remove(target);
+        setData((current) =>
+          current
+            ? {
+                ...current,
+                targets: current.targets.filter(
+                  (item) => item.id !== target.id,
+                ),
+              }
+            : current,
+        );
+      },
+    };
+  }, [authenticatedRequest]);
+  const resumeApi = useMemo<ResumeApi>(() => {
+    const update = async (operation: Promise<Resume>) => {
+      const result = await operation;
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              resumes: [
+                {
+                  id: result.id,
+                  label: result.label,
+                  evidence: result.evidence
+                    .filter((item) => item.review_status !== "rejected")
+                    .map(
+                      (item) =>
+                        item.user_correction ??
+                        item.source_excerpt ??
+                        item.claim,
+                    ),
+                },
+                ...current.resumes.filter((item) => item.id !== result.id),
+              ].slice(0, 10),
+            }
+          : current,
+      );
+      return result;
+    };
+    return {
+      list: (signal) => createResumeApi(authenticatedRequest).list(signal),
+      read: (id) => createResumeApi(authenticatedRequest).read(id),
+      upload: (file) =>
+        update(createResumeApi(authenticatedRequest).upload(file)),
+      saveEvidence: (resume, input, evidence) =>
+        update(
+          createResumeApi(authenticatedRequest).saveEvidence(
+            resume,
+            input,
+            evidence,
+          ),
+        ),
+      removeEvidence: (resume, evidence) =>
+        update(
+          createResumeApi(authenticatedRequest).removeEvidence(
+            resume,
+            evidence,
+          ),
+        ),
+      remove: async (resume) => {
+        await createResumeApi(authenticatedRequest).remove(resume);
+        setData((current) =>
+          current
+            ? {
+                ...current,
+                resumes: current.resumes.filter(
+                  (item) => item.id !== resume.id,
+                ),
+              }
+            : current,
+        );
+      },
+    };
+  }, [authenticatedRequest]);
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
@@ -144,6 +251,20 @@ function AccountSession({ children }: { children: ReactNode }) {
       setBusy(false);
     }
   }
+  async function deleteProfile() {
+    if (!data?.profile)
+      throw new Error("Reload your profile before deleting it.");
+    setBusy(true);
+    try {
+      await authenticatedRequest(
+        `/api/v1/account/profile?expected_id=${encodeURIComponent(data.profile.id)}&expected_revision=${data.profile.revision}`,
+        { method: "DELETE" },
+      );
+      setData((current) => (current ? { ...current, profile: null } : current));
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <WorkspaceShell mode="account" onLeave={() => void leave()} busy={busy}>
       {error && (
@@ -155,7 +276,15 @@ function AccountSession({ children }: { children: ReactNode }) {
       )}
       {data ? (
         <WorkspaceContext
-          value={{ data, busy, onSaveProfile: saveProfile, onReload: reload }}
+          value={{
+            data,
+            busy,
+            onSaveProfile: saveProfile,
+            onDeleteProfile: deleteProfile,
+            targetApi,
+            resumeApi,
+            onReload: reload,
+          }}
         >
           {children}
         </WorkspaceContext>

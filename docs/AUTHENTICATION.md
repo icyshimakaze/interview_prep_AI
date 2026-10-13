@@ -94,6 +94,17 @@ through the existing profile endpoint. Loading, validation, save errors and expl
 reload recovery preserve the server revision contract. Subject changes remount
 private UI state. See [the UI route map](UI_FOUNDATION.md).
 
+Candidate profile and target-job CRUD now run through the existing account boundary.
+Profile edits/deletion include the expected profile ID and revision; target edits/
+deletion include revision. Optional background information and user interests are
+never inferred or sent to an AI service. Source links are validated and stored,
+never fetched. See [candidate context, contracts and retention](CANDIDATE_CONTEXT.md).
+
+Resume upload/review now uses the same account boundary. Every list, detail,
+evidence edit/add/delete and resume deletion resolves the verified owner on the
+server. Uploads are bounded PDF bodies, never accepted in the fictional demo.
+Evidence mutations and deletion include the aggregate revision; foreign IDs are 404. See [resume processing, API and retention](RESUME_PRIVACY.md).
+
 Short-lived custom JWTs can remain valid after managed sign-out until expiry plus
 clock leeway. There is no claimed instant token revocation. Signed Clerk lifecycle
 webhooks, account export/erasure with provider reconciliation, production CSP,

@@ -18,12 +18,17 @@ export const workspaceFixture: Dashboard = {
   data_label: "Fictional demo candidate · simulated history",
   expires_at: "2026-10-13T00:00:00Z",
   profile: {
+    id: "00000000-0000-4000-8000-000000000001",
     display_name: "Aarav Rao (fictional)",
     target_role: "Junior Backend Engineer",
     experience_band: "entry",
     timezone: "Asia/Kolkata",
     weekly_minutes: 240,
     revision: 1,
+    education: null,
+    graduation_year: null,
+    interests: [],
+    interview_date: null,
   },
   resumes: [
     {
@@ -38,6 +43,11 @@ export const workspaceFixture: Dashboard = {
       title: "Backend Engineer",
       organization: "Fictional company",
       description: "A fictional target job",
+      source_url: null,
+      notes: null,
+      priority: "normal",
+      status: "saved",
+      revision: 1,
     },
   ],
   assessments: [

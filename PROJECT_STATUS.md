@@ -2,6 +2,176 @@
 
 Updated: 2026-10-13 (Asia/Calcutta).
 
+## Secure resume upload and evidence review (current phase)
+
+Implemented on `rebuild/professional-v2`, following the
+[resume ingestion plan](.agent/plans/resume-ingestion.md). The user explicitly
+authorized committing and pushing this work to GitHub, including the preceding
+verified candidate profile/target-job changes still in the working tree.
+Existing application database and Compose services were preserved; this phase
+does not deploy or migrate them.
+
+### Functionality, integrity and privacy
+
+- Account Resume now uploads PDFs, lists owned records, displays original cited
+  evidence, and supports corrections, category/review changes, explicit additions,
+  entry deletion and confirmed aggregate deletion. Loading/empty/error states,
+  retained failed drafts, conflict reload and duplicate-gesture guards are present.
+- Require PDF MIME, `.pdf` extension, validated normalized filename, PDF signature
+  and strict parsing. Filename paths/control characters are rejected and never
+  become filesystem paths. Bound uploads to 5 MiB/20 pages, extracted text to
+  100,000 characters, decoded streams to 2 MiB and evidence to 100 entries.
+- Stream raw bodies without multipart spooling. Two in-flight read/parse operations
+  per API process, 15-second read and worker deadlines, 512 MiB OS worker limits
+  on Windows/Linux, and Linux CPU bounds protect processing. Workers receive no
+  application credential environment, suppress parser logs, and return validated
+  excerpts/metadata through private pipes. Encrypted/corrupt/excessive PDFs fail
+  safely without creating records. Scans/blank PDFs explain missing selectable text.
+- Raw PDFs and full extracted text are never permanently stored or logged. They
+  remain only in request/worker memory. Retained data is the validated display label,
+  checksum/page/size/extraction metadata, selected cited excerpts and user edits.
+  No OCR, AI, external document service, link fetching or automatic profile filling.
+- The deterministic `lexical-sections-v1` extractor proposes explicit language,
+  framework, database/tool mentions and project/education/experience excerpts.
+  Negative and aspirational mentions preserve their context for review. It creates
+  no global skills, competence scores, experience estimates or missing-skill verdicts.
+  **No evidence detected never means the candidate does not know something.**
+- Proposed, confirmed-by-user and rejected states are explicit. Corrections retain
+  original PDF excerpts; user additions have no PDF source fields. Rejected claims
+  are excluded from dashboard preparation context. Confirmation is user review,
+  not independent verification. Every API uses verified account ownership, strict
+  input bounds and locked aggregate revisions; missing/foreign IDs return 404.
+- Deleting an unreferenced resume removes every version/excerpt/correction and
+  preserves the account/profile/jobs. Existing history references can block the
+  aggregate deletion; individual evidence can still be erased. Active-record
+  deletion does not erase operator backups. Account evidence has no automatic
+  expiry; full account/history erasure remains unavailable and is disclosed.
+- Migration `0004_resume_evidence` adds revisions, extraction notes and evidence
+  category/origin fields, preserving legacy IDs/excerpts and compound ownership
+  constraints. User-origin source fields must be null. Lossy downgrade is refused.
+  Earlier frozen migrations and V1 files are unchanged. Added only pinned
+  `pypdf==6.20.1`, with a matching lockfile and generated API contracts.
+- Updated public privacy/product availability copy, README, authentication,
+  development and data-model notes; added [resume API/privacy guide](docs/RESUME_PRIVACY.md).
+
+### Verification
+
+| Check                     | Actual result                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend lint/format/types | Ruff passed across 82 Python files; strict mypy passed for 77 source/test/script files.                                                                                                                                                                                                                                                                       |
+| Backend tests             | **143 passed** on fresh migrated PostgreSQL, including actual valid/blank/encrypted/corrupt PDFs, invalid MIME/extensions/signatures/paths, declared and chunked oversized bodies, page/decompression bounds, worker timeout/reaping, deterministic source offsets, ownership, corrections/rejection, concurrent revisions and deletion/history preservation. |
+| Migrations/contracts      | Upgrade, metadata drift, downgrade/re-upgrade, original content preservation, populated rollback refusal, OpenAPI and legacy hashes/seeds passed. Dedicated 0003-to-0004 preservation/recovery test passed.                                                                                                                                                   |
+| Frontend lint/types/tests | Zero-warning ESLint and strict TypeScript passed; **52 tests passed** across seven files, including SDK-authorized upload/review/delete transport, retained failed file/draft state, safe errors, no-evidence semantics and existing account/context workflows.                                                                                               |
+| Production/browser        | Production build and **21 Chrome browser tests passed** with a disposable API/database; zero axe violations in tested views, including desktop/mobile actual resume form/evidence markup. New screenshots visually inspected.                                                                                                                                 |
+| Linux runtime             | Separate backend container image built with frozen production dependencies. Non-root parser passed valid/blank/encrypted/corrupt/compressed-limit checks with network disabled, read-only storage and container resource bounds. Existing service images/containers were not replaced.                                                                        |
+
+The resume browser preview is explicitly a static test fixture, not a live account
+or authentication bypass. Existing live demo/connectivity/mobile/modal regressions
+remain covered. Real Clerk credentials are absent; managed account browser upload
+was not run. Windows backend tests use genuinely signed tokens and trusted test
+JWKS; frontend account integration mocks the SDK/transport. Worker behavior was
+verified on both Windows and Linux.
+
+Whole-repository formatting and `git diff --check` passed. The final production
+build restored the normal backend destination. The browser harness removed its
+temporary API/database, and the owned port-3100 frontend was stopped. A targeted
+review of 80 commit candidates found no configured secrets, credential-shaped
+strings or environment files; cache/test/runtime artifacts remain ignored.
+
+### Rollout limits and next task
+
+- Apply migrations through `0004_resume_evidence` before starting the updated
+  API/frontend. Existing services still serve the previous implementation.
+- The finite extractor cannot reliably understand all layouts or semantic claims;
+  users must review proposed evidence. No OCR or proficiency inference is provided.
+- Process limits are resource isolation, not complete OS sandbox certification.
+  Production ingress, container resource configuration, HTTPS, logging policy,
+  backups and live Clerk account isolation need the documented release review.
+- Next: configure and exercise live Clerk with two accounts, apply the reviewed
+  rollout, then build assessments using explicitly reviewed candidate context.
+
+## Candidate profile and target jobs (preceding phase)
+
+Implemented the requested account workflows end-to-end in source on
+`rebuild/professional-v2`, following the
+[candidate context plan](.agent/plans/candidate-profile-target-jobs.md).
+No new dependencies, commit, push, or deployment occurred in this phase. The
+existing application database/Compose services were preserved; the new migration
+was applied and verified only on disposable PostgreSQL databases.
+
+### Functionality and data handling
+
+- Settings/Profile now saves optional display name, short education description,
+  graduation year, supplied technologies/interests and interview date, alongside
+  existing target role, experience, timezone and study budget. The form uses hours
+  per week and persists whole minutes. Optional fields can be cleared. No contact,
+  demographic, birth-date, institution or grade fields were added.
+- User interests live in normalized `profile_interests` rows with explicit owner/
+  profile constraints. They remain supplied labels; neither profile context nor
+  job descriptions create inferred skills, requirements or competence evidence.
+- Added owned profile GET/PUT/DELETE. Profile edits/deletion require current ID and
+  revision; identity prevents stale edits after delete/re-create. Deletion erases
+  profile/interests and clears the UI while preserving account, jobs and history.
+- Target Job now supports a persisted paginated list, status filter, creation,
+  detail view, editing and confirmed deletion. Title and supplied description are
+  required; company, source URL and notes are optional. Priority is low/normal/high;
+  status is saved/applied/interviewing/archived. Source links are HTTP(S), without
+  embedded credentials, and are stored without fetching. Job text renders as text.
+- Every target read/write uses the resolved account owner; unknown ownership input
+  is rejected, foreign/missing IDs return 404, edits/deletion use locked revisions,
+  lists are bounded to 20 per page, and account storage is limited to 100 jobs.
+- Description edits append immutable versions; metadata edits preserve the latest
+  description without creating duplicate versions. Referenced jobs cannot be
+  deleted; a safe conflict offers archive editing and preserves preparation history.
+- Forms retain failed edits, show field errors and save feedback, block duplicate
+  gestures, and offer explicit reload/discard recovery after conflicts. Shared
+  dialogs are scrollable on mobile. Existing auth separation, subject-change guards,
+  empty/loading states, demo disclosure and recruiter-demo operations are preserved.
+- Revision `0003_candidate_context` preserves existing rows, adds optional profile
+  fields and interest rows, and adds target metadata with neutral defaults. It
+  refuses rollback that would discard populated new context. Readiness/smoke/browser
+  expectations now require the new schema. OpenAPI and TypeScript contracts match.
+- Updated public privacy copy, authentication/data/development/UI documentation,
+  README and [candidate context API/retention guide](docs/CANDIDATE_CONTEXT.md).
+
+### Verification for candidate context
+
+| Check                | Actual result                                                                                                                                                                                                                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend lint/format  | Ruff passed across 70 Python files.                                                                                                                                                                                                                                                                      |
+| Backend strict types | mypy passed for 66 source/test/script files.                                                                                                                                                                                                                                                             |
+| Backend tests        | **115 passed** on a fresh migrated PostgreSQL database, including CRUD, input bounds, supplied-label behavior, ownership, unauthenticated/foreign access, concurrent edits, stale revisions, profile re-creation, history-preserving deletion and count/list bounds.                                     |
+| Migration/recovery   | Clean upgrade, metadata drift, downgrade to base/re-upgrade, legacy demo compatibility and populated rollback refusal passed. Dedicated 0002-to-0003 test preserved existing profile/job/description data and refused lossy rollback. Application database was not downgraded or migrated in this phase. |
+| Contracts/legacy     | OpenAPI drift and original hashes/seeds passed; generated frontend types updated. Original V1 files and frozen 0001/0002 migrations have no diff.                                                                                                                                                        |
+| Frontend lint/types  | Zero-warning ESLint and strict TypeScript/Next route generation passed.                                                                                                                                                                                                                                  |
+| Frontend tests       | **41 passed** across six files. Includes authenticated target CRUD integration, optional profile fields/clearing, hour conversion, supplied-label validation, confirmation, conflict/error recovery and preserved account-isolation checks.                                                              |
+| Production build     | `pnpm build` passed, including the final build with the normal backend destination restored.                                                                                                                                                                                                             |
+| Browser checks       | **20 Chrome tests passed** using an isolated production frontend/API and fresh migrated disposable database; existing real demo persistence/isolation/deletion and all workspace regressions passed.                                                                                                     |
+| Accessibility/visual | Zero axe WCAG A/AA violations in tested public/demo/modal views and desktop/mobile profile/job forms; new form screenshots inspected. Form QA uses actual component markup rendered as explicitly labeled static test fixtures, with no account auth bypass. This is not full WCAG certification.        |
+
+One browser run hit a transient PostgreSQL connection timeout; the full rerun
+passed without relaxing checks or increasing connection timeouts. Added a backend
+regression and safe 503 handling for database timeouts instead of unexpected 500
+responses. Windows process permissions used reviewed local execution. The browser
+harness removed its test API/databases; the temporary native frontend was stopped.
+
+### Rollout limits and next task
+
+- Apply migration `0003_candidate_context` before starting the updated API/frontend
+  in the intended environment. Existing Compose services still serve the preceding
+  implementation. No automatic deployment or application-data changes were made.
+- Real Clerk credentials remain absent. Live managed sign-in/profile/job CRUD was
+  not exercised against Clerk. Backend tests use genuine signed JWTs with a trusted
+  mock JWKS transport; frontend integration tests mock SDK/transport. Static browser
+  form fixtures verify layout/accessibility, not live account interactions.
+- Resume ingestion, extraction/requirements review, assessment creation, AI,
+  exports/full account erasure and scheduled-cleanup operational follow-up remain
+  later work. Account profile/job retention and the archive/delete boundary are
+  documented explicitly.
+- Next: configure/test live Clerk with two accounts and apply the reviewed local
+  rollout, then implement the deterministic assessment slice against supplied
+  candidate/job context with authored content and preserved history.
+
 ## GitHub publication request
 
 On 2026-10-13 the user explicitly authorized committing and pushing the accumulated
@@ -13,7 +183,7 @@ files found no configured secrets or credential-shaped content; local credential
 dependencies and runtime/build artifacts remain ignored. Earlier no-commit/no-push
 notes describe the state at the end of those implementation phases.
 
-## Public and authenticated UI foundation (current phase)
+## Public and authenticated UI foundation (preceding phase)
 
 Implemented the requested public site and ten-section workspace on
 `rebuild/professional-v2`, following the [UI plan](.agent/plans/ui-foundation.md).

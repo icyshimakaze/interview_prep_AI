@@ -1,10 +1,11 @@
 from datetime import date, datetime
 from enum import StrEnum
+from uuid import UUID
 
 from sqlalchemy import CheckConstraint, Date, DateTime, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from interview_prep.db.model_support import OwnedRecord, Record, enum_column, owned_args
+from interview_prep.db.model_support import OwnedRecord, Record, enum_column, owned_args, owned_fk
 
 
 class PrincipalKind(StrEnum):
@@ -63,6 +64,13 @@ class Profile(OwnedRecord):
         CheckConstraint("revision > 0", name="revision"),
         CheckConstraint("length(trim(target_role)) > 0", name="target_role"),
         CheckConstraint("length(trim(timezone)) > 0", name="timezone"),
+        CheckConstraint(
+            "graduation_year IS NULL OR graduation_year BETWEEN 1900 AND 2100",
+            name="graduation_year",
+        ),
+        CheckConstraint(
+            "education IS NULL OR length(trim(education)) BETWEEN 1 AND 300", name="education"
+        ),
     )
 
     target_role: Mapped[str] = mapped_column(String(200))
@@ -74,3 +82,22 @@ class Profile(OwnedRecord):
     weekly_minutes: Mapped[int] = mapped_column(Integer)
     target_date: Mapped[date | None] = mapped_column(Date)
     revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    education: Mapped[str | None] = mapped_column(String(300))
+    graduation_year: Mapped[int | None] = mapped_column(Integer)
+
+
+class ProfileInterest(OwnedRecord):
+    """User-supplied labels only; no mapping to skills or competency evidence."""
+
+    __tablename__ = "profile_interests"
+    __table_args__ = owned_args(
+        __tablename__,
+        owned_fk("profile_id", "candidate_profiles"),
+        UniqueConstraint("owner_id", "profile_id", "position"),
+        UniqueConstraint("owner_id", "profile_id", "label"),
+        CheckConstraint("position BETWEEN 0 AND 19", name="position"),
+        CheckConstraint("length(trim(label)) BETWEEN 1 AND 80", name="label"),
+    )
+    profile_id: Mapped[UUID] = mapped_column(index=True)
+    label: Mapped[str] = mapped_column(String(80))
+    position: Mapped[int] = mapped_column(Integer)

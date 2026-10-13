@@ -80,3 +80,32 @@ export function FormSection({
     </section>
   );
 }
+
+export function TextareaField({
+  label,
+  hint,
+  error,
+  id: suppliedId,
+  className,
+  ...props
+}: ComponentProps<"textarea"> & FieldProps) {
+  const generated = useId();
+  const id = suppliedId ?? generated;
+  return (
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
+      <textarea
+        id={id}
+        className={cn("input min-h-28 resize-y", className)}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error || hint ? `${id}-help` : undefined}
+        {...props}
+      />
+      {(error || hint) && (
+        <p id={`${id}-help`} className={error ? "field-error" : "field-hint"}>
+          {error ?? hint}
+        </p>
+      )}
+    </div>
+  );
+}

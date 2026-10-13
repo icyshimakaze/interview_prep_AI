@@ -13,8 +13,9 @@ from uuid import uuid4
 
 import httpx
 from check_backend import drop_created_database, prepare_test_database
-from interview_prep.core.config import get_settings
 from sqlalchemy.engine import make_url
+
+from interview_prep.core.config import get_settings
 
 ROOT = Path(__file__).resolve().parents[1]
 

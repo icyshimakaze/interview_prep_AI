@@ -35,7 +35,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      className="dialog"
+      className="dialog max-h-[90dvh] overflow-y-auto"
       aria-labelledby={titleId}
       onKeyDown={(event) => {
         if (event.key !== "Tab") return;

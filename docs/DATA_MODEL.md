@@ -1,5 +1,16 @@
 # Relational data model
 
+Revision `0004_resume_evidence` adds aggregate revisions, extraction notes and
+explicit evidence categories/origins to existing resume tables. User-added claims
+have no PDF source fields; extracted claims retain their excerpts and provenance.
+The table count remains 40. See [resume retention and migration recovery](RESUME_PRIVACY.md).
+
+Follow-up revision `0003_candidate_context` adds optional education/year fields,
+owned `profile_interests`, and editable target metadata/revisions. There are now 40
+application tables (37 domain plus three demo infrastructure tables). The original
+model discussion below describes revision 0002; current behavior, preservation,
+rollout and safe rollback are documented in [CANDIDATE_CONTEXT.md](CANDIDATE_CONTEXT.md).
+
 Implemented by Alembic revision `0002_relational_model` on PostgreSQL. There are
 36 new domain tables and three preserved demo infrastructure tables; Alembic also
 maintains its own version table. SQLAlchemy models live in small domain modules

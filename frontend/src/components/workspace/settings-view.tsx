@@ -3,11 +3,14 @@ import type { WorkspaceContextValue } from "./workspace-context";
 import { ProfileForm } from "./profile-form";
 import { SectionHeader } from "./section-header";
 import { Badge } from "@/components/ui/table";
+import { ProfileDeletion } from "./profile-deletion";
 
 export function SettingsView({
   data,
   onSaveProfile,
   onReload,
+  onDeleteProfile,
+  busy,
 }: WorkspaceContextValue) {
   const profile = data.profile;
   return (
@@ -19,6 +22,7 @@ export function SettingsView({
       />
       {data.mode === "account" && onSaveProfile ? (
         <ProfileForm
+          key={profile?.id ?? "new-profile"}
           profile={profile}
           onSave={onSaveProfile}
           onReload={onReload}
@@ -52,6 +56,13 @@ export function SettingsView({
             ))}
           </dl>
         </section>
+      )}
+      {data.mode === "account" && profile && onDeleteProfile && (
+        <ProfileDeletion
+          onDelete={onDeleteProfile}
+          onReload={onReload}
+          disabled={busy}
+        />
       )}
       <section className="form-section">
         <div>

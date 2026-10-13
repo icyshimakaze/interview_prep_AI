@@ -126,6 +126,11 @@ and builds containers; it does not publish or deploy.
 
 For repeatable local browser checks, leave the built native frontend running and
 stop the existing API first (`docker compose stop backend cleanup` for Compose).
+Run `pnpm test` first: the component suite writes ignored static form previews to
+`.cache/ui-previews/` for browser layout/accessibility checks. Those previews use
+actual components and test fixtures; they provide no account authentication bypass
+or interactive account session.
+Profile, target-job, and resume upload/evidence forms are included in these fixtures.
 Then run:
 
 ```sh
@@ -149,6 +154,11 @@ On Windows, use `$env:NAME='value'` to set a process environment variable, and
 `$env:E2E_BROWSER_CHANNEL='chrome'` when testing with installed Chrome.
 
 ## Contracts and migration discipline
+
+Resume parsing requires the locked pypdf dependency and schema
+`0004_resume_evidence`. Run migrations before the updated API; workers enforce
+Linux or Windows resource limits and fail closed if those cannot be applied.
+See [resume privacy, upload contracts and rollout](RESUME_PRIVACY.md).
 
 ```sh
 uv run --project backend python scripts/export_openapi.py

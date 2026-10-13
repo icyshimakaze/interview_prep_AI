@@ -18,6 +18,11 @@ describe("preparation profile", () => {
       timezone: "Asia/Kolkata",
       weekly_minutes: 240,
       expected_revision: null,
+      expected_id: null,
+      education: null,
+      graduation_year: null,
+      interests: [],
+      interview_date: null,
     });
     expect(screen.getByRole("status")).toHaveTextContent("Profile saved");
     await user.type(screen.getByLabelText("Target role"), " II");

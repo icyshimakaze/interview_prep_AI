@@ -101,18 +101,26 @@ export function Overview({ data }: { data: Dashboard }) {
                 status: hasProfile ? "Saved" : "Start here",
               },
               {
-                title: "Explore your target job",
+                title: demo
+                  ? "Explore your target job"
+                  : data.targets.length
+                    ? "Review your target jobs"
+                    : "Add a target job",
                 description: "Keep the role’s requirements in view.",
                 href: href("targets"),
                 ready: data.targets.length > 0,
-                status: data.targets.length ? "Available" : "Preview",
+                status: data.targets.length ? "Available" : "Next step",
               },
               {
                 title: "Bring your experience into focus",
                 description: "Review the evidence behind your resume.",
                 href: href("resume"),
                 ready: data.resumes.length > 0,
-                status: data.resumes.length ? "Available" : "Preview",
+                status: data.resumes.length
+                  ? "Available"
+                  : demo
+                    ? "Preview"
+                    : "Next step",
               },
             ].map((step, index) => (
               <li key={step.title} className="border-b border-line">

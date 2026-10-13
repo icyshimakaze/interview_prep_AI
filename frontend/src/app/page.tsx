@@ -15,7 +15,7 @@ const features: {
     title: "A role to work toward",
     description:
       "Keep the job requirements and your experience in view, so preparation has a purpose.",
-    status: "Target & resume · Demo preview",
+    status: "Target & resume · Account workspace",
   },
   {
     icon: "assessments",

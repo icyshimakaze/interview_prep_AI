@@ -203,7 +203,16 @@ erDiagram
 
 REST JSON under `/api/v1`, with FastAPI OpenAPI as the contract source. Generate TypeScript types/client in CI and fail on unexplained drift. IDs are opaque; timestamps are UTC ISO 8601; lists have bounded cursor pagination. Long operations return `{job_id, status_url}` with `202`. Polling endpoints expose only owned jobs and redacted error messages.
 
-The implemented account/demo slice uses `/account/session`, `/account/dashboard`, `/account/profile`, owned `/account/resumes/{id}` and `/account/targets/{id}` reads, and separate `/demo` dashboard/resource/task routes. Profile writes use `PUT` with `expected_revision`, returning 409 for conflicts. Demo exit is `DELETE /demo/session`; `POST /demo/reset` clears expired credentials, requiring CSRF for a live workspace. Dashboard collections are bounded snapshots, not paginated feature APIs. The representative feature endpoints below remain the target for later phases. [Current account/demo contracts and setup](AUTHENTICATION.md)
+The implemented account/demo slice now includes candidate profile and target-job
+CRUD and bounded PDF upload/evidence review, alongside separate fictional demo
+routes. See [candidate context contracts](CANDIDATE_CONTEXT.md),
+[resume API, parsing and retention](RESUME_PRIVACY.md), and
+[account/demo setup](AUTHENTICATION.md). Resume uploads use binary PDF bodies
+with validated filename headers, process bytes only in memory, and persist cited
+evidence rather than raw files. This is a deliberate simpler implementation than
+the later queued object-storage proposal below. Mutations use aggregate identity/
+revision checks. Dashboard collections remain bounded snapshots; the representative
+future workflow endpoints below are not all implemented.
 
 | Endpoint family | Representative operations |
 | --- | --- |

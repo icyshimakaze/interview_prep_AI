@@ -37,7 +37,7 @@ export function EvidenceView({
           description={
             targets
               ? "No target job has been added. You can already save your target role in your preparation profile. Job descriptions and requirement review are coming next."
-              : "No resume evidence has been added. Resume upload and evidence review are still in development. You can explore a fictional resume in the demo."
+              : "No resume evidence is available here. Signed-in accounts can upload and review PDF resumes; the demo uses a fictional resume."
           }
           action={
             <ButtonLink
@@ -52,7 +52,7 @@ export function EvidenceView({
           note={
             targets
               ? "Job description entry is not available in this preview."
-              : "This preview does not accept or process resume files."
+              : "The fictional demo does not accept resume uploads."
           }
         />
       ) : (

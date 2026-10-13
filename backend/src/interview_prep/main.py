@@ -14,10 +14,13 @@ from interview_prep.core.config import Settings, get_settings
 from interview_prep.core.errors import register_error_handlers
 from interview_prep.db.models import Base
 from interview_prep.db.session import create_engine
+from interview_prep.modules.context.router import router as target_router
 from interview_prep.modules.demo.router import router as demo_router
 from interview_prep.modules.demo.workspace_router import router as demo_workspace_router
 from interview_prep.modules.identity.router import router as account_router
 from interview_prep.modules.identity.verification import TokenVerifier
+from interview_prep.modules.resumes.router import router as resume_router
+from interview_prep.modules.resumes.upload import PdfParser
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -28,6 +31,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         engine = create_engine(configuration)
         app.state.session_factory = async_sessionmaker(engine, expire_on_commit=False)
+        app.state.pdf_parser = PdfParser()
         async with httpx.AsyncClient(timeout=3, follow_redirects=False, trust_env=False) as http:
             app.state.token_verifier = TokenVerifier(configuration, http)
             try:
@@ -48,7 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_origins=configuration.allowed_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-        allow_headers=["Content-Type", "X-CSRF-Token", "Authorization"],
+        allow_headers=["Content-Type", "X-CSRF-Token", "Authorization", "X-Resume-Filename"],
     )
 
     @app.middleware("http")
@@ -64,5 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router)
     app.include_router(demo_router)
     app.include_router(account_router)
+    app.include_router(target_router)
+    app.include_router(resume_router)
     app.include_router(demo_workspace_router)
     return app

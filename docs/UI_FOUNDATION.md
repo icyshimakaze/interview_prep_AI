@@ -1,8 +1,13 @@
 # Public and workspace UI
 
-Implemented 2026-10-13. This phase builds the interface on the existing owned
+Foundation implemented 2026-10-13. This phase builds the interface on the existing owned
 account/profile and isolated demo APIs. It does not enable new ingestion, practice,
 question publication, AI, export, or account erasure workflows.
+
+Follow-up: [candidate profile and target-job CRUD](CANDIDATE_CONTEXT.md) is now
+implemented in account mode, including optional background/interests, profile
+deletion, target editing/deletion, filtering and pagination. The original phase
+route behaviors below remain an archive of the UI foundation.
 
 ## Routes
 
