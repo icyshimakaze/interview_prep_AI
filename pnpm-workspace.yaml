@@ -1,0 +1,12 @@
+packages:
+  - frontend
+
+saveExact: true
+engineStrict: true
+strictPeerDependencies: true
+storeDir: .cache/pnpm
+fetchTimeout: 600000
+networkConcurrency: 8
+
+allowBuilds:
+  unrs-resolver: true

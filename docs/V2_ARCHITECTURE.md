@@ -1,6 +1,8 @@
 # V2 architecture
 
-Date: 2026-10-09 (Asia/Calcutta). Status: design specification; no V2 functionality is implemented. Baseline: commit `48fcd90`, reviewed alongside [the audit](CURRENT_STATE_AUDIT.md), [project status](../PROJECT_STATUS.md), [engineering rules](../AGENTS.md), and [planning guidance](../.agent/PLANS.md).
+Date: 2026-10-09 (Asia/Calcutta). Status: approved design specification; foundation implementation is recorded in [project status](../PROJECT_STATUS.md). Baseline: commit `48fcd90`, reviewed alongside [the audit](CURRENT_STATE_AUDIT.md), [engineering rules](../AGENTS.md), and [planning guidance](../.agent/PLANS.md).
+
+Implementation note: the foundation uses `frontend/`, `backend/`, and root `compose.yaml` in accordance with the subsequent explicit user request, replacing the proposed `apps/web/`, `apps/api/`, and `infra/compose.yaml` paths below. The generated health/demo API types live in the sole frontend package until a second consumer justifies a shared client package. V1 remains unchanged at the root, with deterministic draft exports; major product features, accounts, AI and job processing remain future phases. See [development instructions](DEVELOPMENT.md) for actual commands and configuration.
 
 Build an adaptive interview preparation platform whose recommendations can be explained and whose progress can be traced to actual work. The portfolio should demonstrate sound contracts, authorization, state transitions, failure handling, tests, and deployment discipline. AI is an optional capability behind a defined boundary, not a substitute for those foundations.
 
@@ -147,6 +149,8 @@ Logging uses request/job correlation IDs, duration, status, and error codes. Do 
 
 Create tables as their implementation phase requires them. This is the target logical model, not a requirement to scaffold every table on day one. UUID primary keys, UTC timestamps, foreign keys, check constraints, and explicit indexes are standard. JSONB is for bounded versioned payloads and rule traces; relationships and identity do not live in opaque JSON.
 
+Implementation update (2026-10-12): the user explicitly requested the full relational foundation ahead of the later workflows. Revision `0002_relational_model` implements the requested model in 36 normalized domain tables, preserving the three existing demo infrastructure tables. `User` maps to `principals`. Resume/job versions, skills/evidence, assessment and interview aggregates, versioned evaluations, bookmarks, roadmaps/progress and cited project snapshots are explicit entities. Assessments and interviews use separate aggregates rather than the conceptual shared `preparation_sessions`/`answers`; this provides stricter typed parent/attempt constraints. Skills cover the current global topic vocabulary; broader track/resource catalogs, selection decisions, jobs, AI runs and privacy operations remain later work. See [the implemented entity mapping and migration policy](DATA_MODEL.md).
+
 | Entity group | Principal fields and relationships |
 | --- | --- |
 | `principals` | `id`, `kind=account|demo`, account `issuer`/`subject` unique pair, status, demo expiry, deletion generation. Provider subject is not email. |
@@ -188,7 +192,7 @@ erDiagram
 
 ### Invariants
 
-- Every private table carries `owner_id`; compound foreign keys such as `(owner_id, session_id)` prevent attaching a child to another owner's parent. Global curriculum is explicitly distinguished from private generated content. Cross-owner sharing is out of scope.
+- Every private aggregate carries `owner_id`; compound foreign keys such as `(owner_id, session_id)` prevent attaching a child to another owner's parent. Versioned question content and grading children inherit global/private ownership from their question, with database guards enforcing access to references and immutable publication. Global curriculum is explicitly distinguished from private generated content. Cross-owner sharing is out of scope.
 - Queries must include the resolved principal and permitted global visibility. Possession of a UUID is not authorization. Row-level security is optional later defense in depth, not a replacement for these checks; it is not part of the first implementation.
 - `(session_id, sequence)` and `(session_item_id)` final-answer uniqueness prevent duplicate turns/submissions. Revision checks and row locks serialize state changes. Repeated idempotency keys with a different body are conflicts.
 - Sessions freeze question, rubric, target, evidence-reference, selector, and provider versions. Public questions cannot change under a running attempt. Historical results are immutable except for required privacy erasure; revoked/deleted private evidence must not survive in copied snapshots.
@@ -198,6 +202,8 @@ erDiagram
 ## 7. API design
 
 REST JSON under `/api/v1`, with FastAPI OpenAPI as the contract source. Generate TypeScript types/client in CI and fail on unexplained drift. IDs are opaque; timestamps are UTC ISO 8601; lists have bounded cursor pagination. Long operations return `{job_id, status_url}` with `202`. Polling endpoints expose only owned jobs and redacted error messages.
+
+The implemented account/demo slice uses `/account/session`, `/account/dashboard`, `/account/profile`, owned `/account/resumes/{id}` and `/account/targets/{id}` reads, and separate `/demo` dashboard/resource/task routes. Profile writes use `PUT` with `expected_revision`, returning 409 for conflicts. Demo exit is `DELETE /demo/session`; `POST /demo/reset` clears expired credentials, requiring CSRF for a live workspace. Dashboard collections are bounded snapshots, not paginated feature APIs. The representative feature endpoints below remain the target for later phases. [Current account/demo contracts and setup](AUTHENTICATION.md)
 
 | Endpoint family | Representative operations |
 | --- | --- |
@@ -247,6 +253,8 @@ Implementation policy: allow only the configured signing algorithm and issuer, r
 Pass bearer tokens from the Clerk SDK in memory; do not create application-managed refresh tokens or store bearer tokens in localStorage. Server-rendered protected fetches forward a valid audience token; frontend route protection is only a UX convenience. Local principal suspension/deletion is checked on each request. Account deletion and logout clear frontend caches. Short-lived JWTs remain usable until expiry unless additional revocation is checked; target a maximum 60-second lifetime and require a fresh identity check for account deletion. Clerk lifecycle webhooks require signature verification and idempotency; they may disable users but must not be the only check for local deletion.
 
 For demo access, FastAPI creates a cryptographically random opaque token, stores only its hash, and sets a `Secure`, `HttpOnly`, `SameSite=Lax` cookie with a 24-hour maximum lifetime. Use a host-only cookie and a CSRF token plus exact Origin validation on demo mutations. Local HTTP development has an explicit development-only cookie configuration. Never use a shared demo user or a static token. Public account mode must refuse startup if required auth configuration is missing; an invalid bearer token cannot select demo mode.
+
+The implemented recruiter flow seeds a fictional candidate separately for every expiring principal. Three authored private questions support two explicitly simulated assessment attempts and one simulated interview; resume/target, three roadmap tasks and four initial progress facts are also examples. The UI always discloses fictional data and accepts no real uploads or AI key. Account UI/API verification is implemented, but no Clerk keys were supplied: live managed sign-up/sign-in/sign-out requires [the documented setup](AUTHENTICATION.md). Signed-token verification and ownership tests run independently against trusted JWKS fixtures and PostgreSQL. Missing keys produce an explicit account-unavailable state and never a fake account login.
 
 ## 9. Resume flow
 

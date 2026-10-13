@@ -1,0 +1,25 @@
+{
+  "name": "interview-prep-v2",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": "^24.15.0 || ^26.0.0"
+  },
+  "devDependencies": {
+    "prettier": "3.9.9",
+    "prettier-plugin-tailwindcss": "0.8.1"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @interview-prep/frontend dev",
+    "start": "pnpm --filter @interview-prep/frontend start",
+    "lint": "pnpm --filter @interview-prep/frontend lint",
+    "typecheck": "pnpm --filter @interview-prep/frontend typecheck",
+    "test": "pnpm --filter @interview-prep/frontend test",
+    "test:e2e": "pnpm --filter @interview-prep/frontend test:e2e",
+    "build": "pnpm --filter @interview-prep/frontend build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "api:types": "pnpm --filter @interview-prep/frontend api:types"
+  }
+}

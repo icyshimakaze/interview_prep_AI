@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: Consolas, "Courier New", monospace;
+  --color-paper: #f7f8f4;
+  --color-surface: #ffffff;
+  --color-ink: #202d29;
+  --color-muted: #5b6661;
+  --color-line: #dce1d9;
+  --color-accent: #285a48;
+  --color-accent-hover: #1e4537;
+  --color-tint: #eaf0e7;
+  --color-danger: #9a302b;
+}
+
+@layer base {
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+  button,
+  summary,
+  select {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  ::selection {
+    background: #d8e4cf;
+    color: #202d29;
+  }
+  html {
+    scroll-padding-top: 2rem;
+  }
+}
+
+@layer components {
+  .public-width {
+    @apply mx-auto w-full max-w-6xl px-6 sm:px-10;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold tracking-[0.14em] text-accent uppercase;
+  }
+  .editorial-title {
+    @apply font-serif text-4xl leading-[1.13] tracking-tight sm:text-5xl;
+  }
+  .section-title {
+    @apply text-lg leading-7 font-semibold tracking-tight;
+  }
+  .text-link {
+    @apply inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent;
+  }
+  .public-section {
+    @apply border-t border-line py-16 sm:py-24;
+  }
+  .page-header {
+    @apply mb-9 flex flex-wrap items-end justify-between gap-5;
+  }
+  .page-title {
+    @apply mt-3 font-serif text-3xl leading-tight tracking-tight sm:text-4xl;
+  }
+  .page-description {
+    @apply mt-3 max-w-2xl text-sm leading-7 text-muted;
+  }
+  .section-rule {
+    @apply mt-9 border-t border-line pt-7;
+  }
+  .field {
+    @apply min-w-0 space-y-2 text-sm;
+  }
+  .field label {
+    @apply block font-medium;
+  }
+  .input {
+    @apply block min-h-11 w-full rounded-md border border-[#b8c2b8] bg-surface px-3 py-2.5 text-ink placeholder:text-muted disabled:cursor-not-allowed disabled:bg-paper;
+  }
+  .input[aria-invalid="true"] {
+    @apply border-danger;
+  }
+  .field-hint {
+    @apply text-xs leading-5 text-muted;
+  }
+  .field-error {
+    @apply text-xs leading-5 text-danger;
+  }
+  .form-section {
+    @apply grid gap-7 border-t border-line py-8 lg:grid-cols-[1fr_2fr] lg:gap-12;
+  }
+  .empty-state {
+    @apply border-y border-line bg-surface px-6 py-14 text-center sm:py-20;
+  }
+  .empty-icon {
+    @apply mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-line text-accent;
+  }
+  .error-display {
+    @apply my-6 border-l-2 border-danger bg-[#fcf1ee] p-5 text-danger;
+  }
+  .skeleton {
+    @apply rounded-sm bg-line;
+  }
+  .table-scroll {
+    @apply overflow-x-auto border-y border-line bg-surface;
+  }
+  .data-table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+  .data-table th {
+    @apply border-b border-line bg-paper px-5 py-3 text-xs font-medium whitespace-nowrap text-muted;
+  }
+  .data-table td {
+    @apply border-b border-line px-5 py-5 align-top leading-6;
+  }
+  .data-table tr:last-child td {
+    @apply border-0;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-sm px-2 py-1 text-xs leading-4 font-medium whitespace-nowrap;
+  }
+  .badge-neutral {
+    @apply bg-paper text-muted;
+  }
+  .badge-green {
+    @apply bg-tint text-accent;
+  }
+  .badge-amber {
+    @apply bg-[#f3ecd9] text-[#76561f];
+  }
+  .dialog {
+    @apply fixed m-auto w-[calc(100%-2rem)] max-w-lg rounded-lg border border-line bg-surface p-6 text-ink shadow-xl sm:p-8;
+  }
+  .dialog::backdrop {
+    background: rgb(24 36 30 / 45%);
+  }
+  .nav-link {
+    @apply flex min-h-11 items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted hover:bg-tint/60 hover:text-ink;
+  }
+  .nav-link[aria-current="page"] {
+    @apply bg-tint font-semibold text-accent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

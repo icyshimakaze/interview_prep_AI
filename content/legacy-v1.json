@@ -1,0 +1,536 @@
+{
+  "schema_version": 1,
+  "source_commit": "48fcd90",
+  "source_sha256": {
+    "app.py": "5a6abc9d300423ecbe75ed4afc53c188ea840d34e744b2aebd449a27be622f99",
+    "questions.json": "8324fd68ac2c257b5d5c0d4f82406e16b2eb62ea22fbd7a4ffb618ba856a95b9",
+    "requirements.txt": "0cbb47835edb89b4addfff09725e98a7aacc8f52e291a9e6e6bffeb2076f1eff"
+  },
+  "usage": "Unpublished editorial seeds; no assessment evidence, training data, or scheduled tasks.",
+  "topic_aliases": {
+    "Arrays": "arrays",
+    "Linked List": "linked-list",
+    "Stack": "stack",
+    "Queue": "queue",
+    "DBMS": "dbms",
+    "OS": "operating-system",
+    "Operating System": "operating-system"
+  },
+  "questions": [
+    {
+      "id": "10240884-6e77-5786-819b-abc6bf704a1a",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "title": "Find duplicate element in array",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "364dcb57-29e3-5b2f-a253-d79c3e599606",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "title": "Maximum subarray sum",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "468346d4-bf27-516a-9bcc-3fc8e18f68d7",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "title": "Rotate array by k steps",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "43446533-5913-56d9-ac36-009661b46e1b",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "title": "Two Sum Problem",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "b96af539-09b0-522e-8fde-baba0fafa48d",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "title": "Merge two sorted arrays",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "0a82016a-ab03-56c0-bbd6-45d0c0c4137e",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "title": "Reverse Linked List",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "e1a495f4-8fc9-583b-ab54-038cd7c944c0",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "title": "Detect cycle in linked list",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "dbb89325-c5be-5122-ba64-e816883c0229",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "title": "Merge two linked lists",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "8c5c5158-e9b8-56b3-9b34-fb2de57eafed",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "title": "Find middle node",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "33c87aea-12fd-52ac-b68a-525578f5eabd",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "title": "Add Two Numbers",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "a0b8839b-2629-5d3b-bcf0-747aa014e605",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "title": "Valid Parentheses",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "67f71bc5-40ea-588f-8aee-3e40193b131f",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "title": "Implement stack using queue",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "1490fed3-ee09-5f7c-85c2-6a675f239d66",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "title": "Next Greater Element",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "0731287e-8c68-5949-ae84-ce237832956c",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "title": "Min Stack",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    },
+    {
+      "id": "05ace82a-395c-5b60-b473-c3e76826d825",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "title": "Postfix Evaluation",
+      "status": "draft",
+      "difficulty": null,
+      "prompt": null,
+      "rubric": null,
+      "source": {
+        "file": "questions.json",
+        "commit": "48fcd90"
+      },
+      "provenance_review": "required"
+    }
+  ],
+  "roadmap_suggestions": [
+    {
+      "id": "55310628-23b4-50d6-954d-e6cb4c1063d6",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "original_text": "Week 1 :- Array Basics",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 188,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "9da89440-09e0-5254-937a-ecbfc1527067",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "original_text": "Week 2 :- Sliding Window",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 189,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "f07ae91b-083c-5f55-b647-ece03242c569",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "original_text": "Week 3 :- Prefix Sum",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 190,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "1c1b2507-4512-511e-9157-8be634019340",
+      "topic_id": "arrays",
+      "original_topic": "Arrays",
+      "original_text": "Week 4 :- LeetCode Problems",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 191,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "b59d9b4d-5efb-5100-b058-0c51f6bc35e3",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "original_text": "Week 1 :- Linked List Basics",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 194,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "5c071a15-d2f7-5ca7-8677-9e6ac01d60d0",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "original_text": "Week 2 :- Reverse Linked List",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 195,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "a6d4ab3c-8996-5ae6-90fc-fe081417e255",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "original_text": "Week 3 :- Fast & Slow Pointer",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 196,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "3b7cfef3-d5cf-5934-a5ec-0d11630c94c1",
+      "topic_id": "linked-list",
+      "original_topic": "Linked List",
+      "original_text": "Week 4 :- Interview Problems",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 197,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "d4cb3903-6ea5-5c3d-8f79-fbad620fc0ef",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "original_text": "Week 1 :- Stack Basics",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 200,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "942f04f5-cc27-5283-ab05-4f26c6e71101",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "original_text": "Week 2 :- Monotonic Stack",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 201,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "968e7a9a-56a8-592e-a04a-7574bf304743",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "original_text": "Week 3 :- Expression Evaluation",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 202,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "056407d8-a047-5102-821a-735009f76d7a",
+      "topic_id": "stack",
+      "original_topic": "Stack",
+      "original_text": "Week 4 :- Advanced Problems",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 203,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "30fe3583-5910-5358-9524-e6f2ac0919e3",
+      "topic_id": "queue",
+      "original_topic": "Queue",
+      "original_text": "Week 1 :- Queue Basics",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 206,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "539485a1-736e-5708-962f-fb4d8fb43164",
+      "topic_id": "queue",
+      "original_topic": "Queue",
+      "original_text": "Week 2 :- Circular Queue",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 207,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "0fffaec1-401a-5015-809c-e46116dd076b",
+      "topic_id": "queue",
+      "original_topic": "Queue",
+      "original_text": "Week 3 :- Priority Queue",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 208,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "23fb9836-9a70-5a41-b49c-067b39f6672c",
+      "topic_id": "queue",
+      "original_topic": "Queue",
+      "original_text": "Week 4 :- Graph Applications",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 209,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "eb218af3-037b-55ef-8a4d-bfff70ed8daf",
+      "topic_id": "dbms",
+      "original_topic": "DBMS",
+      "original_text": "Week 1 :- SQL Basics",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 212,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "0202c8bf-6847-5a32-95ff-a47655d3049e",
+      "topic_id": "dbms",
+      "original_topic": "DBMS",
+      "original_text": "Week 2 :- Joins",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 213,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "b3051da6-175b-5048-8e78-ad9b97ab02d8",
+      "topic_id": "dbms",
+      "original_topic": "DBMS",
+      "original_text": "Week 3 :- Normalization",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 214,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "6bbe4fb0-3316-5ced-8e48-04541bb7279f",
+      "topic_id": "dbms",
+      "original_topic": "DBMS",
+      "original_text": "Week 4 :- Transactions & Indexing",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 215,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "5a86f43d-8ff9-58a3-aaab-84df8520deff",
+      "topic_id": "operating-system",
+      "original_topic": "OS",
+      "original_text": "Week 1 :- Process & Thread",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 218,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "6faf6d42-985c-540e-99f9-751c8454b8aa",
+      "topic_id": "operating-system",
+      "original_topic": "OS",
+      "original_text": "Week 2 :- Scheduling",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 219,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "6f8a0866-69d1-5fbe-b533-8f492db10238",
+      "topic_id": "operating-system",
+      "original_topic": "OS",
+      "original_text": "Week 3 :- Deadlock",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 220,
+        "commit": "48fcd90"
+      }
+    },
+    {
+      "id": "0b53a9e0-afc2-5c4c-97dc-8261da78dc65",
+      "topic_id": "operating-system",
+      "original_topic": "OS",
+      "original_text": "Week 4 :- Memory Management",
+      "status": "editorial_seed",
+      "source": {
+        "file": "app.py",
+        "line": 221,
+        "commit": "48fcd90"
+      }
+    }
+  ]
+}

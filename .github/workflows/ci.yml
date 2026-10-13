@@ -1,0 +1,75 @@
+name: V2 foundation checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+        env:
+          POSTGRES_USER: interview_prep
+          POSTGRES_DB: interview_prep
+          POSTGRES_PASSWORD: disposable-ci-password
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U interview_prep -d interview_prep"
+          --health-interval 5s --health-timeout 3s --health-retries 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24"
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.12.24"
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install locked dependencies
+        run: |
+          npm install --global --allow-scripts=pnpm pnpm@12.8.1
+          pnpm install --frozen-lockfile
+          uv sync --project backend --frozen
+      - name: Local-only configuration
+        run: python scripts/init_env.py
+      - name: Backend quality and real database checks
+        env:
+          DATABASE_URL: postgresql+asyncpg://interview_prep:disposable-ci-password@127.0.0.1:5433/interview_prep
+          TEST_DATABASE_URL: postgresql+asyncpg://interview_prep:disposable-ci-password@127.0.0.1:5433/interview_prep_test
+        run: uv run --project backend python scripts/check_backend.py
+      - name: Frontend quality and production build
+        run: |
+          pnpm lint
+          pnpm format:check
+          pnpm typecheck
+          pnpm test
+          pnpm api:types
+          git diff --exit-code -- frontend/src/lib/api/generated.ts
+          pnpm build
+      - name: Start services and run live browser checks
+        env:
+          DATABASE_URL: postgresql+asyncpg://interview_prep:disposable-ci-password@127.0.0.1:5433/interview_prep
+        run: |
+          uv run --project backend alembic -c backend/alembic.ini upgrade head
+          uv run --project backend uvicorn interview_prep.main:create_app --factory --host 127.0.0.1 --port 8000 --no-proxy-headers --no-access-log > /tmp/interview-api.log 2>&1 &
+          pnpm --filter @interview-prep/frontend start > /tmp/interview-web.log 2>&1 &
+          uv run --project backend python scripts/wait_services.py
+          uv run --project backend python scripts/smoke_stack.py
+          pnpm --filter @interview-prep/frontend exec playwright install --with-deps chromium
+          pnpm test:e2e
+      - name: Container builds
+        run: docker compose build

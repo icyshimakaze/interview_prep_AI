@@ -1,0 +1,109 @@
+name: interview-prep-v2
+
+x-backend-environment: &backend-environment
+  APP_ENV: development
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:?Run scripts/init_env.py}:${POSTGRES_PASSWORD:?Run scripts/init_env.py}@postgres:5432/${POSTGRES_DB:?Run scripts/init_env.py}
+  DEMO_RATE_LIMIT_KEY: ${DEMO_RATE_LIMIT_KEY:?Run scripts/init_env.py}
+  ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-["http://localhost:3000","http://127.0.0.1:3000"]}
+  AUTH_ENABLED: ${AUTH_ENABLED:-false}
+  AUTH_ISSUER: ${AUTH_ISSUER:-}
+  AUTH_AUDIENCE: ${AUTH_AUDIENCE:-interview-prep-api}
+
+x-backend-build: &backend-build
+  context: ./backend
+
+services:
+  postgres:
+    image: postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Run scripts/init_env.py}
+      POSTGRES_USER: ${POSTGRES_USER:?Run scripts/init_env.py}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/init_env.py}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  migrate:
+    build: *backend-build
+    environment: *backend-environment
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    build: *backend-build
+    environment: *backend-environment
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=4)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    init: true
+    restart: unless-stopped
+
+  cleanup:
+    build: *backend-build
+    environment: *backend-environment
+    command: ["python", "-m", "interview_prep.cleanup", "--repeat"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        BACKEND_INTERNAL_URL: http://backend:8000
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-}
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:-}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    init: true
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
