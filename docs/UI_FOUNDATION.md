@@ -9,7 +9,24 @@ implemented in account mode, including optional background/interests, profile
 deletion, target editing/deletion, filtering and pagination. The original phase
 route behaviors below remain an archive of the UI foundation.
 
+Follow-up: `/app/skills` and `/demo/skills` now provide the
+[Skill Matrix](SKILL_EVIDENCE_ENGINE.md), with target selection, separate resume
+and demonstrated evidence, deterministic ordering, source disclosures and refresh.
+The workspace navigation now has eleven sections. Account/demo identity boundaries
+remain unchanged.
+
 ## Routes
+
+Follow-up: `/app/questions` and `/demo/questions` now provide the
+[production question bank](QUESTION_BANK.md), including real filters/search/pages,
+owned bookmarks and attempt-first self-review/history. Placeholder descriptions
+below record the original foundation phase.
+
+Follow-up: `/app/assessments` and `/demo/assessments` now provide
+[real assessments](ASSESSMENTS.md): configuration, saved responses/navigation,
+unfinished-attempt resume, deterministic objective grading, labelled mock
+conceptual feedback, review and paginated history. The public preview still shows
+explicitly fictional recorded examples.
 
 | Public route           | Purpose                                                                              |
 | ---------------------- | ------------------------------------------------------------------------------------ |

@@ -30,7 +30,8 @@ def stable_id(topic: str, text: str) -> str:
 
 def export_content() -> dict[str, object]:
     for name, expected_hash in SOURCE_HASHES.items():
-        if hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != expected_hash:
+        source = ROOT / "content/provenance/streamlit-v1.txt" if name == "app.py" else ROOT / name
+        if hashlib.sha256(source.read_bytes()).hexdigest() != expected_hash:
             raise ValueError(f"Legacy source changed: {name}. Review before updating provenance.")
 
     bank: object = json.loads((ROOT / "questions.json").read_text(encoding="utf-8"))
@@ -58,7 +59,7 @@ def export_content() -> dict[str, object]:
                 }
             )
 
-    tree = ast.parse((ROOT / "app.py").read_text(encoding="utf-8"))
+    tree = ast.parse((ROOT / "content/provenance/streamlit-v1.txt").read_text(encoding="utf-8"))
     roadmaps: list[dict[str, object]] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare):

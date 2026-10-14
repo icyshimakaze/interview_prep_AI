@@ -73,6 +73,22 @@ def register_error_handlers(app: FastAPI) -> None:
         code, message = messages.get(exc.status_code, ("http_error", "The request failed."))
         if exc.status_code == 409:
             conflicts = {
+                "assessment_pool": "There are fewer published questions than requested for these "
+                "filters. Choose fewer questions or change the filters.",
+                "assessment_limit": "Assessment limit reached (100 attempts or 5 unfinished). "
+                "Resume or abandon an unfinished attempt.",
+                "assessment_expired": "This assessment expired. Your saved responses are retained; "
+                "start a new attempt.",
+                "assessment_closed": "This assessment is closed and cannot be changed.",
+                "assessment_revision": "This assessment changed in another request. "
+                "Reload the saved attempt before continuing.",
+                "question_changed": "This question is inactive or changed. "
+                "Reload before submitting.",
+                "submission_conflict": "This submission key already belongs "
+                "to a different response.",
+                "practice_limit": "You can save up to 1000 question-bank responses. "
+                "Delete an old response first.",
+                "bookmark_limit": "You can save up to 500 bookmarks. Remove a bookmark first.",
                 "target_in_use": "This job is used by preparation history. "
                 "Archive it instead of deleting it.",
                 "target_limit": "You can save up to 100 target jobs. "

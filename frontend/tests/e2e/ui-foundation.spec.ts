@@ -15,6 +15,38 @@ async function mockDemo(page: Page) {
   await page.route("**/api/v1/demo/dashboard", (route) =>
     route.fulfill({ json: workspaceFixture }),
   );
+  await page.route("**/api/v1/demo/questions/facets", (route) =>
+    route.fulfill({ json: { categories: [], subtopics: [], roles: [] } }),
+  );
+  await page.route("**/api/v1/demo/questions?*", (route) =>
+    route.fulfill({ json: { items: [], total: 0, offset: 0, limit: 12 } }),
+  );
+  await page.route("**/api/v1/demo/assessments/options", (route) =>
+    route.fulfill({
+      json: {
+        inventory: [],
+        max_questions: 12,
+        duration_hours: 24,
+        conceptual_provider: "MockAIProvider",
+        conceptual_kind: "simulation",
+      },
+    }),
+  );
+  await page.route("**/api/v1/demo/assessments?*", (route) =>
+    route.fulfill({ json: { items: [], total: 0, offset: 0, limit: 10 } }),
+  );
+  await page.route("**/api/v1/demo/skill-evidence", (route) =>
+    route.fulfill({
+      json: {
+        policy_version: "skill-evidence-v1",
+        mode: "demo",
+        target_id: null,
+        targets: [],
+        rows: [],
+        notices: ["Fictional demo sources never validate real competence."],
+      },
+    }),
+  );
 }
 async function checkAccessibility(page: Page) {
   const result = await new AxeBuilder({ page })

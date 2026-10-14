@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "content_version": "assessment-bank-v1",
+  "questions": [
+    {
+      "key": "assessment-transaction-properties",
+      "title": "Transaction guarantees",
+      "legacy_title": null,
+      "category": "DBMS",
+      "subtopic": "Transactions",
+      "difficulty": "easy",
+      "question_type": "multiple_select",
+      "prompt": "Select every statement that correctly describes a database transaction guarantee. Assume an ACID database with durable commits. Select all that apply.",
+      "expected_concepts": [
+        "Atomicity groups changes into an all-or-nothing unit",
+        "Durability preserves committed changes after recovery"
+      ],
+      "tags": ["transactions", "acid"],
+      "roles": ["backend-engineer", "software-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": [
+        {
+          "text": "Atomicity prevents a failed transaction from leaving only some of its changes committed.",
+          "is_correct": true
+        },
+        {
+          "text": "Durability means committed changes survive a crash and recovery.",
+          "is_correct": true
+        },
+        {
+          "text": "Atomicity guarantees every query finishes in constant time.",
+          "is_correct": false
+        },
+        {
+          "text": "Durability means a transaction never needs concurrency control.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "key": "assessment-http-retries",
+      "title": "Safe HTTP retry reasoning",
+      "legacy_title": null,
+      "category": "Backend",
+      "subtopic": "HTTP retries",
+      "difficulty": "medium",
+      "question_type": "multiple_select",
+      "prompt": "A client times out after sending a payment creation request. Select every measure that helps avoid duplicate payments when the client retries. Select all that apply.",
+      "expected_concepts": [
+        "Persist an idempotency key with the operation result",
+        "Reject reuse of a key with a different request payload"
+      ],
+      "tags": ["http", "idempotency"],
+      "roles": ["backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": [
+        {
+          "text": "Atomically persist an idempotency key and the payment result.",
+          "is_correct": true
+        },
+        {
+          "text": "Reject the same key when it is reused for a different payment payload.",
+          "is_correct": true
+        },
+        {
+          "text": "Always create a new payment because the first request timed out.",
+          "is_correct": false
+        },
+        {
+          "text": "Keep the idempotency key only in the browser's memory.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "key": "assessment-serializable-retries",
+      "title": "Serializable transaction retries",
+      "legacy_title": null,
+      "category": "DBMS",
+      "subtopic": "Concurrency",
+      "difficulty": "hard",
+      "question_type": "multiple_select",
+      "prompt": "A PostgreSQL serializable transaction fails with SQLSTATE 40001. Which responses preserve transactional correctness? Select all that apply. External effects are not transactional.",
+      "expected_concepts": [
+        "Retry the entire transaction with fresh reads",
+        "Delay external effects until commit or use a transactional outbox"
+      ],
+      "tags": ["serializable", "concurrency"],
+      "roles": ["backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": [
+        {
+          "text": "Retry the whole transaction, including the reads that informed its writes.",
+          "is_correct": true
+        },
+        {
+          "text": "Use an outbox committed with the transaction to schedule external effects safely.",
+          "is_correct": true
+        },
+        {
+          "text": "Retry only the last SQL statement inside the failed transaction.",
+          "is_correct": false
+        },
+        {
+          "text": "Send an external payment on every retry before attempting to commit.",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "key": "assessment-binary-search",
+      "title": "Binary search precondition",
+      "legacy_title": null,
+      "category": "Algorithms",
+      "subtopic": "Binary search",
+      "difficulty": "easy",
+      "question_type": "multiple_choice",
+      "prompt": "You want to use ordinary binary search to find a number in an array by comparing it with the middle element. Which precondition makes discarding half the search range valid? Choose one.",
+      "expected_concepts": ["The array is sorted under the comparison order"],
+      "tags": ["binary-search"],
+      "roles": ["software-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": [
+        {
+          "text": "The array is sorted under the same comparison order used by the search.",
+          "is_correct": true
+        },
+        { "text": "Every value occurs exactly twice.", "is_correct": false },
+        { "text": "The array has an even length.", "is_correct": false }
+      ]
+    },
+    {
+      "key": "assessment-index-tradeoff",
+      "title": "Index read and write tradeoffs",
+      "legacy_title": null,
+      "category": "DBMS",
+      "subtopic": "Indexes",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "In a few sentences, explain why adding a database index can speed up a filtered read but slow down inserts or updates. Mention storage and explain why an index is not always selected by the query planner.",
+      "expected_concepts": [
+        "Selective filters reduce scanned rows",
+        "Writes maintain index entries",
+        "Indexes consume storage",
+        "Planner estimates compare access costs"
+      ],
+      "tags": ["indexes", "query-planning"],
+      "roles": ["backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "assessment-dns-purpose",
+      "title": "DNS lookup purpose",
+      "legacy_title": null,
+      "category": "Computer Networks",
+      "subtopic": "DNS",
+      "difficulty": "easy",
+      "question_type": "written",
+      "prompt": "In a few sentences, describe what a DNS lookup does when a browser opens a hostname. Explain how caching helps and why a DNS result alone does not establish an encrypted connection.",
+      "expected_concepts": [
+        "Hostname resolution returns address records",
+        "Caching reduces repeated lookups",
+        "TLS establishes encryption separately"
+      ],
+      "tags": ["dns", "tls"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": []
+    }
+  ]
+}

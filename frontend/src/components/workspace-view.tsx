@@ -14,6 +14,10 @@ import type { WorkspaceContextValue } from "./workspace/workspace-context";
 import type { WorkspaceSection } from "./workspace/navigation";
 import { TargetJobsView } from "./workspace/target-jobs-view";
 import { ResumeView } from "./workspace/resume-view";
+import { SkillMatrixView } from "./workspace/skill-matrix";
+import { QuestionBankView } from "./workspace/question-bank-view";
+import { SectionHeader } from "./workspace/section-header";
+import { AssessmentsWorkspace } from "./workspace/assessments-view";
 
 export function WorkspaceView({
   section = "dashboard",
@@ -21,6 +25,16 @@ export function WorkspaceView({
 }: WorkspaceContextValue & { section?: WorkspaceSection }) {
   const { data } = workspace;
   switch (section) {
+    case "skills":
+      return workspace.skillApi ? (
+        <SkillMatrixView api={workspace.skillApi} />
+      ) : (
+        <SectionHeader
+          title="Skill Matrix"
+          eyebrow="Evidence, explained"
+          description="Skill evidence is unavailable. Reload your workspace to try again."
+        />
+      );
     case "dashboard":
       return <Overview data={data} />;
     case "targets":
@@ -36,7 +50,11 @@ export function WorkspaceView({
         <EvidenceView data={data} section={section} />
       );
     case "assessments":
-      return <AssessmentsView data={data} />;
+      return workspace.assessmentApi ? (
+        <AssessmentsWorkspace api={workspace.assessmentApi} />
+      ) : (
+        <AssessmentsView data={data} />
+      );
     case "interviews":
       return <InterviewsView data={data} />;
     case "roadmap":
@@ -44,6 +62,15 @@ export function WorkspaceView({
     case "progress":
       return <ProgressView data={data} />;
     case "questions":
+      return workspace.questionApi ? (
+        <QuestionBankView api={workspace.questionApi} mode={data.mode} />
+      ) : (
+        <SectionHeader
+          title="Question Bank"
+          eyebrow="Focused practice"
+          description="Question browsing is unavailable. Reload your workspace to try again."
+        />
+      );
     case "projects":
       return <PlannedView mode={data.mode} section={section} />;
     case "settings":

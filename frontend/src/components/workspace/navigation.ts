@@ -10,6 +10,12 @@ export const workspaceSections = [
   { slug: "targets", label: "Target Job", icon: "target", group: "Prepare" },
   { slug: "resume", label: "Resume", icon: "resume", group: "Prepare" },
   {
+    slug: "skills",
+    label: "Skill Matrix",
+    icon: "questions",
+    group: "Prepare",
+  },
+  {
     slug: "assessments",
     label: "Assessments",
     icon: "assessments",

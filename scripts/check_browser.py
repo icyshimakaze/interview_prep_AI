@@ -108,6 +108,13 @@ def main() -> None:
             check=True,
             timeout=60,
         )
+        subprocess.run(
+            [sys.executable, "-m", "interview_prep.modules.questions.seed", "--apply"],
+            cwd=ROOT,
+            env=environment,
+            check=True,
+            timeout=60,
+        )
         cache = ROOT / ".cache"
         cache.mkdir(exist_ok=True)
         with (cache / "browser-api.log").open("wb") as log:

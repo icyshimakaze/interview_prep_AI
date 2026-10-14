@@ -1,3 +1,4 @@
+import ast
 import json
 import subprocess
 import sys
@@ -15,3 +16,10 @@ def test_legacy_seeds_have_provenance_and_are_unpublished() -> None:
     assert all(question["rubric"] is None for question in seeds["questions"])
     assert seeds["source_commit"] == "48fcd90"
     assert seeds["topic_aliases"]["OS"] == seeds["topic_aliases"]["Operating System"]
+
+
+def test_runnable_legacy_launcher_has_no_self_ratings_or_fake_ml() -> None:
+    source = (ROOT / "app.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    assert not any(isinstance(n, ast.Attribute) and n.attr == "slider" for n in ast.walk(tree))
+    assert "sklearn" not in source and "Self-rated sliders have been retired" in source

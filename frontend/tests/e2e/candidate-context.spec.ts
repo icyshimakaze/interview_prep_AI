@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-for (const name of ["profile", "target", "resume"] as const) {
+for (const name of ["profile", "target", "resume", "skills"] as const) {
   test(`${name} form layout and accessibility on desktop and mobile`, async ({
     page,
   }) => {

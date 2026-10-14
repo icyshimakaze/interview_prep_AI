@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 // Actual components rendered with public test fixtures for browser layout/axe QA.
 // These ignored artifacts have no React handlers or authentication bypass.
 export async function writeUiPreview(
-  name: "profile" | "target" | "resume",
+  name: "profile" | "target" | "resume" | "skills",
   content: ReactNode,
 ) {
   const directory = resolve(process.cwd(), "../.cache/ui-previews");

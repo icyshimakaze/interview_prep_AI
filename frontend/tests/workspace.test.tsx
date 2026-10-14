@@ -44,7 +44,10 @@ describe("workspace contracts and truthful UI", () => {
     const nav = screen.getByRole("navigation", {
       name: "Workspace navigation",
     });
-    expect(within(nav).getAllByRole("link")).toHaveLength(10);
+    expect(within(nav).getAllByRole("link")).toHaveLength(11);
+    expect(
+      within(nav).getByRole("link", { name: "Skill Matrix" }),
+    ).toHaveAttribute("href", "/demo/skills");
     expect(
       within(nav).getByRole("link", { name: "Assessments" }),
     ).toHaveAttribute("aria-current", "page");

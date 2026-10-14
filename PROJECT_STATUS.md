@@ -1,8 +1,224 @@
 # Project Status
 
-Updated: 2026-10-13 (Asia/Calcutta).
+Updated: 2026-10-15 (Asia/Calcutta).
 
-## Secure resume upload and evidence review (current phase)
+## Real assessments (current phase)
+
+Implemented following the [assessment plan](.agent/plans/real-assessments.md) and
+[workflow, scoring, privacy and rollout specification](docs/ASSESSMENTS.md).
+The user-authorized local commit includes the preceding question-bank and
+skill-engine phases, which the assessment implementation integrates with.
+Commit message: `feat: replace self-rating with real assessment engine`.
+No dependency installation, push, live migration, live seed or deployment occurred.
+
+- The runnable V1 launcher no longer offers self-rated sliders, fake metrics or
+  its classifier. Original bytes are preserved as a non-executable provenance
+  fixture with the original SHA-256/AST seed checks intact; questions/requirements
+  and the 15 legacy draft versions remain unchanged.
+- Migration `0006_real_assessments` extends existing owned aggregates with frozen
+  configuration, validated multiple-select selections, scores and evaluation
+  metadata. Existing rows/final answers survive; populated lossy rollback refuses.
+- Account/demo workflows configure from actual published inventory, start, save,
+  navigate, resume, submit, persist, review and paginate history. Category and
+  difficulty are exact filters. Six supplemental authored prompts bring the
+  explicit catalogue to 29; no breadth or psychometric validation claim is made.
+- MCQ, exact-set multiple-select and literal objective short answers score on the
+  server. Answer keys, concepts/rubrics and correctness never leave the assessment
+  API before completed submission. Blanks become skipped; drafts stay editable.
+- The evaluation-provider boundary validates structured output/provenance and
+  bounds conceptual evaluation time. Default `MockAIProvider` uses a documented
+  lexical-coverage simulation, requires no key/network call, and does not set
+  correctness or validate competence. Objective counts and conceptual points are
+  separate, with real category-level response/skip totals and no readiness number.
+- Principal/attempt locks, start keys, revisions, immutable final answers and
+  atomic submission handle concurrency/retries without duplicate attempts/events.
+  Expiry, invalid state/options, limits, foreign ownership and demo CSRF fail safely.
+  Provider failures leave saved drafts intact. Frontend failures retain local
+  input, block failed navigation and offer saved-state reload/retry.
+- Responses are stored privately with question versions/evaluation timestamps.
+  Account attempts have no automatic expiry or individual deletion UI; profile
+  deletion does not erase preparation history. Demo exit/expiry and principal
+  erasure cascade. Privacy/setup/legacy docs and generated contracts are updated.
+
+### Verification
+
+| Check                | Actual result                                                                                                                                                                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Backend              | Ruff lint/format passed for 115 files; strict mypy passed for 108 files; **250 tests passed** on disposable PostgreSQL, including 29 new assessment/migration/legacy cases.                                                                                                          |
+| Migrations/contracts | Clean upgrade, metadata drift check, complete downgrade/re-upgrade, old-row preservation, populated rollback refusal, OpenAPI and original provenance hashes/seeds passed.                                                                                                           |
+| Frontend             | Zero-warning ESLint, strict TypeScript, **79 tests across 10 files** with one worker, and production build passed.                                                                                                                                                                   |
+| Browser              | **23 Chrome tests passed** with a seeded disposable API/database. Actual multiple-select save/reload/resume, protected keys, objective/mock review, ownership isolation and demo erasure passed. Zero axe violations in tested desktop/mobile views; screenshots visually inspected. |
+
+An initial concurrent run hit timing failures in unchanged frontend tests and an
+existing backend fixture cleanup. Isolated runs passed without changing assertions
+or test time limits. A new demo test initially expected 201 from the established
+200 session-creation contract; its expectation was corrected without changing the
+production API. Live Clerk credentials remain unavailable: account integration
+uses signed tokens/trusted test JWKS and mocked frontend SDK/transport.
+
+The browser harness removed its temporary API/database, and the owned port-3100
+frontend was stopped. A final production build restored the normal backend
+destination. Catalogue validation reports 29 questions without database writes;
+original source hashes, frozen migrations and legacy seed reconciliation remain
+verified.
+
+Rollout: apply migration 0006, validate/publish the two manifests explicitly, then
+deploy the matched API/frontend in an authorized environment. Running services
+have not been upgraded. Future work: independent curriculum review, a real
+interview workflow, and live Clerk verification before an authorized release.
+
+## Production question bank (preceding phase)
+
+Implemented on `rebuild/professional-v2` following the
+[question-bank plan](.agent/plans/question-bank.md) and
+[question-bank API/content/rollout guide](docs/QUESTION_BANK.md).
+Preserved the preceding uncommitted skill-engine work. No new dependencies, commit,
+push, live migration, application-data seed or deployment occurred.
+
+### Content and behavior
+
+- Preserved all original files and 15 legacy title-only version-1 drafts. Authored
+  complete version-2 adaptations plus eight broader-topic prompts: **23 questions**
+  in the explicit versioned catalogue, with constraints, expected concepts, tags,
+  role relevance, difficulty/type and source classification. No volume/usage or
+  outcome claims. Difficulty and role relevance are editorial classifications.
+- Migration `0005_question_bank` adds nullable version metadata, frozen ordered
+  concepts/tags/roles and owned append-only practice attempts. Existing content and
+  history remain intact. Latest released versions govern browsing; retirement does
+  not resurrect an older release. Populated lossy downgrade is refused.
+- Explicit validated transactional publication preserves stable legacy IDs/drafts,
+  retirement and editorial versions; reruns are idempotent, publication is serialized
+  and collisions roll back. API reads/demo bootstrap never publish global content.
+- Account/demo Question Bank now supports literal search, category/topic, real
+  difficulty/type/role filters, active/inactive views, stable pagination, owned
+  bookmarks and attempted state. All filters apply in PostgreSQL before paging;
+  escaped wildcard input cannot broaden search. Facets respect private ownership.
+- Detail shows prompts and MCQ option text/IDs; no answer keys, correctness flags
+  or rubric anchors are returned. Expected concepts unlock only after an owned
+  submitted response to that exact version. Historical attempts never reveal newer
+  concepts. Bookmarks are independent of attempted state and survive version changes.
+- Submitted history combines owned question-bank/assessment/interview responses
+  across versions; draft/skipped work is excluded. Bank practice is explicitly
+  self-review (simulation in demo), with no fabricated score or competence evidence.
+  Responses can be deleted from bank history; deleting the final qualifying attempt
+  removes concept access on the next read. Other channels preserve their history.
+- Inputs/storage are bounded, ownership is resolved server-side, duplicate retries
+  return one stored attempt, changed-key payloads/stale versions fail safely, and
+  owner locks serialize concurrent mutations. Demo mutations retain Origin/CSRF and
+  the two-visitor quota. Responses stay private, never execute and are not sent to AI.
+- Frontend has loading/empty/error/retry, canceled/stale-response guards, retained
+  failed answers/retry keys, duplicate-gesture prevention, explicit self-review and
+  confirmation before response deletion. Filters/results/history are separate small
+  components; privacy, authentication, development and rollout docs are updated.
+
+### Verification
+
+| Check                            | Actual result                                                                                                                                                                                                                                                                                               |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend                          | Ruff lint/format passed for 105 files; strict mypy passed for 99 files. **221 tests passed** on disposable PostgreSQL, including 28 new bank/content/migration cases.                                                                                                                                       |
+| Migration/contracts/preservation | Clean upgrade, metadata drift, downgrade/re-upgrade, populated rollback refusal, original-row preservation, OpenAPI and original V1 hashes/seed checks passed.                                                                                                                                              |
+| Frontend                         | Zero-warning ESLint, strict TypeScript, **68 tests across nine files** and production build passed. Tests cover filters/pages, stale responses, retained retry keys, gated concepts, history/deletion and SDK-authorized transport.                                                                         |
+| Browser/accessibility            | **23 Chrome browser tests passed** with a seeded disposable API/database, including actual difficulty/pages/bookmarks, concept disclosure, reload/history/deletion and existing two-visitor isolation. Zero axe violations in tested desktop/mobile views; screenshots inspected and mobile overflow fixed. |
+| Formatting                       | Whole-repository Prettier, diff checks and Compose configuration passed; original files and frozen migrations have no diff. Explicit content-directory validation reported 23 questions with no writes.                                                                                                     |
+
+Browser fixtures use a seeded disposable database and actual API responses. The
+bank flow shares the existing demo visitor scenario rather than weakening the
+production two-visitor quota. Real Clerk credentials remain absent: backend account
+tests use signed tokens/trusted test JWKS; frontend account tests mock SDK/transport.
+Live managed account sign-in was not exercised.
+
+The final production build restored the normal backend destination. The browser
+harness removed its temporary API/database and the owned port-3100 frontend was
+stopped. One concurrent build/test run hit timing failures in unchanged profile
+tests; the separate rerun passed without changing test limits or assertions.
+The optional Compose seed tool uses a read-only content mount and defaults to
+validation without writes; no live container seed command was run.
+
+### Rollout and next task
+
+- Apply migration 0005, validate the authored catalogue and explicitly run its
+  `--apply` seed in the reviewed environment, then deploy updated API/frontend.
+  Existing Compose services still serve their preceding implementation.
+- This phase provides durable submitted practice/self-review, not scored assessments
+  or durable unfinished drafts. Account responses have no automatic expiry and can
+  be deleted individually; demo responses expire with the workspace. Active deletion
+  does not erase backups. Full account/history erasure remains separate work.
+- Continue independent curriculum review with new immutable versions. The current
+  23-question set is deliberately limited, not a claim of comprehensive coverage.
+- Next: implement deterministic objective assessment creation/answer/submission/
+  scoring against this versioned content, with protected keys and explicit evaluation
+  provenance. Configure/exercise live Clerk before an authorized deployment.
+
+## Explainable skill evidence engine (preceding phase)
+
+Implemented on `rebuild/professional-v2` using the
+[skill evidence plan](.agent/plans/skill-evidence-engine.md). The complete versioned
+policy and API are documented in [SKILL_EVIDENCE_ENGINE.md](docs/SKILL_EVIDENCE_ENGINE.md).
+No ML, external service, dependency, database migration, commit, push or deployment
+was introduced. Existing application data and Compose services were preserved.
+
+### Behavior and integrity
+
+- Pure deterministic engine separates job importance, resume mentions and
+  demonstrated competence. Profile interests and user-added claims remain
+  self-reported. Missing resume evidence never establishes missing ability.
+- Required/Preferred use confirmed linked requirements for the selected job's
+  latest version. Proposed/text-only matches are Mentioned; absent selected-job
+  evidence is Low relevance. Rejected linked requirements suppress re-extraction.
+- Completed deterministic assessments and eligible completed interview rubrics
+  contribute tested evidence. Simulation, self-review, model-assisted output,
+  missing grades, incomplete sessions, incomplete/mismatched rubric coverage,
+  unreviewed questions and multi-skill attribution cannot validate competence.
+- Latest eligible result per channel/concept governs retakes; unresolved negative
+  results win over positives. Strong evidence requires two distinct successful
+  concepts, not repeated attempts. Assessment validation remains separately visible
+  when interview practice is needed. These are documented editorial rules, not
+  statistical confidence or claims of mastery.
+- Priority sorts by Required/Preferred/Mentioned/Low relevance, then
+  Practice/Validate/Maintain, then skill name/key. Ordinal positions and the rubric
+  anchor threshold are documented; no summed score or readiness percentage exists.
+- Read-only account/demo endpoints resolve ownership on the server, protect
+  private question content, return source IDs/excerpts/provenance, and use
+  no-store responses. Every input category is bounded; overflow is disclosed and
+  withholds validation. No new evidence snapshots or retention stores are created.
+- Skill Matrix is available at `/app/skills` and `/demo/skills`, with all owned
+  target choices, separate evidence columns, priority/source disclosures, refresh,
+  loading/empty/error/retry states and stale-response protection. Account changes
+  remount private state. Demo sources never validate real competence.
+
+### Verification
+
+| Check                     | Actual result                                                                                                                                                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Targeted evidence tests   | **50 passed**, covering pure policy, real PostgreSQL source adapters, authenticated ownership, job versions, corrections/rejection, retakes, rubric boundaries/completeness, exclusions, demo isolation and partial-input behavior.  |
+| Backend full suite        | Ruff lint/format passed across 94 files; strict mypy passed for 89 files. **193 tests passed** on disposable PostgreSQL; migration round trips, schema drift, OpenAPI and legacy preservation checks passed.                         |
+| Frontend lint/types/tests | Zero-warning ESLint and strict TypeScript passed; **60 tests passed** across eight files, including authenticated matrix transport, malformed responses, target races, source rendering, empty/retry/refresh and existing workflows. |
+| Production/browser        | Production build and **23 Chrome browser tests passed** with an isolated API/database. Final normal-destination production build also passed.                                                                                        |
+| Accessibility/visual      | Zero axe violations in tested views, including actual matrix markup on desktop/mobile and live demo source disclosure. Screenshots inspected; mobile table has a labeled keyboard-scrollable region.                                 |
+| Formatting                | Whole-repository Prettier and `git diff --check` passed.                                                                                                                                                                             |
+
+The test fixtures follow published-content and completed-evaluation immutability;
+no integrity protections were weakened. Invalid content snapshots used for adapter
+defense tests remain in memory and are rolled back. Windows frontend checks used
+reviewed child-process access. Browser checks removed their temporary API/database;
+the owned port-3100 frontend was stopped.
+
+### Limits and next task
+
+- The engine consumes existing structured history; production assessment/interview
+  creation and a requirement-review editor remain separate work. New raw job text
+  consequently produces Mentioned entries until requirements are reviewed.
+- Finite lexical matching can miss skills and retain negative/aspirational mentions;
+  it does not interpret experience or assert proficiency. Source dates are shown;
+  no automatic evidence decay or calibrated readiness prediction is claimed.
+- Real Clerk browser credentials remain unavailable. Backend ownership tests use
+  signed test tokens; frontend account integration mocks SDK/transport. Live browser
+  verification uses the isolated fictional demo, not real-account sign-in.
+- Next: author reviewed questions/rubrics and build the deterministic assessment
+  workflow, then connect explicit job-requirement review to the existing schema.
+  Configure and exercise live Clerk before an authorized deployment.
+
+## Secure resume upload and evidence review (preceding phase)
 
 Implemented on `rebuild/professional-v2`, following the
 [resume ingestion plan](.agent/plans/resume-ingestion.md). The user explicitly

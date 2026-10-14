@@ -36,6 +36,63 @@ beforeEach(() => {
 });
 
 describe("account workspace integration", () => {
+  it("loads question bank filters through SDK authentication", async () => {
+    const fetchMock = vi.fn(async (url: string, init: RequestInit) => {
+      expect(new Headers(init.headers).get("Authorization")).toBe(
+        "Bearer test-sdk-token",
+      );
+      expect(url).not.toContain("owner_id");
+      if (url.endsWith("/session")) return Response.json({ mode: "account" });
+      if (url.endsWith("/dashboard")) return Response.json(emptyAccount);
+      if (url.endsWith("/questions/facets"))
+        return Response.json({ categories: [], subtopics: [], roles: [] });
+      if (url.includes("/questions?"))
+        return Response.json({ items: [], total: 0, offset: 0, limit: 12 });
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(
+      <AccountWorkspace>
+        <WorkspaceScreen section="questions" />
+      </AccountWorkspace>,
+    );
+    expect(
+      await screen.findByText("No questions match this view"),
+    ).toBeVisible();
+    expect(auth.token).toHaveBeenCalledWith({ template: "interview-prep-api" });
+  });
+  it("loads the skill matrix through SDK authentication without a client owner ID", async () => {
+    const fetchMock = vi.fn(async (url: string, init: RequestInit) => {
+      expect(new Headers(init.headers).get("Authorization")).toBe(
+        "Bearer test-sdk-token",
+      );
+      expect(url).not.toContain("owner_id");
+      if (url.endsWith("/session")) return Response.json({ mode: "account" });
+      if (url.endsWith("/dashboard")) return Response.json(emptyAccount);
+      if (url.endsWith("/skill-evidence"))
+        return Response.json({
+          policy_version: "skill-evidence-v1",
+          mode: "account",
+          target_id: null,
+          targets: [],
+          rows: [],
+          notices: [],
+        });
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(
+      <AccountWorkspace>
+        <WorkspaceScreen section="skills" />
+      </AccountWorkspace>,
+    );
+    expect(await screen.findByText("No skill evidence yet")).toBeVisible();
+    expect(auth.token).toHaveBeenCalledWith({ template: "interview-prep-api" });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/account/skill-evidence",
+      expect.any(Object),
+    );
+  });
   it("uploads, corrects and deletes a resume using SDK authentication and owned revisions", async () => {
     let resume: Resume | null = null;
     const fetchMock = vi.fn(async (url: string, init: RequestInit) => {

@@ -62,6 +62,20 @@ services:
     init: true
     restart: unless-stopped
 
+  seed-questions:
+    profiles: ["tools"]
+    build: *backend-build
+    environment:
+      <<: *backend-environment
+      QUESTION_CONTENT_DIR: /app/content
+    volumes:
+      - ./content:/app/content:ro
+    command: ["python", "-m", "interview_prep.modules.questions.seed"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   cleanup:
     build: *backend-build
     environment: *backend-environment

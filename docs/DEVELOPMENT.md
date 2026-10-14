@@ -214,6 +214,11 @@ rate-limit keys. These safeguards do not authorize a public deployment.
 
 ## Troubleshooting
 
+Question browsing and assessments require migration `0006_real_assessments` and the explicit catalogue
+seed. See [validation/publication and recovery commands](QUESTION_BANK.md).
+Readiness requires 0005. The browser harness seeds only its freshly created
+disposable database; existing application services are not automatically replaced.
+
 - A stopped Docker daemon: start Docker Desktop and rerun `docker version`.
 - A 503 readiness response: verify PostgreSQL is healthy, credentials/ports match,
   and `alembic upgrade head` succeeded. No raw connection string is returned.

@@ -158,3 +158,16 @@ CSRF, repeated seeding/completion and erasure. Browser tests use actual local
 services for demo isolation/persistence/deletion and the missing-key account state.
 Live Clerk sign-up/sign-in/sign-out requires the configuration above and has not
 been exercised without credentials. See [current results](../PROJECT_STATUS.md).
+
+Question-bank account endpoints use the same verified bearer identity. Shared
+published questions are readable; private question metadata, bookmarks, response
+history and concept access remain owner-scoped. Demo bookmarks and practice
+submissions require exact Origin/CSRF; responses are explicitly simulation.
+Expected concepts unlock only after an owned submitted response to that version.
+See [question-bank API and retention](QUESTION_BANK.md).
+
+Assessment configuration/history/read/save/submit/abandon endpoints retain these
+account/demo identity boundaries. Every allocation and response is owner-scoped;
+demo mutations require Origin/CSRF. Keys are returned only in an owned completed
+review. Principal/attempt locks, revision checks and idempotent final submission
+protect retries and concurrent requests. See [assessments](ASSESSMENTS.md).

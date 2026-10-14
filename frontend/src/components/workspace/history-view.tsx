@@ -45,7 +45,7 @@ export function AssessmentsView({ data }: { data: Dashboard }) {
         <EmptyState
           icon="assessments"
           title="No assessment attempts yet."
-          description="Your completed assessments will appear here with the questions answered and how they were evaluated. Starting a real assessment is not available yet."
+          description="This preview has no recorded attempts. In your workspace, configure an assessment to answer questions and review your saved results."
           action={
             <ButtonLink href="/demo/assessments" variant="outline">
               Explore sample results

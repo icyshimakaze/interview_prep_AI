@@ -227,6 +227,34 @@ export async function workspaceRequest(
     };
     const payload: unknown = await response.json().catch(() => null);
     if (payload && typeof payload === "object" && "code" in payload) {
+      const questionMessages: Record<string, string> = {
+        assessment_pool:
+          "There are fewer published questions than requested. Choose fewer questions or change the filters.",
+        assessment_limit:
+          "You can retain 100 attempts and 5 unfinished assessments. Resume or abandon unfinished work.",
+        assessment_expired:
+          "This assessment expired. Your saved responses are retained. Start a new attempt.",
+        assessment_closed:
+          "This assessment is closed. Reload to review its saved state.",
+        assessment_revision:
+          "This assessment changed in another request. Reload the saved attempt before continuing.",
+        question_changed:
+          "This question is inactive or changed. Reload before submitting.",
+        submission_conflict:
+          "This submission key belongs to a different response. Reload to confirm your history.",
+        practice_limit:
+          "You can save up to 1000 practice responses. Delete an old response first.",
+        bookmark_limit:
+          "You can save up to 500 bookmarks. Remove a bookmark first.",
+      };
+      if (
+        typeof payload.code === "string" &&
+        Object.hasOwn(questionMessages, payload.code)
+      )
+        throw new WorkspaceError(
+          questionMessages[payload.code] ?? "Question request failed.",
+          payload.code,
+        );
       const resumeMessages: Record<string, string> = {
         pdf_filename:
           "Choose a .pdf filename without paths or control characters.",

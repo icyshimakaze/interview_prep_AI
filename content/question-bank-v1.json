@@ -1,0 +1,457 @@
+{
+  "schema_version": 1,
+  "content_version": "question-bank-v1",
+  "questions": [
+    {
+      "key": "duplicate-array",
+      "title": "Find duplicate element in array",
+      "legacy_title": "Find duplicate element in array",
+      "category": "Data Structures",
+      "subtopic": "Arrays",
+      "difficulty": "easy",
+      "question_type": "written",
+      "prompt": "Given an integer array, return any value that occurs more than once, or report that none exists. The array may be empty and values may be negative. Explain a solution that does not modify the input, its time and space costs, and how you would test it.",
+      "expected_concepts": [
+        "Track previously seen values and identify a repeated value.",
+        "A hash set gives expected linear time with linear auxiliary space; explain the no-duplicate and empty cases."
+      ],
+      "tags": ["arrays", "hashing"],
+      "roles": ["software-engineer", "backend-engineer", "frontend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "maximum-subarray",
+      "title": "Maximum subarray sum",
+      "legacy_title": "Maximum subarray sum",
+      "category": "Algorithms",
+      "subtopic": "Dynamic programming",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "Given a nonempty array of integers, find the largest sum of a nonempty contiguous subarray. Explain how your algorithm handles an all-negative array. Walk through [-2, 1, -3, 4, -1, 2, 1, -5, 4] and discuss time and space complexity.",
+      "expected_concepts": [
+        "Maintain the best sum ending at the current position and the best sum seen so far.",
+        "Initialize from an actual element so an all-negative array does not incorrectly return zero.",
+        "The running-state solution is linear time with constant auxiliary space."
+      ],
+      "tags": ["arrays", "dynamic-programming"],
+      "roles": ["software-engineer", "backend-engineer", "frontend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "rotate-array",
+      "title": "Rotate array by k steps",
+      "legacy_title": "Rotate array by k steps",
+      "category": "Data Structures",
+      "subtopic": "Arrays",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "Rotate an array to the right by k positions, where k is a nonnegative integer. Describe an in-place solution, handling an empty array and k larger than the array length. Show the result for [1, 2, 3, 4, 5] with k = 2 and explain complexity.",
+      "expected_concepts": [
+        "Reduce k modulo the nonzero array length; handle empty input before taking a modulo.",
+        "Reversal of the full array and the two resulting segments implements the rotation in linear time and constant auxiliary space."
+      ],
+      "tags": ["arrays", "in-place"],
+      "roles": ["software-engineer", "backend-engineer", "frontend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "two-sum",
+      "title": "Two Sum Problem",
+      "legacy_title": "Two Sum Problem",
+      "category": "Algorithms",
+      "subtopic": "Hash lookup",
+      "difficulty": "easy",
+      "question_type": "written",
+      "prompt": "Given an integer array and target sum, return the indices of two distinct elements whose values sum to the target, or report no pair. There may be duplicate values and multiple valid pairs. Explain an approach without sorting the input, using [3, 3] and target 6 as an edge case.",
+      "expected_concepts": [
+        "Look up the complement among elements visited before the current index.",
+        "Keep indices rather than only values, so equal values at different indices can form a pair without reusing one element."
+      ],
+      "tags": ["arrays", "hashing"],
+      "roles": ["software-engineer", "backend-engineer", "frontend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "merge-arrays",
+      "title": "Merge two sorted arrays",
+      "legacy_title": "Merge two sorted arrays",
+      "category": "Data Structures",
+      "subtopic": "Arrays",
+      "difficulty": "easy",
+      "question_type": "written",
+      "prompt": "Given two arrays sorted in nondecreasing order, produce a new sorted array containing every element, including duplicates. Neither input may be modified. Describe the algorithm for empty inputs and explain its time and output-space costs.",
+      "expected_concepts": [
+        "Use two advancing pointers and append the smaller current element, then append the remaining suffix.",
+        "All elements are visited once: time is linear in the combined lengths, with output space of the same size."
+      ],
+      "tags": ["arrays", "two-pointers"],
+      "roles": ["software-engineer", "backend-engineer", "frontend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "reverse-list",
+      "title": "Reverse Linked List",
+      "legacy_title": "Reverse Linked List",
+      "category": "Data Structures",
+      "subtopic": "Linked List",
+      "difficulty": "easy",
+      "question_type": "written",
+      "prompt": "Reverse a singly linked list in place and return its new head. Describe an iterative approach, including the empty and single-node cases. Explain which pointer must be saved before changing a node's next pointer.",
+      "expected_concepts": [
+        "Maintain previous, current and saved-next pointers to avoid losing the remainder of the list.",
+        "Return the final previous pointer; the iterative solution uses linear time and constant auxiliary space."
+      ],
+      "tags": ["linked-list", "pointers"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "cycle-list",
+      "title": "Detect cycle in linked list",
+      "legacy_title": "Detect cycle in linked list",
+      "category": "Data Structures",
+      "subtopic": "Linked List",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "Determine whether a singly linked list contains a cycle without changing the nodes or allocating storage proportional to its length. Explain why your pointer strategy detects a cycle and why it terminates for an acyclic list.",
+      "expected_concepts": [
+        "Advance a slow pointer by one link and a fast pointer by two, checking for a meeting.",
+        "Inside a cycle the relative distance changes each step; outside a cycle the fast pointer reaches the end.",
+        "Check null pointers safely; time is linear and auxiliary space is constant."
+      ],
+      "tags": ["linked-list", "two-pointers"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "merge-lists",
+      "title": "Merge two linked lists",
+      "legacy_title": "Merge two linked lists",
+      "category": "Data Structures",
+      "subtopic": "Linked List",
+      "difficulty": "easy",
+      "question_type": "written",
+      "prompt": "Merge two singly linked lists already sorted in nondecreasing order into one sorted list by reusing their nodes. The lists are disjoint and acyclic. Explain head handling, equal values and appending a remaining suffix.",
+      "expected_concepts": [
+        "Build the output with a tail pointer, selecting the smaller current node each time.",
+        "A dummy head simplifies initialization; append the remaining list after one input is exhausted."
+      ],
+      "tags": ["linked-list", "merge"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "middle-list",
+      "title": "Find middle node",
+      "legacy_title": "Find middle node",
+      "category": "Data Structures",
+      "subtopic": "Linked List",
+      "difficulty": "easy",
+      "question_type": "written",
+      "prompt": "Return the middle node of a singly linked list. For an even-length list return the second of the two middle nodes; for an empty list return no node. Explain a one-pass method and illustrate it on lists of four and five nodes.",
+      "expected_concepts": [
+        "Use slow and fast pointers beginning at the head, advancing by one and two links respectively.",
+        "The chosen loop condition yields the second middle for an even length and safely handles the empty list."
+      ],
+      "tags": ["linked-list", "two-pointers"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "add-numbers",
+      "title": "Add Two Numbers",
+      "legacy_title": "Add Two Numbers",
+      "category": "Data Structures",
+      "subtopic": "Linked List",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "Two nonempty singly linked lists store nonnegative integers, one decimal digit per node, least significant digit first. Add the integers without converting either entire list into a numeric type. Describe unequal lengths and a final carry, using 99 plus 1 as an example.",
+      "expected_concepts": [
+        "Traverse both lists while maintaining a carry; a missing digit contributes zero.",
+        "Append sum modulo ten and carry integer-divided by ten, continuing for a final carry."
+      ],
+      "tags": ["linked-list", "arithmetic"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "parentheses",
+      "title": "Valid Parentheses",
+      "legacy_title": "Valid Parentheses",
+      "category": "Data Structures",
+      "subtopic": "Stack",
+      "difficulty": "easy",
+      "question_type": "written",
+      "prompt": "Given a string containing only (, ), [, ], { and }, determine whether every opener has the correct closer in properly nested order. The empty string is valid. Explain your algorithm and why equal counts alone do not validate ([)].",
+      "expected_concepts": [
+        "Push opening symbols on a stack and compare each closer against the most recent opener.",
+        "Reject unmatched or mismatched closers and require an empty stack at the end."
+      ],
+      "tags": ["stack", "parsing"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "stack-queue",
+      "title": "Implement stack using queue",
+      "legacy_title": "Implement stack using queue",
+      "category": "Data Structures",
+      "subtopic": "Stack",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "Implement stack push, pop and top using one FIFO queue with enqueue, dequeue and size operations. Describe a design with constant-time pop and top, and explain the work done on push. Define behavior for operations on an empty stack.",
+      "expected_concepts": [
+        "After enqueueing a new element, rotate the older elements behind it so the newest is at the front.",
+        "Push is linear in current size while pop and top are constant time; define underflow behavior explicitly."
+      ],
+      "tags": ["stack", "queue"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "next-greater",
+      "title": "Next Greater Element",
+      "legacy_title": "Next Greater Element",
+      "category": "Algorithms",
+      "subtopic": "Monotonic stack",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "For each position in an integer array, return the first strictly greater value to its right, or report that none exists. Duplicates do not count as greater. Explain a method faster than checking every suffix and walk through [2, 1, 2, 4, 3].",
+      "expected_concepts": [
+        "A monotonic stack can track unresolved indices; a greater incoming value resolves smaller elements.",
+        "Each index is pushed and popped at most once, giving linear time; equal values must not satisfy strictly-greater comparisons."
+      ],
+      "tags": ["stack", "monotonic-stack"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "min-stack",
+      "title": "Min Stack",
+      "legacy_title": "Min Stack",
+      "category": "Data Structures",
+      "subtopic": "Stack",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "Design a stack supporting push, pop, top and getMin in constant time per operation. Values may repeat. Explain how the design preserves the minimum after popping one of two equal minimum values, and define empty-stack behavior.",
+      "expected_concepts": [
+        "Store the minimum so far alongside each value, or maintain a duplicate-aware minimum stack.",
+        "Repeated minima must be represented so popping one occurrence does not discard another remaining minimum."
+      ],
+      "tags": ["stack", "invariants"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "postfix",
+      "title": "Postfix Evaluation",
+      "legacy_title": "Postfix Evaluation",
+      "category": "Data Structures",
+      "subtopic": "Stack",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "Evaluate a space-separated postfix expression containing integer literals and binary +, -, * and / operators. Division truncates toward zero. Describe operand order, division by zero and invalid expressions. Work through '8 3 - 2 *'. Do not execute the expression as source code.",
+      "expected_concepts": [
+        "Push literals; for an operator pop the right operand first and then the left.",
+        "Require two operands per operator and exactly one result at the end; reject malformed input and division by zero."
+      ],
+      "tags": ["stack", "parsing"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "legacy_adapted",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "sql-null-count",
+      "title": "COUNT and NULL",
+      "legacy_title": null,
+      "category": "SQL",
+      "subtopic": "Aggregation",
+      "difficulty": "easy",
+      "question_type": "short_answer",
+      "prompt": "A table has a nullable email column with four rows: 'a@example.test', NULL, 'b@example.test', NULL. What integer does SELECT COUNT(email) FROM the_table return? Submit just the integer.",
+      "expected_concepts": [
+        "COUNT(column) counts non-NULL values, whereas COUNT(*) counts rows."
+      ],
+      "tags": ["sql", "null", "aggregation"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": ["2"],
+      "options": []
+    },
+    {
+      "key": "process-thread",
+      "title": "Process and thread memory",
+      "legacy_title": null,
+      "category": "Operating Systems",
+      "subtopic": "Processes and threads",
+      "difficulty": "easy",
+      "question_type": "multiple_choice",
+      "prompt": "Which resource is normally shared by threads within the same process? Select one option.",
+      "expected_concepts": [
+        "Threads share a process address space, including heap memory; each thread has its own stack and execution state."
+      ],
+      "tags": ["threads", "memory"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": [
+        {
+          "text": "Heap memory in the process address space",
+          "is_correct": true
+        },
+        {
+          "text": "Each thread's stack",
+          "is_correct": false
+        },
+        {
+          "text": "Each thread's instruction pointer",
+          "is_correct": false
+        }
+      ]
+    },
+    {
+      "key": "tcp-http",
+      "title": "TCP and HTTP responsibilities",
+      "legacy_title": null,
+      "category": "Computer Networks",
+      "subtopic": "Protocol layers",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "A web client sends an HTTP request over a TCP connection. Explain which protocol provides ordered byte delivery and which defines request/response meaning. Does a TCP acknowledgement prove that the application completed the requested operation? Explain.",
+      "expected_concepts": [
+        "TCP provides an ordered byte stream; HTTP defines application messages and semantics.",
+        "Transport receipt does not prove application completion or durable business effects."
+      ],
+      "tags": ["tcp", "http"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "oop-composition",
+      "title": "Composition for replaceable behavior",
+      "legacy_title": null,
+      "category": "OOP",
+      "subtopic": "Composition",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "A notification service supports email and SMS, and delivery providers may change. Explain a composition-based design that allows replacing a provider without changing caller logic. Compare the tradeoff with a deep inheritance hierarchy and describe one useful test boundary.",
+      "expected_concepts": [
+        "Depend on a small delivery interface and inject a concrete provider.",
+        "Composition enables substitution and focused tests while inheritance can couple unrelated behavior."
+      ],
+      "tags": ["oop", "composition", "testing"],
+      "roles": ["software-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "backend-retry",
+      "title": "Safe request retries",
+      "legacy_title": null,
+      "category": "Backend",
+      "subtopic": "Idempotency",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "A client times out after submitting an order and retries the request. Describe how the API can prevent creating two orders. Explain how to handle the same idempotency key with a different payload and how concurrent requests should be serialized.",
+      "expected_concepts": [
+        "Persist an idempotency key scoped to the owner and operation, and replay the recorded result for an identical retry.",
+        "Reject a different payload for the same key; use uniqueness and transactional locking to handle concurrency."
+      ],
+      "tags": ["api", "idempotency", "transactions"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "frontend-stale",
+      "title": "Search responses arriving out of order",
+      "legacy_title": null,
+      "category": "Frontend",
+      "subtopic": "Asynchronous state",
+      "difficulty": "medium",
+      "question_type": "written",
+      "prompt": "A user types two search queries quickly. The first request finishes after the second and overwrites the newer results. Explain how the UI should prevent stale results, handle cancellation and show network errors while keeping the current query.",
+      "expected_concepts": [
+        "Associate each request with the current query or generation and ignore stale completions.",
+        "Cancellation helps resource use but does not replace a stale-response guard; retain user input and offer retry."
+      ],
+      "tags": ["react", "async", "search"],
+      "roles": ["software-engineer", "frontend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "design-shortlinks",
+      "title": "Design a bounded short-link service",
+      "legacy_title": null,
+      "category": "System Design",
+      "subtopic": "Storage and availability",
+      "difficulty": "hard",
+      "question_type": "design",
+      "prompt": "Design a short-link service for a small organization. It must create links, redirect readers, expire links and restrict editing to the creator. Discuss identifier collisions, database constraints, caching of expired links, abuse controls and recovery after a database outage. State assumptions before choosing components.",
+      "expected_concepts": [
+        "Define ownership and expiration invariants and enforce uniqueness when allocating identifiers.",
+        "Describe cache invalidation or bounded staleness, safe failure behavior and recovery tradeoffs.",
+        "Choose components based on stated traffic and operational constraints rather than unsupported scale claims."
+      ],
+      "tags": ["system-design", "storage", "caching"],
+      "roles": ["software-engineer", "backend-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": []
+    },
+    {
+      "key": "behavioral-tradeoff",
+      "title": "Discuss a technical disagreement",
+      "legacy_title": null,
+      "category": "Behavioral",
+      "subtopic": "Collaboration",
+      "difficulty": "easy",
+      "question_type": "behavioral",
+      "prompt": "Describe a real technical disagreement you participated in, or clearly label a hypothetical scenario. Explain the alternatives, how you considered others' constraints, how the decision was reached and what you learned. Do not invent measurable outcomes.",
+      "expected_concepts": [
+        "Give concrete context, your contribution, alternatives and decision criteria.",
+        "Distinguish observed outcomes from assumptions and describe what you would improve."
+      ],
+      "tags": ["collaboration", "tradeoffs"],
+      "roles": ["software-engineer"],
+      "source_classification": "authored",
+      "accepted_answers": [],
+      "options": []
+    }
+  ]
+}

@@ -11,7 +11,9 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    Uuid,
 )
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from interview_prep.db.model_support import (
@@ -59,6 +61,7 @@ class Assessment(OwnedRecord):
     context_version: Mapped[str] = mapped_column(String(100))
     policy_version: Mapped[str] = mapped_column(String(100))
     revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    configuration: Mapped[dict[str, object] | None] = mapped_column(JSONB)
     questions: Mapped[list["AssessmentQuestion"]] = relationship(viewonly=True, lazy="raise")
     attempts: Mapped[list["AssessmentAttempt"]] = relationship(viewonly=True, lazy="raise")
 
@@ -162,7 +165,11 @@ class QuestionAttempt(OwnedRecord):
             "(status = 'submitted') = (submitted_at IS NOT NULL)", name="submission_timestamp"
         ),
         CheckConstraint(
-            ("status <> 'submitted' OR answer_text IS NOT NULL OR selected_option_id IS NOT NULL"),
+            (
+                "status <> 'submitted' OR answer_text IS NOT NULL OR "
+                "selected_option_id IS NOT NULL "
+                "OR cardinality(selected_option_ids) > 0"
+            ),
             name="submitted_answer",
         ),
         CheckConstraint(
@@ -170,8 +177,8 @@ class QuestionAttempt(OwnedRecord):
         ),
         CheckConstraint(
             (
-                "result_kind IS NULL OR result_kind IN ('deterministic', 'simulati"
-                "on', 'self_review')"
+                "result_kind IS NULL OR result_kind IN ('deterministic', 'simulation', "
+                "'self_review', 'model_assisted')"
             ),
             name="result_kind",
         ),
@@ -181,6 +188,14 @@ class QuestionAttempt(OwnedRecord):
             name="grading_provenance",
         ),
         CheckConstraint("revision > 0", name="revision"),
+        CheckConstraint(
+            "(score IS NULL AND max_score IS NULL) OR "
+            "(score IS NOT NULL AND max_score IS NOT NULL AND max_score IN (1,4) "
+            "AND score BETWEEN 0 AND max_score "
+            "AND status = 'submitted' AND result_kind IS NOT NULL AND grading_version IS NOT NULL)",
+            name="score_provenance",
+        ),
+        CheckConstraint("cardinality(selected_option_ids) <= 6", name="selection_limit"),
     )
     assessment_id: Mapped[UUID] = mapped_column(index=True)
     assessment_attempt_id: Mapped[UUID] = mapped_column(index=True)
@@ -192,6 +207,13 @@ class QuestionAttempt(OwnedRecord):
     selected_option_id: Mapped[UUID | None] = mapped_column(
         history_fk("question_options.id"), index=True
     )
+    selected_option_ids: Mapped[list[UUID]] = mapped_column(
+        ARRAY(Uuid), default=list, server_default="{}"
+    )
+    score: Mapped[int | None] = mapped_column(Integer)
+    max_score: Mapped[int | None] = mapped_column(Integer)
+    feedback: Mapped[str | None] = mapped_column(Text)
+    evaluation_metadata: Mapped[dict[str, object] | None] = mapped_column(JSONB)
     submission_key: Mapped[UUID | None] = mapped_column()
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     is_correct: Mapped[bool | None] = mapped_column()

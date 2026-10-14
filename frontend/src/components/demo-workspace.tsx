@@ -7,6 +7,9 @@ import { Dialog } from "@/components/ui/dialog";
 import { ErrorDisplay, WorkspaceSkeleton } from "@/components/ui/states";
 import { WorkspaceShell } from "@/components/workspace/workspace-shell";
 import { WorkspaceContext } from "@/components/workspace/workspace-context";
+import { createSkillApi } from "@/lib/api/skills";
+import { createQuestionApi } from "@/lib/api/questions";
+import { createAssessmentApi } from "@/lib/api/assessments";
 import {
   csrfToken,
   enterDemo,
@@ -14,6 +17,10 @@ import {
   workspaceRequest,
   type Dashboard,
 } from "@/lib/api/workspace";
+
+const skillApi = createSkillApi(workspaceRequest, "demo");
+const questionApi = createQuestionApi(workspaceRequest, "demo");
+const assessmentApi = createAssessmentApi(workspaceRequest, "demo");
 
 export function DemoWorkspace({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -151,7 +158,14 @@ export function DemoWorkspace({ children }: { children: ReactNode }) {
       )}
       {data ? (
         <WorkspaceContext
-          value={{ data, busy, onComplete: (id) => void complete(id) }}
+          value={{
+            data,
+            busy,
+            skillApi,
+            questionApi,
+            assessmentApi,
+            onComplete: (id) => void complete(id),
+          }}
         >
           {children}
         </WorkspaceContext>

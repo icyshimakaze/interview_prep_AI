@@ -15,7 +15,7 @@ export default function PrivacyPage() {
             This development preview keeps fictional demo data separate from
             account data. Here is what the current product does.
           </p>
-          <p className="mt-4 text-xs text-muted">Updated 13 October 2026</p>
+          <p className="mt-4 text-xs text-muted">Updated 14 October 2026</p>
           {[
             [
               "The interactive demo",
@@ -40,6 +40,14 @@ export default function PrivacyPage() {
             [
               "AI and external services",
               "Resume parsing runs on this application's server without OCR, external document services, or AI providers. The application does not log full resume text or send it to an AI provider. Repository imports and AI evaluation remain unavailable. The demo’s authored feedback is a simulation.",
+            ],
+            [
+              "Question-bank practice",
+              "Bookmarks and submitted practice responses are stored privately with the question version and submission time. Expected concepts become available after you submit a response to that version. Practice uses self-review and sends no responses to an AI service. You can remove bookmarks and delete each question-bank response from its history; other assessment or interview records retain their existing controls. Account responses have no automatic expiry. Demo responses are simulated practice and expire with the demo workspace; use fictional text. Deletion removes active records and does not erase operator backups.",
+            ],
+            [
+              "Assessment responses",
+              "Assessments store your selected options, written responses, question versions, scores, evaluation method and timestamps. Objective grading runs on the server. Conceptual feedback currently uses a labelled local MockAIProvider simulation; no response is sent to a cloud AI service. Unsaved edits stay in page memory. Saved account attempts have no automatic expiry or individual deletion control yet; deleting your profile does not erase preparation history. Demo attempts are erased with the expiring workspace or when you exit and delete it. Backups follow operator retention policies.",
             ],
             [
               "Access and storage",

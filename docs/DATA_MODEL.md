@@ -1,5 +1,18 @@
 # Relational data model
 
+Revision `0006_real_assessments` adds frozen assessment configuration, multiple-select
+response arrays with presented-option validation, scores and evaluation metadata.
+Existing attempts and final answers are preserved. See [assessment contracts and
+scoring](ASSESSMENTS.md).
+
+Revision `0005_question_bank` adds nullable category/subtopic/source classification
+to immutable question versions and four tables: `question_expected_concepts`,
+`question_tags`, `question_roles`, and owned `question_practice_attempts`. Published
+metadata is frozen; practice submissions are append-only and individually deletable.
+There are now 44 application tables. Bookmarks/history remain owner-scoped and
+versioned; account self-review and demo simulation do not validate competence.
+See [question-bank content, APIs and migration recovery](QUESTION_BANK.md).
+
 Revision `0004_resume_evidence` adds aggregate revisions, extraction notes and
 explicit evidence categories/origins to existing resume tables. User-added claims
 have no PDF source fields; extracted claims retain their excerpts and provenance.

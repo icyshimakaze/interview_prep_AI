@@ -1,10 +1,21 @@
+from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from interview_prep.db.model_support import OwnedRecord, Record, enum_column, owned_args
+from interview_prep.db.model_support import OwnedRecord, Record, enum_column, history_fk, owned_args
 
 
 class QuestionVisibility(StrEnum):
@@ -20,6 +31,7 @@ class PublicationStatus(StrEnum):
 
 class QuestionType(StrEnum):
     MULTIPLE_CHOICE = "multiple_choice"
+    MULTIPLE_SELECT = "multiple_select"
     SHORT_ANSWER = "short_answer"
     WRITTEN = "written"
     DESIGN = "design"
@@ -30,6 +42,13 @@ class Difficulty(StrEnum):
     EASY = "easy"
     MEDIUM = "medium"
     HARD = "hard"
+
+
+class SourceClassification(StrEnum):
+    AUTHORED = "authored"
+    LEGACY_ADAPTED = "legacy_adapted"
+    EXTERNAL_REVIEWED = "external_reviewed"
+    FICTIONAL_DEMO = "fictional_demo"
 
 
 class Question(Record):
@@ -66,6 +85,15 @@ class QuestionVersion(Record):
             "AND difficulty IS NOT NULL AND provenance_reviewed AND source_license IS NOT NULL)",
             name="published_content",
         ),
+        CheckConstraint(
+            "category IS NULL OR length(trim(category)) BETWEEN 1 AND 100", name="category"
+        ),
+        CheckConstraint(
+            "subtopic IS NULL OR length(trim(subtopic)) BETWEEN 1 AND 100", name="subtopic"
+        ),
+        Index(
+            "ix_question_versions_bank_filters", "status", "category", "difficulty", "question_type"
+        ),
     )
     question_id: Mapped[UUID] = mapped_column(
         ForeignKey("questions.id", ondelete="CASCADE"), index=True
@@ -90,6 +118,11 @@ class QuestionVersion(Record):
     original_topic: Mapped[str | None] = mapped_column(String(150))
     provenance_reviewed: Mapped[bool] = mapped_column(default=False, server_default="false")
     rubric_version: Mapped[str | None] = mapped_column(String(100))
+    category: Mapped[str | None] = mapped_column(String(100))
+    subtopic: Mapped[str | None] = mapped_column(String(100))
+    source_classification: Mapped[SourceClassification | None] = mapped_column(
+        enum_column(SourceClassification, "question_source_classification")
+    )
     skills: Mapped[list["QuestionSkill"]] = relationship(viewonly=True, lazy="raise")
     options: Mapped[list["QuestionOption"]] = relationship(viewonly=True, lazy="raise")
     criteria: Mapped[list["QuestionRubricCriterion"]] = relationship(viewonly=True, lazy="raise")
@@ -160,3 +193,64 @@ class Bookmark(OwnedRecord):
         ForeignKey("question_versions.id", ondelete="CASCADE"), index=True
     )
     note: Mapped[str | None] = mapped_column(String(2000))
+
+
+class ExpectedConcept(Record):
+    __tablename__ = "question_expected_concepts"
+    __table_args__ = (
+        UniqueConstraint("question_version_id", "position"),
+        CheckConstraint("position BETWEEN 1 AND 12", name="position"),
+        CheckConstraint("length(trim(text)) BETWEEN 1 AND 1000", name="text"),
+    )
+    question_version_id: Mapped[UUID] = mapped_column(
+        ForeignKey("question_versions.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(String(1000))
+
+
+class QuestionTag(Record):
+    __tablename__ = "question_tags"
+    __table_args__ = (
+        UniqueConstraint("question_version_id", "label"),
+        CheckConstraint("length(trim(label)) BETWEEN 1 AND 80", name="label"),
+    )
+    question_version_id: Mapped[UUID] = mapped_column(
+        ForeignKey("question_versions.id", ondelete="CASCADE"), index=True
+    )
+    label: Mapped[str] = mapped_column(String(80), index=True)
+
+
+class QuestionRole(Record):
+    __tablename__ = "question_roles"
+    __table_args__ = (
+        UniqueConstraint("question_version_id", "label"),
+        CheckConstraint("length(trim(label)) BETWEEN 1 AND 80", name="label"),
+    )
+    question_version_id: Mapped[UUID] = mapped_column(
+        ForeignKey("question_versions.id", ondelete="CASCADE"), index=True
+    )
+    label: Mapped[str] = mapped_column(String(80), index=True)
+
+
+class PracticeAttempt(OwnedRecord):
+    __tablename__ = "question_practice_attempts"
+    __table_args__ = owned_args(
+        __tablename__,
+        UniqueConstraint("owner_id", "submission_key"),
+        CheckConstraint("length(trim(answer_text)) BETWEEN 1 AND 10000", name="answer_length"),
+        CheckConstraint("result_kind IN ('self_review','simulation')", name="result_kind"),
+        Index(
+            "ix_question_practice_attempts_owner_version",
+            "owner_id",
+            "question_version_id",
+            "submitted_at",
+        ),
+    )
+    question_version_id: Mapped[UUID] = mapped_column(
+        history_fk("question_versions.id"), index=True
+    )
+    submission_key: Mapped[UUID] = mapped_column()
+    answer_text: Mapped[str] = mapped_column(Text)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    result_kind: Mapped[str] = mapped_column(String(20))

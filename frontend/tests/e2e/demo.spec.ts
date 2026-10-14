@@ -1,12 +1,16 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { parseDashboard } from "../../src/lib/api/workspace";
+import { checkQuestionBank } from "./question-bank-flow";
+import { checkAssessments } from "./assessment-flow";
 
 test("isolated fictional demo persists edits, rejects foreign IDs, and erases on exit", async ({
   page,
   browser,
   baseURL,
 }) => {
+  // This scenario now covers both question practice and two-visitor demo lifecycle.
+  test.setTimeout(90000);
   const secondContext = await browser.newContext();
   const second = await secondContext.newPage();
   try {
@@ -32,8 +36,33 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
     const firstResume = first.resumes[0];
     if (!firstResume)
       throw new Error("The demo must include its sample resume.");
+    await checkQuestionBank(page);
+    const firstAssessment = await checkAssessments(page);
+    await page.getByRole("link", { name: "Skill Matrix", exact: true }).click();
+    await expect(page.getByRole("table")).toContainText("Python");
+    const target = first.targets[0];
+    if (!target) throw new Error("The demo must include a target.");
+    await page.getByLabel("Target job").selectOption(target.id);
+    await expect(page.getByRole("table")).toContainText("Mentioned");
+    await expect(page.getByRole("table")).toContainText(
+      "Needs assessment validation",
+    );
+    await page.getByText("Why this priority? Sources for Python").click();
+    await expect(
+      page.getByText(/Original excerpt: Fictional project/).first(),
+    ).toBeVisible();
+    const matrixAccessibility = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      .analyze();
+    expect(matrixAccessibility.violations).toEqual([]);
+    await page.screenshot({
+      path: test.info().outputPath("skill-matrix-live.png"),
+      fullPage: true,
+    });
     await page.getByRole("link", { name: "Assessments", exact: true }).click();
-    await expect(page.getByText(/correct of 2 answered/)).toHaveCount(2);
+    await expect(
+      page.getByText("4 saved attempts", { exact: true }),
+    ).toBeVisible();
     await page.getByRole("link", { name: "Roadmap", exact: true }).click();
     await page
       .getByRole("button", {
@@ -73,6 +102,13 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
       `${baseURL}/api/v1/demo/resumes/${firstResume.id}`,
     );
     expect(foreign.status()).toBe(404);
+    expect(
+      (
+        await second.request.get(
+          `${baseURL}/api/v1/demo/assessments/${firstAssessment}`,
+        )
+      ).status(),
+    ).toBe(404);
     await page.getByRole("button", { name: "Exit and delete demo" }).click();
     await page.getByRole("button", { name: "Delete demo and exit" }).click();
     await expect(page).toHaveURL(`${baseURL}/`);
@@ -85,7 +121,7 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
   } finally {
     // Each browser can erase only its own capability, including on failed checks.
     for (const context of [page.context(), secondContext]) {
-      const cookies = await context.cookies();
+      const cookies = await context.cookies().catch(() => []);
       const csrf = cookies.find(
         (cookie) => cookie.name === "interview_prep_csrf",
       )?.value;

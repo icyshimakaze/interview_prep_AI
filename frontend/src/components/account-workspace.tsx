@@ -21,6 +21,9 @@ import {
   type ProfileInput,
 } from "@/lib/api/workspace";
 import { createTargetApi, type TargetApi } from "@/lib/api/targets";
+import { createSkillApi } from "@/lib/api/skills";
+import { createQuestionApi } from "@/lib/api/questions";
+import { createAssessmentApi, type AssessmentApi } from "@/lib/api/assessments";
 import {
   createResumeApi,
   type ResumeApi,
@@ -74,6 +77,63 @@ function AccountSession({ children }: { children: ReactNode }) {
       return workspaceRequest(path, { ...init, headers });
     },
     [getToken],
+  );
+  const skillApi = useMemo(
+    () => ({
+      read: (target: string | null, signal?: AbortSignal) =>
+        createSkillApi(authenticatedRequest, "account").read(target, signal),
+    }),
+    [authenticatedRequest],
+  );
+  const questionApi = useMemo(
+    () => ({
+      list: (
+        ...args: Parameters<ReturnType<typeof createQuestionApi>["list"]>
+      ) => createQuestionApi(authenticatedRequest, "account").list(...args),
+      facets: (
+        ...args: Parameters<ReturnType<typeof createQuestionApi>["facets"]>
+      ) => createQuestionApi(authenticatedRequest, "account").facets(...args),
+      read: (
+        ...args: Parameters<ReturnType<typeof createQuestionApi>["read"]>
+      ) => createQuestionApi(authenticatedRequest, "account").read(...args),
+      bookmark: (
+        ...args: Parameters<ReturnType<typeof createQuestionApi>["bookmark"]>
+      ) => createQuestionApi(authenticatedRequest, "account").bookmark(...args),
+      submit: (
+        ...args: Parameters<ReturnType<typeof createQuestionApi>["submit"]>
+      ) => createQuestionApi(authenticatedRequest, "account").submit(...args),
+      history: (
+        ...args: Parameters<ReturnType<typeof createQuestionApi>["history"]>
+      ) => createQuestionApi(authenticatedRequest, "account").history(...args),
+      removeAttempt: (
+        ...args: Parameters<
+          ReturnType<typeof createQuestionApi>["removeAttempt"]
+        >
+      ) =>
+        createQuestionApi(authenticatedRequest, "account").removeAttempt(
+          ...args,
+        ),
+    }),
+    [authenticatedRequest],
+  );
+  const assessmentApi = useMemo<AssessmentApi>(
+    () => ({
+      options: (...args) =>
+        createAssessmentApi(authenticatedRequest, "account").options(...args),
+      history: (...args) =>
+        createAssessmentApi(authenticatedRequest, "account").history(...args),
+      read: (...args) =>
+        createAssessmentApi(authenticatedRequest, "account").read(...args),
+      start: (...args) =>
+        createAssessmentApi(authenticatedRequest, "account").start(...args),
+      save: (...args) =>
+        createAssessmentApi(authenticatedRequest, "account").save(...args),
+      submit: (...args) =>
+        createAssessmentApi(authenticatedRequest, "account").submit(...args),
+      abandon: (...args) =>
+        createAssessmentApi(authenticatedRequest, "account").abandon(...args),
+    }),
+    [authenticatedRequest],
   );
   const readDashboard = useCallback(
     async (signal?: AbortSignal) => {
@@ -283,6 +343,9 @@ function AccountSession({ children }: { children: ReactNode }) {
             onDeleteProfile: deleteProfile,
             targetApi,
             resumeApi,
+            skillApi,
+            questionApi,
+            assessmentApi,
             onReload: reload,
           }}
         >

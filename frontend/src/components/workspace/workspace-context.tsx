@@ -4,6 +4,9 @@ import { createContext, useContext } from "react";
 import type { Dashboard, ProfileInput } from "@/lib/api/workspace";
 import type { TargetApi } from "@/lib/api/targets";
 import type { ResumeApi } from "@/lib/api/resumes";
+import type { SkillApi } from "@/lib/api/skills";
+import type { QuestionApi } from "@/lib/api/questions";
+import type { AssessmentApi } from "@/lib/api/assessments";
 import { WorkspaceView } from "@/components/workspace-view";
 import type { WorkspaceSection } from "./navigation";
 
@@ -15,6 +18,9 @@ export type WorkspaceContextValue = {
   onDeleteProfile?: () => Promise<void>;
   targetApi?: TargetApi;
   resumeApi?: ResumeApi;
+  skillApi?: SkillApi;
+  questionApi?: QuestionApi;
+  assessmentApi?: AssessmentApi;
   onReload?: () => void;
 };
 export const WorkspaceContext = createContext<WorkspaceContextValue | null>(
