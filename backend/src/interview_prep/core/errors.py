@@ -73,6 +73,22 @@ def register_error_handlers(app: FastAPI) -> None:
         code, message = messages.get(exc.status_code, ("http_error", "The request failed."))
         if exc.status_code == 409:
             conflicts = {
+                "interview_state": "This interview action is unavailable in the current state.",
+                "interview_turn": "This is not the current answerable question. "
+                "Reload the interview.",
+                "interview_revision": "The interview changed. "
+                "Reload and reconcile your saved answer.",
+                "interview_expired": "This interview expired. Saved work is retained for review.",
+                "interview_pool": "There are not enough published questions "
+                "for this type, difficulty and count.",
+                "interview_limit": "Interview limit reached. Finish an unfinished session first.",
+                "interview_context_limit": "The interview context exceeds supported limits.",
+                "interview_legacy": "This historical example is available for review only.",
+                "command_conflict": "This command key belongs to a different request.",
+                "followup_limit": "The follow-up limit for this question "
+                "or session has been reached.",
+                "followup_not_ready": "The follow-up is not ready. Wait or continue without it.",
+                "evaluation_retry_limit": "This evaluation cannot be retried again.",
                 "assessment_pool": "There are fewer published questions than requested for these "
                 "filters. Choose fewer questions or change the filters.",
                 "assessment_limit": "Assessment limit reached (100 attempts or 5 unfinished). "

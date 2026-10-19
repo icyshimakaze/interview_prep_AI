@@ -6,6 +6,7 @@ from interview_prep.modules.context import models as context
 from interview_prep.modules.demo import models as demo
 from interview_prep.modules.identity import models as identity
 from interview_prep.modules.interviews import models as interviews
+from interview_prep.modules.interviews import work_models as interview_work
 from interview_prep.modules.projects import models as projects
 from interview_prep.modules.questions import models as questions
 from interview_prep.modules.roadmaps import models as roadmaps
@@ -17,6 +18,7 @@ __all__ = [
     "demo",
     "identity",
     "interviews",
+    "interview_work",
     "projects",
     "questions",
     "roadmaps",

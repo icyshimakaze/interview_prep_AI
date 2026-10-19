@@ -16,6 +16,14 @@ from interview_prep.db.session import create_engine
 from interview_prep.main import create_app
 
 
+@pytest.fixture(autouse=True)
+def isolated_ai_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Local credentials/configuration must never opt the test suite into network AI."""
+    monkeypatch.setenv("AI_PROVIDER", "mock")
+    for key in ("OPENAI_API_KEY", "OPENAI_MODEL", "OLLAMA_BASE_URL", "OLLAMA_MODEL"):
+        monkeypatch.setenv(key, "")
+
+
 def test_settings(
     database_url: str = "postgresql+asyncpg://test:test@127.0.0.1:1/unit_test",
 ) -> Settings:
@@ -25,6 +33,7 @@ def test_settings(
         database_url=SecretStr(database_url),
         demo_rate_limit_key=SecretStr("test-only-rate-limit-key-at-least-32-characters"),
         allowed_origins=["http://localhost:3000"],
+        interview_worker_enabled=False,
     )
 
 

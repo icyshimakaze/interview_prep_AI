@@ -9,6 +9,7 @@ from interview_prep.modules.assessments.evaluation import (
     POLICY_VERSION,
     ConceptualInput,
     EvaluationProvider,
+    ProviderEvaluationAdapter,
     validate_evaluation,
 )
 from interview_prep.modules.assessments.models import AnswerStatus, QuestionAttempt
@@ -37,6 +38,8 @@ async def grade(
         [answer.selected_option_id] if answer.selected_option_id else []
     )
     matched: list[str] = []
+    model: str | None = None
+    prompt_version: str | None = None
     provider_name, provider_version = "deterministic", POLICY_VERSION
     if version.question_type in (QuestionType.MULTIPLE_CHOICE, QuestionType.MULTIPLE_SELECT):
         correct = list(
@@ -84,7 +87,10 @@ async def grade(
             ).all()
         )
         try:
-            async with asyncio.timeout(5):
+            deadline = (
+                provider.timeout_seconds if isinstance(provider, ProviderEvaluationAdapter) else 5
+            )
+            async with asyncio.timeout(deadline):
                 raw = await provider.evaluate(
                     ConceptualInput(
                         prompt=version.prompt or "",
@@ -101,6 +107,8 @@ async def grade(
         answer.result_kind, answer.feedback = evaluated.kind, evaluated.feedback
         provider_name, provider_version = provider.name, provider.version
         matched = evaluated.matched_concepts
+        if isinstance(provider, ProviderEvaluationAdapter):
+            model, prompt_version = provider.model, "ai-prompts-v1"
     else:
         raise HTTPException(status_code=409, detail="assessment_closed")
     now = datetime.now(UTC)
@@ -116,6 +124,8 @@ async def grade(
             else "Review the expected answer and try a fresh assessment."
         )
     answer.evaluation_metadata = EvaluationMetadata(
+        model=model,
+        prompt_version=prompt_version,
         provider=provider_name,
         provider_version=provider_version,
         policy_version=POLICY_VERSION,

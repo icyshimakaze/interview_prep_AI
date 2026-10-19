@@ -18,6 +18,7 @@ import { SkillMatrixView } from "./workspace/skill-matrix";
 import { QuestionBankView } from "./workspace/question-bank-view";
 import { SectionHeader } from "./workspace/section-header";
 import { AssessmentsWorkspace } from "./workspace/assessments-view";
+import { InterviewsWorkspace } from "./workspace/interviews-workspace";
 
 export function WorkspaceView({
   section = "dashboard",
@@ -56,7 +57,11 @@ export function WorkspaceView({
         <AssessmentsView data={data} />
       );
     case "interviews":
-      return <InterviewsView data={data} />;
+      return workspace.interviewApi ? (
+        <InterviewsWorkspace api={workspace.interviewApi} />
+      ) : (
+        <InterviewsView data={data} />
+      );
     case "roadmap":
       return <RoadmapView {...workspace} />;
     case "progress":

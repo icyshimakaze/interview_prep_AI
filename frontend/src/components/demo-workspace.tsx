@@ -10,6 +10,7 @@ import { WorkspaceContext } from "@/components/workspace/workspace-context";
 import { createSkillApi } from "@/lib/api/skills";
 import { createQuestionApi } from "@/lib/api/questions";
 import { createAssessmentApi } from "@/lib/api/assessments";
+import { createInterviewApi } from "@/lib/api/interviews";
 import {
   csrfToken,
   enterDemo,
@@ -21,6 +22,7 @@ import {
 const skillApi = createSkillApi(workspaceRequest, "demo");
 const questionApi = createQuestionApi(workspaceRequest, "demo");
 const assessmentApi = createAssessmentApi(workspaceRequest, "demo");
+const interviewApi = createInterviewApi(workspaceRequest, "demo");
 
 export function DemoWorkspace({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -164,6 +166,7 @@ export function DemoWorkspace({ children }: { children: ReactNode }) {
             skillApi,
             questionApi,
             assessmentApi,
+            interviewApi,
             onComplete: (id) => void complete(id),
           }}
         >

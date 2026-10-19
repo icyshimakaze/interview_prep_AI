@@ -15,7 +15,7 @@ export default function PrivacyPage() {
             This development preview keeps fictional demo data separate from
             account data. Here is what the current product does.
           </p>
-          <p className="mt-4 text-xs text-muted">Updated 14 October 2026</p>
+          <p className="mt-4 text-xs text-muted">Updated 19 October 2026</p>
           {[
             [
               "The interactive demo",
@@ -39,7 +39,7 @@ export default function PrivacyPage() {
             ],
             [
               "AI and external services",
-              "Resume parsing runs on this application's server without OCR, external document services, or AI providers. The application does not log full resume text or send it to an AI provider. Repository imports and AI evaluation remain unavailable. The demo’s authored feedback is a simulation.",
+              "Resume parsing runs on this application's server without OCR, external document services, or AI providers. Uploading a resume does not send it to an AI provider. Repository imports remain unavailable. AI defaults to local deterministic mock simulation; the recruiter demo always uses mock. Optional account evaluation can use an operator-configured Ollama server or OpenAI. Provider credentials remain on the backend.",
             ],
             [
               "Question-bank practice",
@@ -47,7 +47,11 @@ export default function PrivacyPage() {
             ],
             [
               "Assessment responses",
-              "Assessments store your selected options, written responses, question versions, scores, evaluation method and timestamps. Objective grading runs on the server. Conceptual feedback currently uses a labelled local MockAIProvider simulation; no response is sent to a cloud AI service. Unsaved edits stay in page memory. Saved account attempts have no automatic expiry or individual deletion control yet; deleting your profile does not erase preparation history. Demo attempts are erased with the expiring workspace or when you exit and delete it. Backups follow operator retention policies.",
+              "Assessments store selected options, written responses, question versions, scores, evaluation provenance and timestamps. Objective grading runs on the server. Conceptual feedback defaults to labelled MockAIProvider simulation with no external sharing. If OpenAI or Ollama is configured, written answer text, the question and review criteria are sent to that provider when you submit; the configuration screen identifies it. No resume, job description or project is sent by the assessment workflow. OpenAI requests disable response storage, but provider retention policies still apply. Unsaved edits stay in page memory. Saved account attempts have no automatic expiry or individual deletion control yet; deleting your profile does not erase preparation history. Demo attempts expire with the workspace or are erased when you exit and delete it. Backups follow operator retention policies.",
+            ],
+            [
+              "Mock interviews",
+              "Interview sessions store your typed drafts, submitted answers, skips, timing and final feedback privately. Answers are saved before optional evaluation. Mock is the default and the recruiter demo always uses clearly labelled simulations. If an operator enables OpenAI or Ollama for accounts, the question, submitted answer and authored review criteria go to that provider for evaluation; requesting a follow-up also sends that question and answer with recent interview prompts. Setup discloses the provider before you start. Target-job relevance selection stays local. Sessions expire for interaction after 24 hours; saved account history is retained without an automatic deletion or individual deletion control. Demo data is erased with its workspace. Unsaved text is only in page memory and can be lost on reload. Timing can include time away unless you pause. AI feedback does not establish competence or predict interview outcomes.",
             ],
             [
               "Access and storage",

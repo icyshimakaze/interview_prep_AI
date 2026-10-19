@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from interview_prep.modules.questions.models import Difficulty
+
 Importance = Literal["Required", "Preferred", "Mentioned", "Low relevance"]
 ResumeState = Literal["Some evidence", "No resume evidence"]
 CompetenceState = Literal[
@@ -28,6 +30,7 @@ class EvidenceSource(BaseModel):
     concept: str | None = None
     occurred_at: datetime | None = None
     importance: Importance | None = None
+    difficulty: Difficulty | None = None
 
 
 class SkillFact(BaseModel):

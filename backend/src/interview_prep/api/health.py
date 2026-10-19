@@ -9,7 +9,7 @@ from interview_prep.core.errors import ErrorResponse
 from interview_prep.db.session import get_session
 
 router = APIRouter(tags=["health"])
-SCHEMA_REVISION = "0006_real_assessments"
+SCHEMA_REVISION = "0007_mock_interviews"
 
 
 class HealthResponse(BaseModel):

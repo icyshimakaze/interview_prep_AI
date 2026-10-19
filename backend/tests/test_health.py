@@ -27,7 +27,7 @@ async def test_postgres_and_migration_readiness(integration_client: AsyncClient)
     response = await integration_client.get("/api/v1/health/ready")
     assert response.status_code == 200
     assert response.json()["database"] == "connected"
-    assert response.json()["schema_revision"] == "0006_real_assessments"
+    assert response.json()["schema_revision"] == "0007_mock_interviews"
 
 
 async def test_foreign_origin_has_no_cors_permission(client: AsyncClient) -> None:
@@ -64,7 +64,7 @@ async def test_schema_mismatch_returns_503(
     finally:
         async with database.begin() as connection:
             await connection.execute(
-                text("UPDATE alembic_version SET version_num = '0006_real_assessments'")
+                text("UPDATE alembic_version SET version_num = '0007_mock_interviews'")
             )
 
 

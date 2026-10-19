@@ -7,6 +7,13 @@ on:
 permissions:
   contents: read
 
+env:
+  AI_PROVIDER: mock
+  OPENAI_API_KEY: ""
+  OPENAI_MODEL: ""
+  OLLAMA_BASE_URL: ""
+  OLLAMA_MODEL: ""
+
 concurrency:
   group: checks-${{ github.ref }}
   cancel-in-progress: true

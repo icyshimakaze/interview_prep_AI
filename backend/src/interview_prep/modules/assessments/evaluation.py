@@ -1,10 +1,13 @@
 """Replaceable conceptual evaluator. Mock lexical coverage is simulation, not competence."""
 
-import re
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from interview_prep.ai.mock import MockAIProvider as SharedMockAIProvider
+from interview_prep.ai.provider import AIProvider
+from interview_prep.ai.schemas import AnswerInput
 
 POLICY_VERSION = "assessment-scoring-v1"
 
@@ -33,36 +36,35 @@ class EvaluationProvider(Protocol):
     async def evaluate(self, content: ConceptualInput) -> object: ...
 
 
-def tokens(text: str) -> set[str]:
-    return set(re.findall(r"[a-z0-9]+", text.casefold()))
+class ProviderEvaluationAdapter:
+    """Keep the assessment contract while using the application's shared provider."""
 
-
-class MockAIProvider:
-    name = "MockAIProvider"
-    version = "mock-lexical-v1"
-    kind: Literal["simulation", "model_assisted"] = "simulation"
+    def __init__(self, provider: AIProvider) -> None:
+        self.provider = provider
+        self.name, self.version, self.kind = provider.name, provider.version, provider.kind
+        self.timeout_seconds = provider.timeout_seconds
+        self.model = provider.model
 
     async def evaluate(self, content: ConceptualInput) -> ConceptualEvaluation:
-        # A concept matches when at least half its distinct >=4-character words
-        # occur literally in the response. Integer rounding is floor throughout.
-        response_words = tokens(content.response)
-        matched: list[str] = []
-        for concept in content.expected_concepts:
-            words = {word for word in tokens(concept) if len(word) >= 4}
-            if words and 2 * len(words & response_words) >= len(words):
-                matched.append(concept)
-        score = 4 * len(matched) // max(1, len(content.expected_concepts))
-        return ConceptualEvaluation(
-            score=score,
-            kind="simulation",
-            matched_concepts=matched,
-            feedback=(
-                f"Mock simulation: lexical overlap with {len(matched)} of "
-                f"{len(content.expected_concepts)} expected concepts. "
-                "This does not judge correctness, reasoning, or demonstrated competence. "
-                "Compare your response with the review concepts and practice explaining them."
-            ),
+        result = await self.provider.evaluate_answer(
+            AnswerInput(
+                question=content.prompt,
+                answer=content.response,
+                expected_concepts=list(content.expected_concepts),
+                rubric=list(content.rubric),
+            )
         )
+        return ConceptualEvaluation(
+            **result.data.model_dump(),
+            kind=result.provenance.kind,
+        )
+
+
+class MockAIProvider(ProviderEvaluationAdapter):
+    """Compatibility name for the existing assessment dependency and its test seams."""
+
+    def __init__(self) -> None:
+        super().__init__(SharedMockAIProvider())
 
 
 def validate_evaluation(

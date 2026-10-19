@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from interview_prep.modules.adaptive.schemas import Selection
 from interview_prep.modules.assessments.models import (
     AnswerStatus,
     Assessment,
@@ -254,7 +255,12 @@ async def read(session: AsyncSession, owner: UUID, identifier: UUID) -> AttemptV
         )
     return AttemptView(
         **(await summary(session, owner, attempt)).model_dump(),
-        configuration=Configuration.model_validate(assessment.configuration)
+        selection=Selection.model_validate(assessment.configuration["selection"])
+        if assessment.configuration and "selection" in assessment.configuration
+        else None,
+        configuration=Configuration.model_validate(
+            {key: value for key, value in assessment.configuration.items() if key != "selection"}
+        )
         if assessment.configuration
         else None,
         questions=questions,

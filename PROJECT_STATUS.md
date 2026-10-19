@@ -1,8 +1,270 @@
 # Project Status
 
-Updated: 2026-10-15 (Asia/Calcutta).
+Updated: 2026-10-19 (Asia/Calcutta).
 
-## Real assessments (current phase)
+## Complete mock interviews (current phase)
+
+Implemented the approved [state-machine design](docs/MOCK_INTERVIEW_STATE_MACHINE.md),
+following the [implementation plan](.agent/plans/mock-interview-implementation.md).
+See [MOCK_INTERVIEWS.md](docs/MOCK_INTERVIEWS.md) for workflow, contracts, migration,
+worker operation, sharing and recovery. The user's request authorizes a GitHub push
+on `rebuild/professional-v2`, including the dependent adaptive/provider work that
+was already present locally. Final verification results are recorded below.
+
+- Complete account/demo configure, start, one-question play, typed autosave, submit,
+  skip, contextual follow-up, pause/reload/resume, early end and final review.
+  All seven types use actual published inventory; explicit difficulty is exact.
+- Frozen owned adaptive context and candidate versions preserve selection and
+  required role coverage. Main questions cannot repeat within a session. Sparse
+  specialized coverage is disclosed. Simulation/model feedback never validates
+  competence or raises adaptive difficulty.
+- Answers commit with a command receipt and durable work row before AI dispatch.
+  Short transactions, principal/session locks, revisions, unique keys and database
+  guards prevent duplicate submission, reordered turns, reopened final answers
+  and foreign ownership. Evaluation failure retains the answer and navigation.
+- Two bounded worker loops recover queued/expired work using leases and fencing.
+  Interrupted ambiguous dispatch is not automatically replayed. Finalization can
+  complete with partial evaluation coverage; a current failed evaluation permits
+  one explicit retry before close. Late cancelled follow-ups cannot insert turns.
+- Follow-ups use AIProvider with the actual submitted parent/context, one slot per
+  main, three per session and depth one. Mock authored probes are clearly simulated;
+  children remain unscored because generated probes have no reviewed rubric.
+- Migration `0007_mock_interviews` adds four owned workflow tables and compatible
+  interview extensions. Legacy data remains readable, populated lossy downgrade
+  refuses, and readiness/contracts now require the new revision. Dashboard/history
+  hints are hidden during play; generated children are excluded before exposure
+  counts. No existing migration is rewritten.
+- Recruiter demo always pins mock, including when account AI config is remote or
+  unavailable. Default remains `AI_PROVIDER=mock`; `INTERVIEW_WORKER_ENABLED=true`
+  starts local database-backed work without Redis or external credentials.
+  Privacy, development, data-model and architecture documentation are updated.
+
+### Verification and delivery
+
+- Added **22 PostgreSQL/API integration cases** for workflow, persistence, failure,
+  type inventory, ordering, replay, concurrency, ownership, follow-up budgets,
+  cancelled results, leases/retry, finalization deadline, demo CSRF/pinning and
+  erasure, unavailable optional configuration and populated rollback refusal.
+- Backend: the full regression run passed **396 tests**. Final focused verification
+  passed **37 tests, 361 deselected**, including all 22 new interview cases and the
+  last two added regressions. All 398 tests have passed across those runs; this is
+  not a single full 398-test run. Ruff lint/format passed for 145 files and strict
+  mypy passed for 137 source files.
+- Clean upgrade, drift check, complete downgrade/re-upgrade, populated rollback
+  refusal, generated OpenAPI/TypeScript and legacy hashes/seeds passed. Earlier
+  context/question/resume migration tests retain their assertions with the new
+  expected head. No test, time limit or database guard was weakened.
+- Frontend: **90 tests across 11 files**, zero-warning ESLint, strict types and
+  final production build passed. The normal backend build destination is restored.
+- Browser: **23 Chrome checks passed**, including a live mock interview with
+  save/pause/reload/resume, contextual follow-up, skip, completion and review;
+  accessibility checks passed in tested views. Review screenshot visually inspected.
+- Initial regression found older readiness/head assertions still pinned to 0006;
+  they now expect 0007 while preserving mismatch, rollback and preservation checks.
+  An expiry/finalization flush-order issue was fixed without weakening guards.
+- Disposable databases and isolated localhost test services are used. The running
+  application database has not been migrated, seeded or deployed by this phase.
+  Live OpenAI/Ollama and live Clerk are not required or exercised.
+- Whole-repository Prettier, `git diff --check` and quiet Compose validation passed.
+  A credential-pattern scan of the 92 changed/new files found no matches; ignored
+  environment files are excluded from delivery. Temporary API/frontend processes
+  and disposable databases were removed; Docker Desktop was stopped afterward,
+  restoring its original stopped state.
+
+### Limits and next task
+
+- The 23 typed catalogue prompts limit longer specialized interviews. Broader
+  independently reviewed content remains needed; no automatic substitute questions.
+- Timing is advisory and can include disconnected time unless explicitly paused.
+  Unsaved browser-memory text is not recoverable after reload; acknowledged drafts
+  are stored. Interaction expiry does not erase retained account history.
+- Model output remains unverified; final review has no readiness score. Follow-up
+  answers remain unscored. Individual interview deletion/export, voice/code execution
+  and calibrated evaluation are outside this phase.
+- Next: authorized rollout must apply 0007 and use compatible API/frontend builds;
+  then expand reviewed curriculum and verify live account/provider configuration
+  as needed. Git push does not deploy or migrate a running environment.
+
+## Mock-interview state-machine design (preceding design phase)
+
+Reviewed the existing interview models/SQL guards, assessment workflow, adaptive
+selector, provider contracts, authored catalogue, identity/demo boundaries and
+dashboard/history/evidence readers. The proposed design is documented in
+[MOCK_INTERVIEW_STATE_MACHINE.md](docs/MOCK_INTERVIEW_STATE_MACHINE.md), following
+the [design plan](.agent/plans/mock-interview-design.md).
+
+- Specifies all seven requested interview types and target/type/difficulty/count
+  configuration; exact difficulty filters and truthful runtime inventory limits.
+  The manifests contain 23 typed-interview questions, including just one each for
+  Frontend, System Design and Behavioral. Database publication was not inspected.
+- Defines session, interactive-phase, answer and durable-work transitions for one
+  question at a time, typed drafts, timing, skip/submit, pause/resume, follow-ups,
+  full completion, early end, expiry and final review.
+- Defines account/demo endpoint bodies/views, revisions and command receipts,
+  owned transaction boundaries, proposed additive schema/guard changes, worker
+  leases, crash recovery, bounded evaluation and late-result fencing.
+- Proposes one follow-up slot per main, three per session and depth one. Follow-up
+  answers remain unscored because generated probes have no reviewed rubric.
+  Mock contextual presentation uses an exact parent/answer excerpt with explicitly
+  simulated authored probes; no fake semantic understanding or competence claims.
+- Calls out current integration gaps: no durable AI queue or live interview router,
+  required private follow-up storage, aggregate provider scores versus authored
+  dimension evidence, and dashboard feedback that must be hidden during play.
+  Existing fictional sessions and prior adaptive/provider work must be preserved.
+
+This phase changes documentation only. It does not add application code, endpoints,
+database migrations, generated contracts, tests, dependencies or running services.
+The document includes a future acceptance-test matrix; those tests are not yet
+implemented or executed. Runtime test/build suites were not rerun for this design.
+Verification: Prettier passed for all three changed documentation files;
+`git diff --check` passed, and all nine source links in the design resolve.
+Normal completion, early end, provider outage, replay, cancellation and expiry
+were walked through against the proposed transitions; this is design review,
+not runtime verification.
+
+Next: implement the documented design only in a separately requested phase,
+starting with migration/state-policy tests and owned commands, then durable work,
+UI and end-to-end verification. Broader reviewed catalogue coverage is needed for
+longer specialized interviews; no fallback should silently change their type.
+
+## AI-provider architecture (preceding phase)
+
+Implemented following the [AI-provider plan](.agent/plans/ai-providers.md) and
+[architecture specification](docs/AI_ARCHITECTURE.md). `AI_PROVIDER=mock` is the
+default; local development, tests, CI and recruiter demo need no AI credentials.
+The preceding adaptive work is preserved. No new dependency, schema migration,
+paid API call, model download, commit, push or deployment was performed.
+
+- Shared typed asynchronous interface implements resume analysis, job-description
+  analysis, answer evaluation, follow-up generation, roadmap recommendations and
+  project questions. Bounded schemas and domain validation apply to every provider.
+- Deterministic mock uses literal evidence and authored practice templates, with
+  explicit simulation provenance. Existing lexical assessment scoring is preserved
+  in one shared implementation. It does not claim validated competence or real AI.
+- Optional Ollama uses a configured origin/model; optional OpenAI uses server-side
+  Responses structured outputs. Missing optional configuration or unavailable
+  servers fail safely on use; they do not prevent application startup or demo use.
+  Recruiter demo remains pinned to mock even when an account provider is enabled.
+- Fixed prompts are separate from business rules. Documents and answers remain
+  untrusted user data. Outputs undergo schema, evidence-span, reference, repetition
+  and budget validation before use. Providers have no tool-execution capability.
+- Remote calls have bounded response sizes, total deadlines and narrow transient
+  retries. Invalid output, refusals and ambiguous post-send timeouts are not retried.
+  Safe errors omit upstream bodies and secrets; no silent simulated fallback.
+- Credentials stay in backend configuration. Environment examples, Compose and CI
+  default to mock with blank remote configuration. Account assessment setup and the
+  privacy page disclose optional sharing before submission.
+- Conceptual assessment evaluation uses the shared provider through a compatibility
+  adapter. Validated metadata records configured model and prompt version; old
+  records remain readable. Objective grading, ownership and evidence eligibility
+  remain intact. OpenAPI and generated TypeScript contracts are updated.
+
+### Verification
+
+| Check                | Actual result                                                                                                                                                                                                                                                                           |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New AI tests         | **80 passed**: 79 provider/validation tests and one PostgreSQL/API integration test. Covers all six methods, mock determinism, schemas, domain constraints, unavailable providers, deadlines, retries, invalid configuration, injection-like text, demo isolation and saved provenance. |
+| Backend regression   | Full run: **375 passed, one existing migration test timed out**. That test passed unchanged on a focused rerun (**1 passed, 375 deselected**). All 376 tests have passed across these runs; this was not a single clean full-suite run.                                                 |
+| Backend gates        | Ruff lint/format passed for 134 files; strict mypy passed for 127 source files.                                                                                                                                                                                                         |
+| Migrations/contracts | Disposable clean upgrade, drift check, complete downgrade/re-upgrade, OpenAPI contract check and original-source preservation checks passed on the focused harness run. No migration files changed.                                                                                     |
+| Frontend             | Zero-warning ESLint, strict TypeScript, **81 tests across 10 files** with one worker, and production build passed.                                                                                                                                                                      |
+| Configuration        | `docker compose config --quiet` passed without displaying resolved configuration or credentials.                                                                                                                                                                                        |
+
+The broad backend run encountered an asyncpg timeout during the existing populated
+migration preservation test. The unchanged focused rerun passed, including the
+harness's remaining migration and contract checks. No test or timeout was weakened.
+An automatic approval-review usage limit interrupted the earlier Compose check;
+the resumed check succeeded. Disposable database verification did not migrate or
+seed the application database. Verification databases were removed by the harness;
+Docker Desktop was stopped afterward, restoring its original stopped state.
+Whole-repository Prettier and `git diff --check` passed after the documentation update.
+
+### Limitations and next task
+
+- The other five provider operations are implemented and tested internal services;
+  their owned user workflows and review screens are future work. Resume upload
+  continues to use local extraction and does not automatically send documents to AI.
+- Structured output and exact excerpts do not establish factual accuracy or defeat
+  every prompt injection. Model-assisted and simulated results remain excluded from
+  validated skill performance and adaptive difficulty evidence.
+- Remote evaluation is sequential with a deadline per answer. A slow multi-answer
+  submission can outlast the browser's existing 75-second wait; reload the saved
+  attempt before retrying. Background processing/progress reporting is future work.
+- Live Ollama/OpenAI, browser E2E and live Clerk were not exercised in this phase.
+  No real-provider quality or model-compatibility claim is made by mocked transport
+  tests. Next: connect additional operations to explicit owned review workflows and
+  evaluate optional models using reviewed examples before relying on their advice.
+
+## Explainable adaptive selection (preceding phase)
+
+Implemented following the [adaptive plan](.agent/plans/adaptive-selection.md) and
+[algorithm specification](docs/ADAPTIVE_ALGORITHM.md). New assessment starts use
+`adaptive-v1`; existing attempts keep their frozen questions. No ML, external
+provider, dependency installation, schema migration, commit, push or deployment.
+
+- Pure typed selector with bounded inputs, reproducible seeded tie-breaking and
+  per-choice score components/reasons. These are editorial scheduling heuristics,
+  not competence probabilities or readiness predictions.
+- Easy diagnostics without eligible history; per-skill starting levels from
+  recorded difficulty. Two distinct successful concepts raise one level; two
+  eligible failures lower one level, including repeated failure on one concept.
+  Easy-floor failures favor a topic break. Missing/untrusted results are ignored.
+- High-relevance weaknesses receive priority using existing owned job/skill
+  evidence. Optional `target_id` is checked server-side. Resume claims, simulated
+  evaluations, self-review and demo evidence cannot raise difficulty.
+- Stable question IDs enforce five-exposure cooldowns across versions; concept
+  spacing, two-topic streak limits and every-fourth exploration preserve diversity.
+  Least-recent fallback discloses unavoidable repeats. Batches never duplicate a
+  question or invent performance. Absolute exposure counts preserve exploration
+  after the 1000-row history window fills.
+- Assessment starts retain exact category/type/difficulty filters, ownership,
+  principal locks and retry behavior. Frozen traces use existing configuration
+  JSON and are returned as additive `selection` metadata. Old configurations remain
+  readable/replayable. OpenAPI and generated TypeScript are updated.
+- All private inputs are server-derived and bounded. Traces exclude response text,
+  resume excerpts, keys and rubrics. Partial evidence disables performance
+  adjustment. Existing assessment retention applies; no new external sharing.
+
+### Verification
+
+| Check                | Actual result                                                                                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adaptive tests       | **46 passed**: 37 pure policy cases and nine real PostgreSQL/API cases. Includes all requested candidate scenarios, transitions, repetition, long-run diversity, ownership, trace persistence, old configurations and evidence eligibility. |
+| Backend gates        | Ruff lint/format passed for 121 files; strict mypy passed for 114 source files. All **250 existing tests passed** in the broad regression run. The final focused run passed all 46 adaptive tests.                                          |
+| Migrations/contracts | Disposable clean upgrade, drift check, complete downgrade/re-upgrade passed; generated contracts and original source hashes/seeds verified.                                                                                                 |
+| Frontend             | Zero-warning ESLint, strict TypeScript, **79 tests across 10 files** with one worker, and production build passed.                                                                                                                          |
+| Formatting           | Whole-repository Prettier and `git diff --check` passed, including the final documentation refresh.                                                                                                                                         |
+
+An initial integration scenario incorrectly demanded four unrepeated MCQs from
+the two-MCQ catalogue: that broad run finished with 292 passes and this one failure.
+Its fixture now uses the larger written-question inventory; all assertions remain.
+The final focused run passed all 46 adaptive tests, including three additional
+review regressions. Review added coverage for repeated same-concept failure
+and tied first-history timestamps. Windows child-process restrictions were resolved
+with reviewed execution for frontend tests/build. Docker needed startup before
+the disposable database checks; no application migrations or seeds were run.
+Both disposable databases were removed. Docker Desktop was stopped after
+verification, restoring its original stopped state. The first cleanup attempt
+was blocked by an automatic approval-review usage limit; the resumed cleanup succeeded.
+
+### Limitations and next task
+
+- Adaptation happens between assessments. A single-question pure API is available
+  for a future interview workflow; production interview delivery is not added.
+- The current assessment UI keeps its existing configuration controls. Job-specific
+  selection is available through the optional API target field; a target picker
+  and user-facing explanation display can follow as a separate UI phase.
+- The 29-question catalogue has sparse topic/level coverage. Cooldowns and topic
+  diversity may require a nearest-level choice, or least-recent reuse, with reasons.
+  Explicit difficulty filters never relax. No outcome improvement is claimed.
+- No time-based evidence decay or calibrated difficulty is implemented. Older API
+  binaries that reject new JSON keys cannot read new adaptive attempts; preserve
+  the compatible reader in rollback builds rather than deleting stored traces.
+- Next: independent curriculum/policy review, broaden authored coverage, then wire
+  this selector into the real interview workflow. Browser E2E and live Clerk were
+  not rerun in this backend-engine phase; no new UI was introduced.
+
+## Real assessments (preceding phase)
 
 Implemented following the [assessment plan](.agent/plans/real-assessments.md) and
 [workflow, scoring, privacy and rollout specification](docs/ASSESSMENTS.md).

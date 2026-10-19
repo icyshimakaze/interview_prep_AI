@@ -101,6 +101,7 @@ async def performance_facts(
                                 "eligible": eligible,
                                 "concept": concept,
                                 "review": reason,
+                                "difficulty": version.difficulty,
                             }
                         ),
                     )
@@ -214,7 +215,9 @@ async def performance_facts(
         if interview_answer.id in seen:
             continue
         seen.add(interview_answer.id)
-        mapping = versions.get(question.question_version_id)
+        mapping = (
+            versions.get(question.question_version_id) if question.question_version_id else None
+        )
         if mapping is None:
             continue
         version = mapping[0]

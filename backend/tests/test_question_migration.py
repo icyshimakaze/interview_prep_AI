@@ -58,7 +58,7 @@ async def test_question_migration_preserves_legacy_content_and_refuses_lossy_rol
                 )
                 assert (
                     await connection.scalar(text("SELECT version_num FROM alembic_version"))
-                    == "0006_real_assessments"
+                    == "0007_mock_interviews"
                 )
         finally:
             await engine.dispose()

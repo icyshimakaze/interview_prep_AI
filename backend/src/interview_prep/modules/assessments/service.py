@@ -2,9 +2,10 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from interview_prep.modules.adaptive.service import allocate
 from interview_prep.modules.assessments import queries
 from interview_prep.modules.assessments.evaluation import POLICY_VERSION, EvaluationProvider
 from interview_prep.modules.assessments.grading import grade
@@ -50,7 +51,20 @@ async def start(session: AsyncSession, owner: UUID, body: StartInput) -> Attempt
                 Assessment.id == existing.assessment_id, Assessment.owner_id == owner
             )
         )
-        if assessment is None or assessment.configuration != config:
+        stored = (
+            {
+                key: value
+                for key, value in (assessment.configuration or {}).items()
+                if key != "selection"
+            }
+            if assessment
+            else {}
+        )
+        if (
+            assessment is None
+            or assessment.configuration is None
+            or Configuration.model_validate(stored).model_dump(mode="json") != config
+        ):
             raise HTTPException(status_code=409, detail="submission_conflict")
         return await queries.read(session, owner, existing.id)
     attempts = (
@@ -61,32 +75,16 @@ async def start(session: AsyncSession, owner: UUID, body: StartInput) -> Attempt
         or sum(queries.effective_status(a) == "in_progress" for a in attempts) >= MAX_UNFINISHED
     ):
         raise HTTPException(status_code=409, detail="assessment_limit")
-    # Prior allocations are counted equally; stable title/id order breaks ties.
-    usage = (
-        select(func.count())
-        .select_from(AssessmentQuestion)
-        .where(
-            AssessmentQuestion.owner_id == owner,
-            AssessmentQuestion.question_version_id == QuestionVersion.id,
-        )
-        .scalar_subquery()
-    )
-    versions = (
-        await session.scalars(
-            queries.pool(owner, body)
-            .order_by(usage, QuestionVersion.title, QuestionVersion.id)
-            .limit(body.question_count)
-        )
-    ).all()
+    versions, selection = await allocate(session, owner, body, str(body.submission_key))
     if len(versions) != body.question_count:
         raise HTTPException(status_code=409, detail="assessment_pool")
     assessment = Assessment(
         owner_id=owner,
         title=f"{body.category or 'Mixed topics'} assessment",
         status=AssessmentStatus.READY,
-        context_version="catalogue-v1",
+        context_version="adaptive-v1",
         policy_version=POLICY_VERSION,
-        configuration=config,
+        configuration={**config, "selection": selection.model_dump(mode="json")},
     )
     session.add(assessment)
     await session.flush()

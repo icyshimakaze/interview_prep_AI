@@ -31,6 +31,7 @@ from interview_prep.modules.interviews.models import (
     InterviewAnswer,
     InterviewQuestion,
     InterviewSession,
+    SessionStatus,
 )
 from interview_prep.modules.roadmaps.models import ProgressEvent, RoadmapItem
 
@@ -179,7 +180,15 @@ async def dashboard(session: AsyncSession, user: User) -> DashboardView:
                 id=interview.id,
                 completed_at=interview.completed_at,
                 status=interview.status,
-                feedback=[e.feedback for e in evaluations if e.feedback],
+                feedback=[e.feedback for e in evaluations if e.feedback]
+                if interview.status
+                in (
+                    SessionStatus.FINALIZING,
+                    SessionStatus.COMPLETED,
+                    SessionStatus.ABANDONED,
+                    SessionStatus.FAILED,
+                )
+                else [],
                 result_kind=next(iter(kinds)) if len(kinds) == 1 else "ungraded",
             )
         )

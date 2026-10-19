@@ -53,6 +53,7 @@ def submitted_history(owner: UUID) -> Subquery:
         .where(
             InterviewAnswer.owner_id == owner,
             InterviewQuestion.owner_id == owner,
+            InterviewQuestion.question_version_id.is_not(None),
             InterviewAnswer.status == AnswerStatus.SUBMITTED,
             InterviewAnswer.submitted_at.is_not(None),
         )

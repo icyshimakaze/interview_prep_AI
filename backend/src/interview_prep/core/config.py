@@ -23,6 +23,39 @@ class Settings(BaseSettings):
     auth_issuer: str | None = None
     auth_audience: str = "interview-prep-api"
     auth_jwks_cache_seconds: int = Field(default=300, ge=30, le=900)
+    ai_provider: Literal["mock", "ollama", "openai"] = "mock"
+    ai_timeout_seconds: float = Field(default=30, ge=0.1, le=60)
+    ai_max_retries: int = Field(default=1, ge=0, le=2)
+    interview_worker_enabled: bool = True
+    ollama_base_url: str = Field(default="", max_length=2000)
+    ollama_model: str = Field(default="", max_length=100, pattern=r"^[^\r\n]*$")
+    openai_api_key: SecretStr = Field(default_factory=lambda: SecretStr(""), exclude=True)
+    openai_model: str = Field(default="", max_length=100, pattern=r"^[^\r\n]*$")
+
+    @field_validator("ollama_base_url")
+    @classmethod
+    def ollama_origin(cls, value: str) -> str:
+        from urllib.parse import urlsplit
+
+        value = value.strip().rstrip("/")
+        if not value:
+            return ""
+        parsed = urlsplit(value)
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.hostname
+            or parsed.username
+            or parsed.password
+            or parsed.path
+            or parsed.query
+            or parsed.fragment
+            or any(c.isspace() for c in value)
+        ):
+            raise ValueError(
+                "OLLAMA_BASE_URL must be an HTTP(S) origin without credentials or paths"
+            )
+        _ = parsed.port  # Reject malformed/out-of-range ports without echoing input.
+        return value
 
     @field_validator("database_url")
     @classmethod

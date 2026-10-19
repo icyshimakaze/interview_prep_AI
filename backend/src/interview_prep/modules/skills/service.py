@@ -49,8 +49,8 @@ async def skill_matrix(
             "Required and Preferred use reviewed requirements. Raw job text is only Mentioned; "
             "lexical matching cannot interpret negation or all skill names.",
             "Results describe recorded, tested scope, not overall job readiness. "
-            "Production assessment/interview creation and requirement review "
-            "are not yet available.",
+            "Job requirement confirmation is not yet available; "
+            "simulated/model-assisted interview feedback does not validate competence.",
         ]
     )
     return SkillMatrix(

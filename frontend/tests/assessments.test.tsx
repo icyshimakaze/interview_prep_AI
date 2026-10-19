@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { AssessmentAttemptView } from "@/components/workspace/assessment-attempt";
+import { AssessmentConfigure } from "@/components/workspace/assessment-configure";
 import { AssessmentsWorkspace } from "@/components/workspace/assessments-view";
 import {
   createAssessmentApi,
@@ -11,10 +12,41 @@ import {
 import {
   assessmentApiFixture,
   assessmentFixture,
+  assessmentOptions,
   completedAssessment,
 } from "./assessment-fixture";
 
 describe("real assessments", () => {
+  it.each(["OpenAIProvider", "OllamaProvider"])(
+    "discloses %s data sharing before assessment start",
+    (provider) => {
+      render(
+        <AssessmentConfigure
+          options={{
+            ...assessmentOptions,
+            conceptual_provider: provider,
+            conceptual_kind: "model_assisted",
+          }}
+          busy={false}
+          onStart={vi.fn()}
+        />,
+      );
+      expect(
+        screen.getByText(/does not establish verified competence/),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Start assessment" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          provider === "OpenAIProvider"
+            ? /to OpenAI for AI-assisted feedback/
+            : /configured Ollama server/,
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
   it("configures from actual inventory and applies difficulty and question formats", async () => {
     const api = assessmentApiFixture(),
       user = userEvent.setup();

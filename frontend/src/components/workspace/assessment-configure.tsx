@@ -47,6 +47,21 @@ export function AssessmentConfigure({
         {options.conceptual_kind === "simulation" ? "simulation" : "evaluation"}
         .
       </p>
+      {options.conceptual_provider === "OpenAIProvider" && (
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Submitting written answers sends their text, question and review
+          criteria to OpenAI for AI-assisted feedback. Feedback may be
+          inaccurate and does not establish verified competence. Choose only
+          objective formats to avoid AI evaluation.
+        </p>
+      )}
+      {options.conceptual_provider === "OllamaProvider" && (
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Written answers, their questions and review criteria are sent to the
+          configured Ollama server for AI-assisted feedback. Feedback may be
+          inaccurate and does not establish verified competence.
+        </p>
+      )}
       <form
         className="mt-6 space-y-6"
         onSubmit={(e) => {

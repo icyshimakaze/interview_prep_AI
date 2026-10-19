@@ -20,6 +20,13 @@ origins. PostgreSQL defaults to localhost port **5433**, preserving an existing
 local server on 5432. Use URL-safe random database passwords, or URL-encode them
 when constructing connection URLs.
 
+AI defaults to `AI_PROVIDER=mock`. Keep `OPENAI_API_KEY`, `OPENAI_MODEL`,
+`OLLAMA_BASE_URL` and `OLLAMA_MODEL` empty for credential-free local development.
+No model download or AI service is required for tests, CI or the recruiter demo.
+Optional account providers are configured only on the backend; see
+[AI architecture](AI_ARCHITECTURE.md) for configuration, disclosures and failure
+behavior. The demo remains mock even when an account provider is configured.
+
 ## Full Compose stack
 
 ```sh
@@ -70,6 +77,12 @@ If the full Compose API/frontend already use these ports, stop those services
 first: `docker compose stop frontend backend cleanup`. Both workflows use the
 same persisted application database. After a schema change, apply its migration
 before restarting services; the API does not auto-create tables.
+
+The interview workflow requires migration `0007_mock_interviews`. The API starts
+two bounded database-backed worker loops by default (`INTERVIEW_WORKER_ENABLED=true`).
+They evaluate already-saved main answers, prepare optional follow-ups and recover
+expired/interrupted work. Default/demo use stays local with `AI_PROVIDER=mock`.
+See [interview operations and recovery](MOCK_INTERVIEWS.md).
 
 ## Quality gates
 

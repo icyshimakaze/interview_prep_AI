@@ -3,6 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { parseDashboard } from "../../src/lib/api/workspace";
 import { checkQuestionBank } from "./question-bank-flow";
 import { checkAssessments } from "./assessment-flow";
+import { checkInterviews } from "./interview-flow";
 
 test("isolated fictional demo persists edits, rejects foreign IDs, and erases on exit", async ({
   page,
@@ -38,6 +39,7 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
       throw new Error("The demo must include its sample resume.");
     await checkQuestionBank(page);
     const firstAssessment = await checkAssessments(page);
+    await checkInterviews(page);
     await page.getByRole("link", { name: "Skill Matrix", exact: true }).click();
     await expect(page.getByRole("table")).toContainText("Python");
     const target = first.targets[0];

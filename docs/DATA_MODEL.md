@@ -1,5 +1,11 @@
 # Relational data model
 
+Revision `0007_mock_interviews` extends the existing interview aggregate and adds
+four owned tables for frozen candidates, follow-up content, command receipts and
+durable work. It preserves legacy sessions and prevents destructive populated
+rollback. See [implemented interviews](MOCK_INTERVIEWS.md). Readiness now requires
+0007; frozen earlier migrations below remain historical specifications.
+
 Revision `0006_real_assessments` adds frozen assessment configuration, multiple-select
 response arrays with presented-option validation, scores and evaluation metadata.
 Existing attempts and final answers are preserved. See [assessment contracts and

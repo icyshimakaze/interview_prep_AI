@@ -10,7 +10,13 @@ deterministic preparation priorities without readiness percentages.
 The Question Bank provides search, working filters, bookmarks, submitted history
 and attempt-first concept review. Assessments now save real responses, score
 objective questions deterministically, and offer clearly labelled MockAIProvider
-conceptual feedback, review and history. Cloud AI integrations remain planned.
+conceptual feedback, review and history. The shared [AI-provider architecture](docs/AI_ARCHITECTURE.md)
+defaults to `AI_PROVIDER=mock`; optional account providers support local Ollama and
+OpenAI Responses. No AI credentials are needed for local defaults, tests, CI or
+the recruiter demo, which always uses mock.
+The [mock-interview workflow](docs/MOCK_INTERVIEWS.md) adds persisted adaptive
+sessions, typed answers, optional contextual follow-ups, pause/resume and final
+review across seven interview types. Answers are saved before optional evaluation.
 
 ```text
 frontend/    Next.js App Router, React, strict TypeScript, Tailwind, UI primitives
@@ -62,6 +68,8 @@ The [question-bank guide](docs/QUESTION_BANK.md) covers migration 0005, explicit
 catalogue publication, protected concepts, filters, bookmarks and attempts.
 The [assessment guide](docs/ASSESSMENTS.md) covers migration 0006, saved attempts,
 answer protection, objective scoring and the mock evaluation-provider boundary.
+The [interview guide](docs/MOCK_INTERVIEWS.md) covers migration 0007, durable work,
+recovery, follow-up limits and the approved state-machine contracts.
 
 The root `app.py` retires the V1 slider workflow and directs users to V2. Original
 source bytes remain in `content/provenance/streamlit-v1.txt` and Git baseline

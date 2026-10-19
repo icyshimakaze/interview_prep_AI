@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from interview_prep.modules.adaptive.schemas import Selection
 from interview_prep.modules.questions.models import Difficulty, QuestionType
 
 AssessmentType = Literal["multiple_choice", "multiple_select", "short_answer", "written"]
@@ -14,6 +15,7 @@ class Contract(BaseModel):
 
 
 class Configuration(Contract):
+    target_id: UUID | None = None
     category: str | None = Field(default=None, min_length=1, max_length=100)
     difficulty: Difficulty | None = None
     question_types: list[AssessmentType] = Field(min_length=1, max_length=4)
@@ -61,6 +63,8 @@ class Options(Contract):
 
 
 class EvaluationMetadata(Contract):
+    model: str | None = Field(default=None, max_length=100)
+    prompt_version: str | None = Field(default=None, max_length=100)
     provider: str = Field(min_length=1, max_length=100)
     provider_version: str = Field(min_length=1, max_length=100)
     policy_version: str = Field(min_length=1, max_length=100)
@@ -129,6 +133,7 @@ class AttemptSummary(Contract):
 
 
 class AttemptView(AttemptSummary):
+    selection: Selection | None = None
     configuration: Configuration | None
     questions: list[PresentedQuestion]
     categories: list[CategoryPerformance]

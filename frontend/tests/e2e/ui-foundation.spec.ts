@@ -35,6 +35,27 @@ async function mockDemo(page: Page) {
   await page.route("**/api/v1/demo/assessments?*", (route) =>
     route.fulfill({ json: { items: [], total: 0, offset: 0, limit: 10 } }),
   );
+  await page.route("**/api/v1/demo/interviews/options", (route) =>
+    route.fulfill({
+      json: {
+        inventory: [],
+        provider: {
+          name: "MockAIProvider",
+          version: "mock-lexical-v1",
+          kind: "simulation",
+          model: null,
+          disclosure: "Demo/simulated practice; not verified competence.",
+        },
+        targets: [],
+        max_followups: 3,
+        answer_limit: 10000,
+        notices: ["Frontend fixture; no live interview data."],
+      },
+    }),
+  );
+  await page.route("**/api/v1/demo/interviews?*", (route) =>
+    route.fulfill({ json: { items: [], total: 0, offset: 0, limit: 10 } }),
+  );
   await page.route("**/api/v1/demo/skill-evidence", (route) =>
     route.fulfill({
       json: {

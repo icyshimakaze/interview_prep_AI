@@ -8,7 +8,7 @@ test("frontend reaches the real backend and PostgreSQL", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText(
     "API connected · PostgreSQL connected",
   );
-  await expect(page.getByRole("status")).toContainText("0006_real_assessments");
+  await expect(page.getByRole("status")).toContainText("0007_mock_interviews");
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();

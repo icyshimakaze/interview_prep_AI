@@ -8,6 +8,14 @@ x-backend-environment: &backend-environment
   AUTH_ENABLED: ${AUTH_ENABLED:-false}
   AUTH_ISSUER: ${AUTH_ISSUER:-}
   AUTH_AUDIENCE: ${AUTH_AUDIENCE:-interview-prep-api}
+  AI_PROVIDER: ${AI_PROVIDER:-mock}
+  INTERVIEW_WORKER_ENABLED: ${INTERVIEW_WORKER_ENABLED:-true}
+  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+  OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  OPENAI_MODEL: ${OPENAI_MODEL:-}
+  AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-30}
+  AI_MAX_RETRIES: ${AI_MAX_RETRIES:-1}
 
 x-backend-build: &backend-build
   context: ./backend

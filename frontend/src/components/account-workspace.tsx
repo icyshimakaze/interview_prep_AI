@@ -24,6 +24,7 @@ import { createTargetApi, type TargetApi } from "@/lib/api/targets";
 import { createSkillApi } from "@/lib/api/skills";
 import { createQuestionApi } from "@/lib/api/questions";
 import { createAssessmentApi, type AssessmentApi } from "@/lib/api/assessments";
+import { createInterviewApi } from "@/lib/api/interviews";
 import {
   createResumeApi,
   type ResumeApi,
@@ -113,6 +114,29 @@ function AccountSession({ children }: { children: ReactNode }) {
         createQuestionApi(authenticatedRequest, "account").removeAttempt(
           ...args,
         ),
+    }),
+    [authenticatedRequest],
+  );
+  const interviewApi = useMemo(
+    () => ({
+      options: (
+        ...args: Parameters<ReturnType<typeof createInterviewApi>["options"]>
+      ) => createInterviewApi(authenticatedRequest, "account").options(...args),
+      history: (
+        ...args: Parameters<ReturnType<typeof createInterviewApi>["history"]>
+      ) => createInterviewApi(authenticatedRequest, "account").history(...args),
+      create: (
+        ...args: Parameters<ReturnType<typeof createInterviewApi>["create"]>
+      ) => createInterviewApi(authenticatedRequest, "account").create(...args),
+      read: (
+        ...args: Parameters<ReturnType<typeof createInterviewApi>["read"]>
+      ) => createInterviewApi(authenticatedRequest, "account").read(...args),
+      command: (
+        ...args: Parameters<ReturnType<typeof createInterviewApi>["command"]>
+      ) => createInterviewApi(authenticatedRequest, "account").command(...args),
+      review: (
+        ...args: Parameters<ReturnType<typeof createInterviewApi>["review"]>
+      ) => createInterviewApi(authenticatedRequest, "account").review(...args),
     }),
     [authenticatedRequest],
   );
@@ -346,6 +370,7 @@ function AccountSession({ children }: { children: ReactNode }) {
             skillApi,
             questionApi,
             assessmentApi,
+            interviewApi,
             onReload: reload,
           }}
         >

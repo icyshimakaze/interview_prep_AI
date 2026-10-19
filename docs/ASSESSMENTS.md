@@ -18,9 +18,12 @@ two conceptual prompts to the existing 23-question catalogue. These are authored
 practice materials, not an empirically validated psychometric instrument.
 
 Category and difficulty are exact filters, and selected types form an inclusion
-set. Selection orders candidates by the owner's previous allocation count
-(ascending), then title and version UUID. Every allocation counts once,
-including abandoned attempts; no predictive weighting or randomness is used.
+set. New attempts use the explainable [adaptive selection policy](ADAPTIVE_ALGORITHM.md)
+with optional owned `target_id`, eligible performance, recent allocation cooldowns,
+topic diversity and reproducible tie-breaking. With no explicit difficulty,
+selection starts around the candidate's demonstrated level (easy without evidence).
+Every allocation counts toward exposure, including abandoned attempts. Selection
+reasons and score components are frozen on the attempt; no ML is used.
 Requesting more questions than are available is an explicit conflict, never a
 silent difficulty fallback. An attempt contains 1–12 distinct versions. Stored
 option positions preserve authored order (`authored-order-v1`). Retirement stops
@@ -81,7 +84,9 @@ a submitted practice response; it never returns objective keys.
 Every private query resolves the owner from verified credentials. Demo writes
 require the exact allowed Origin and CSRF token. Client-supplied owner IDs are
 rejected. Browser drafts remain in component memory only; responses and provider
-errors are not logged or sent to an external service. Leaving a dirty page warns
+errors are not logged. Mock makes no external calls. An explicitly configured
+OpenAI/Ollama account provider receives written responses and their question/review
+criteria on submission, as disclosed before starting. Leaving a dirty page warns
 about unsaved edits. A failed save blocks navigation and retains local input.
 Revision/network errors offer a saved-state reload while keeping local edits.
 After an ambiguous submission failure, retry is safe or reload confirms the
@@ -108,15 +113,18 @@ ML, predictive readiness score or combined readiness percentage is produced.
 The `EvaluationProvider` protocol accepts bounded prompt/response/concepts/rubric
 data and returns a structured conceptual evaluation. The application installs
 `MockAIProvider` by default, including for demo mode; no key or network call is
-needed. A future account provider can be injected server-side at the dependency
-boundary, with its actual identity/kind exposed in configuration. Demo evaluation
-is pinned to MockAIProvider independently of the account provider.
-No cloud provider is implemented or enabled here. Output is revalidated (including
+needed. The adapter now uses the shared [AIProvider architecture](AI_ARCHITECTURE.md)
+with optional Ollama and OpenAI Responses integrations. Demo evaluation is pinned
+to MockAIProvider independently of the account provider. Remote providers remain
+disabled unless explicitly configured server-side. Output is revalidated (including
 already constructed model instances): integer score 0–4, bounded feedback,
 allowed result kind matching provider provenance, unique concepts drawn only
-from the actual rubric. Failures, invalid output and five-second per-response
-timeouts return a sanitized retryable 503. The submission request has a bounded
-75-second browser timeout to accommodate up to 12 sequential evaluations.
+from the actual rubric. Failures and invalid output return a sanitized 503 while
+saved drafts remain. Mock/custom evaluators retain a five-second deadline;
+remote providers use a configurable per-answer deadline (default 30 seconds).
+Model and prompt version are stored in optional metadata fields. The browser
+submission request retains its 75-second timeout: a slow remote batch can outlive
+that wait, so reload the saved attempt to check completion before retrying.
 
 Category counts use the frozen questions and finalized responses. Objective
 correct counts include only actual deterministic correctness; the denominator

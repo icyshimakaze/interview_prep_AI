@@ -228,6 +228,25 @@ export async function workspaceRequest(
     const payload: unknown = await response.json().catch(() => null);
     if (payload && typeof payload === "object" && "code" in payload) {
       const questionMessages: Record<string, string> = {
+        interview_revision:
+          "The interview changed. Reload and reconcile your saved answer.",
+        interview_pool:
+          "Not enough published questions match this interview configuration.",
+        interview_state:
+          "This interview action is unavailable in its current state.",
+        interview_turn:
+          "The current question changed. Reload before continuing.",
+        interview_expired:
+          "This interview expired. Saved work is retained for review.",
+        interview_limit:
+          "Interview limit reached. Finish an unfinished session first.",
+        interview_legacy:
+          "This historical example is available for review only.",
+        followup_limit: "The follow-up limit has been reached.",
+        followup_not_ready:
+          "The follow-up is not ready. Wait or continue without it.",
+        command_conflict:
+          "This command key belongs to a different request. Reload saved state.",
         assessment_pool:
           "There are fewer published questions than requested. Choose fewer questions or change the filters.",
         assessment_limit:

@@ -7,6 +7,7 @@ import type { ResumeApi } from "@/lib/api/resumes";
 import type { SkillApi } from "@/lib/api/skills";
 import type { QuestionApi } from "@/lib/api/questions";
 import type { AssessmentApi } from "@/lib/api/assessments";
+import type { InterviewApi } from "@/lib/api/interviews";
 import { WorkspaceView } from "@/components/workspace-view";
 import type { WorkspaceSection } from "./navigation";
 
@@ -21,6 +22,7 @@ export type WorkspaceContextValue = {
   skillApi?: SkillApi;
   questionApi?: QuestionApi;
   assessmentApi?: AssessmentApi;
+  interviewApi?: InterviewApi;
   onReload?: () => void;
 };
 export const WorkspaceContext = createContext<WorkspaceContextValue | null>(
