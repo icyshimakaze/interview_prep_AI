@@ -1,7 +1,7 @@
 name: interview-prep-v2
 
 x-backend-environment: &backend-environment
-  APP_ENV: development
+  APP_ENV: ${APP_ENV:-development}
   DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:?Run scripts/init_env.py}:${POSTGRES_PASSWORD:?Run scripts/init_env.py}@postgres:5432/${POSTGRES_DB:?Run scripts/init_env.py}
   DEMO_RATE_LIMIT_KEY: ${DEMO_RATE_LIMIT_KEY:?Run scripts/init_env.py}
   ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-["http://localhost:3000","http://127.0.0.1:3000"]}
@@ -16,6 +16,9 @@ x-backend-environment: &backend-environment
   OPENAI_MODEL: ${OPENAI_MODEL:-}
   AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-30}
   AI_MAX_RETRIES: ${AI_MAX_RETRIES:-1}
+  AI_OWNER_HOURLY_CALLS: ${AI_OWNER_HOURLY_CALLS:-60}
+  AI_OWNER_DAILY_CALLS: ${AI_OWNER_DAILY_CALLS:-200}
+  AI_GLOBAL_DAILY_CALLS: ${AI_GLOBAL_DAILY_CALLS:-2000}
 
 x-backend-build: &backend-build
   context: ./backend

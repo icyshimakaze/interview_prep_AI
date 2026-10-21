@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_prep.core.errors import ErrorResponse
+from interview_prep.core.quotas import reserve
 from interview_prep.db.session import get_session
 from interview_prep.modules.identity.dependencies import require_account
 from interview_prep.modules.identity.models import User
@@ -51,6 +52,7 @@ async def upload_resume(
     x_resume_filename: Annotated[str, Header(max_length=1024)],
 ) -> ResumeDetail:
     label = safe_filename(x_resume_filename)
+    await reserve(request.app.state.session_factory, request.app.state.settings, user.id, "import")
     parser: PdfParser = request.app.state.pdf_parser
     data, parsed = await parser.upload(request)
     return await service.save_upload(session, user.id, label, data, parsed)

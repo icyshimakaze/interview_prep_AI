@@ -86,7 +86,10 @@ export function SettingsView({
             <h3 className="mt-6 text-sm font-semibold">Data controls</h3>
             <p className="mt-2 text-sm leading-7 text-muted">
               Self-service account export and deletion are not yet available in
-              this preview. Real files and AI processing are not enabled.
+              this preview. Resume PDFs are parsed on this server. Project
+              imports use static analysis. Account assessments and interviews
+              can send submitted answers to the configured AI provider, as
+              disclosed before you start. The demo always uses simulation.
             </p>
             <Link href="/privacy" className="text-link mt-3">
               Read privacy & data details

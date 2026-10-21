@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from interview_prep.ai.schemas import AnswerEvaluation
 from interview_prep.modules.adaptive.schemas import Selection
 from interview_prep.modules.questions.models import Difficulty, QuestionType
 
@@ -63,6 +64,8 @@ class Options(Contract):
 
 
 class EvaluationMetadata(Contract):
+    evaluation: AnswerEvaluation | None = None
+    question_rubric_version: str | None = None
     model: str | None = Field(default=None, max_length=100)
     prompt_version: str | None = Field(default=None, max_length=100)
     provider: str = Field(min_length=1, max_length=100)

@@ -51,13 +51,24 @@ class TokenVerifier:
         if time.monotonic() - self.last_failure < 5:
             raise AuthenticationUnavailable()
         try:
-            async with self.client.stream("GET", self.settings.auth_jwks_url) as response:
+            async with (
+                asyncio.timeout(3),
+                self.client.stream(
+                    "GET",
+                    self.settings.auth_jwks_url,
+                    headers={"Accept-Encoding": "identity"},
+                    follow_redirects=False,
+                    timeout=3,
+                ) as response,
+            ):
                 response.raise_for_status()
+                if response.headers.get("content-encoding", "identity").lower() != "identity":
+                    raise ValueError("Encoded JWKS unsupported")
                 body = bytearray()
                 async for chunk in response.aiter_bytes():
-                    body.extend(chunk)
-                    if len(body) > 65536:
+                    if len(body) + len(chunk) > 65536:
                         raise ValueError("JWKS exceeds budget")
+                    body.extend(chunk)
             import json
 
             payload: object = json.loads(body)
@@ -92,7 +103,14 @@ class TokenVerifier:
                 raise ValueError("No permitted signing key")
             self.keys = keys
             self.expires_at = time.monotonic() + self.settings.auth_jwks_cache_seconds
-        except (httpx.HTTPError, ValueError, TypeError, jwt.PyJWTError):
+        except (
+            httpx.HTTPError,
+            ValueError,
+            TypeError,
+            jwt.PyJWTError,
+            TimeoutError,
+            RecursionError,
+        ):
             self.last_failure = time.monotonic()
             raise AuthenticationUnavailable() from None
 

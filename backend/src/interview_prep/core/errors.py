@@ -7,6 +7,24 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException
 
+from interview_prep.modules.projects.ingestion import ERRORS as PROJECT_ERRORS
+
+PLANNING_ERRORS: dict[str, tuple[int, str]] = {
+    "roadmap_conflict": (
+        409,
+        "This roadmap changed. Reload its saved history before trying again.",
+    ),
+    "roadmap_limit": (
+        409,
+        "The 50-generation history limit has been reached; saved tasks remain available.",
+    ),
+    "roadmap_timezone": (
+        422,
+        "Set a valid IANA timezone in your preparation profile before generating a roadmap.",
+    ),
+    "roadmap_date": (422, "Choose an interview date today or later, or leave it blank."),
+}
+
 RESUME_ERRORS: dict[str, tuple[int, str]] = {
     "pdf_filename": (422, "Choose a .pdf filename without paths or control characters."),
     "pdf_mime": (415, "Only application/pdf uploads are accepted."),
@@ -67,7 +85,7 @@ def register_error_handlers(app: FastAPI) -> None:
             404: ("not_found", "The resource was not found."),
             409: ("conflict", "The resource changed. Reload and try again."),
             422: ("validation_error", "The request is invalid."),
-            429: ("rate_limited", "Demo creation limit reached. Try again in an hour."),
+            429: ("rate_limited", "Operation limit reached. Try again after the quota resets."),
             503: ("unavailable", "The service is temporarily unavailable."),
         }
         code, message = messages.get(exc.status_code, ("http_error", "The request failed."))
@@ -96,6 +114,9 @@ def register_error_handlers(app: FastAPI) -> None:
                 "assessment_expired": "This assessment expired. Your saved responses are retained; "
                 "start a new attempt.",
                 "assessment_closed": "This assessment is closed and cannot be changed.",
+                "assessment_evaluation_limit": "This answer's evaluation failed twice or its "
+                "dispatch was interrupted. Saved drafts remain available; use a new assessment "
+                "to request fresh feedback.",
                 "assessment_revision": "This assessment changed in another request. "
                 "Reload the saved attempt before continuing.",
                 "question_changed": "This question is inactive or changed. "
@@ -113,12 +134,18 @@ def register_error_handlers(app: FastAPI) -> None:
             if isinstance(exc.detail, str) and exc.detail in conflicts:
                 code, message = exc.detail, conflicts[exc.detail]
         response = error_response(request, exc.status_code, code, message)
-        if isinstance(exc.detail, str) and exc.detail in RESUME_ERRORS:
-            expected_status, safe_message = RESUME_ERRORS[exc.detail]
+        if isinstance(exc.detail, str) and exc.detail in (
+            RESUME_ERRORS | PROJECT_ERRORS | PLANNING_ERRORS
+        ):
+            expected_status, safe_message = (RESUME_ERRORS | PROJECT_ERRORS | PLANNING_ERRORS)[
+                exc.detail
+            ]
             if expected_status == exc.status_code:
                 response = error_response(request, exc.status_code, exc.detail, safe_message)
         if exc.status_code == 401 and exc.headers:
             response.headers["WWW-Authenticate"] = exc.headers.get("WWW-Authenticate", "Bearer")
+        if exc.status_code == 429 and exc.headers:
+            response.headers["Retry-After"] = exc.headers.get("Retry-After", "3600")
         return response
 
     @app.exception_handler(RequestValidationError)

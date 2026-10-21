@@ -173,7 +173,7 @@ export function RoadmapView({
         <EmptyState
           icon="roadmap"
           title="A plan starts with your direction."
-          description="No roadmap tasks yet. Save your target role and weekly study budget first. Personal roadmap creation is still in development."
+          description="No tasks are present in this saved dashboard. Open or reload your workspace to generate a personal roadmap from your current context."
           action={
             <ButtonLink href={sectionHref(data.mode, "settings")}>
               Review your study budget

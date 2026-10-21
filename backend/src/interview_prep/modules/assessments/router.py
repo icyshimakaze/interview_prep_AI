@@ -1,7 +1,8 @@
+import asyncio
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_prep.core.errors import ErrorResponse
@@ -90,10 +91,17 @@ def assessment_router(mode: str) -> APIRouter:
     async def submit(
         identifier: UUID,
         body: RevisionInput,
+        request: Request,
         user: Annotated[User, Depends(identity)],
         session: Session,
         provider: Annotated[EvaluationProvider, Depends(provider_dependency)],
     ) -> AttemptView:
+        if provider.kind == "model_assisted":
+            slots: asyncio.Semaphore = request.app.state.assessment_slots
+            if slots.locked():
+                raise HTTPException(503)
+            async with slots:
+                return await service.submit(session, user.id, identifier, body.revision, provider)
         return await service.submit(session, user.id, identifier, body.revision, provider)
 
     @router.post("/{identifier}/abandon", response_model=AttemptView, dependencies=mutations)

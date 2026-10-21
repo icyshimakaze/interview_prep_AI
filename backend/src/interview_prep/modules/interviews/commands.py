@@ -251,15 +251,12 @@ async def queue_evaluation(
         evaluator_version="interview-followup-review-v1"
         if child
         else str(provider.get("version", VERSION)),
-        rubric_version="interview-followup-review-v1"
-        if child
-        else (version.rubric_version or VERSION)
-        if version
-        else VERSION,
+        rubric_version="interview-followup-review-v1" if child else "answer-rubric-v1",
         provider=None if child else interview.provider,
         model=None if child else interview.model,
-        prompt_version=None if child else "ai-prompts-v1",
-        schema_version=VERSION,
+        prompt_version=None if child else "answer-evaluation-v2",
+        schema_version=VERSION if child else "answer-rubric-v1",
+        usage_metadata={"question_rubric_version": version.rubric_version if version else None},
         feedback="Not scored: this contextual practice probe has no reviewed scoring rubric."
         if child
         else None,

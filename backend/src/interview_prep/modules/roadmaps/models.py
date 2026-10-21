@@ -11,6 +11,7 @@ from sqlalchemy import (
     Integer,
     String,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -46,6 +47,17 @@ class Roadmap(OwnedRecord):
         CheckConstraint("weekly_minutes BETWEEN 15 AND 10080", name="study_budget"),
         CheckConstraint("revision > 0", name="revision"),
         Index("ix_roadmaps_owner_status", "owner_id", "status"),
+        UniqueConstraint("owner_id", "generation_key"),
+        CheckConstraint(
+            "input_snapshot IS NULL OR octet_length(input_snapshot::text) <= 32768",
+            name="input_size",
+        ),
+        Index(
+            "uq_generated_active_roadmap",
+            "owner_id",
+            unique=True,
+            postgresql_where=text("generation_key IS NOT NULL AND status = 'active'"),
+        ),
     )
     target_job_version_id: Mapped[UUID | None] = mapped_column(index=True)
     title: Mapped[str] = mapped_column(String(200))
@@ -57,6 +69,8 @@ class Roadmap(OwnedRecord):
     starts_on: Mapped[date] = mapped_column(Date)
     target_date: Mapped[date | None] = mapped_column(Date)
     revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    generation_key: Mapped[UUID | None] = mapped_column()
+    input_snapshot: Mapped[dict[str, object] | None] = mapped_column(JSONB)
     items: Mapped[list["RoadmapItem"]] = relationship(viewonly=True, lazy="raise")
 
 
@@ -74,6 +88,10 @@ class RoadmapItem(OwnedRecord):
             "resource_url IS NULL OR resource_url LIKE 'https://%'", name="resource_https"
         ),
         Index("ix_roadmap_items_owner_due", "owner_id", "status", "scheduled_on"),
+        CheckConstraint(
+            "recommendation IS NULL OR octet_length(recommendation::text) <= 8192",
+            name="recommendation_size",
+        ),
     )
     roadmap_id: Mapped[UUID] = mapped_column(index=True)
     skill_id: Mapped[UUID | None] = mapped_column(
@@ -87,6 +105,7 @@ class RoadmapItem(OwnedRecord):
     scheduled_on: Mapped[date | None] = mapped_column(Date)
     status: Mapped[TaskStatus] = mapped_column(enum_column(TaskStatus, "roadmap_item_status"))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    recommendation: Mapped[dict[str, object] | None] = mapped_column(JSONB)
 
 
 class ProgressEvent(OwnedRecord):

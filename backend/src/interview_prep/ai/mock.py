@@ -4,6 +4,7 @@ import re
 from typing import Literal
 
 from interview_prep.ai.provider import BaseProvider
+from interview_prep.ai.rubric import dimensions
 from interview_prep.ai.schemas import (
     AnswerEvaluation,
     AnswerInput,
@@ -23,6 +24,7 @@ from interview_prep.ai.schemas import (
     Roadmap,
     RoadmapInput,
     RoadmapStep,
+    RubricResult,
     SkillMention,
 )
 
@@ -68,22 +70,76 @@ def evaluate(content: AnswerInput) -> AnswerEvaluation:
         words = {w for w in re.findall(r"[a-z0-9]+", concept.casefold()) if len(w) >= 4}
         if words and 2 * len(words & response_words) >= len(words):
             matched.append(concept)
+    feedback = (
+        f"Mock simulation: lexical overlap with {len(matched)} of "
+        f"{len(content.expected_concepts)} expected concepts. "
+        "This does not judge correctness, reasoning, or demonstrated competence. "
+        "Compare your response with the review concepts and practice explaining them."
+    )
+    score = 4 * len(matched) // max(1, len(content.expected_concepts))
+    missing = [c for c in content.expected_concepts if c not in matched]
     return AnswerEvaluation(
-        score=4 * len(matched) // max(1, len(content.expected_concepts)),
+        rubric_version="answer-rubric-v1",
+        profile=content.profile,
+        score_basis="lexical_coverage",
+        score=score,
         matched_concepts=matched,
-        feedback=(
-            f"Mock simulation: lexical overlap with {len(matched)} of "
-            f"{len(content.expected_concepts)} expected concepts. "
-            "This does not judge correctness, reasoning, or demonstrated competence. "
-            "Compare your response with the review concepts and practice explaining them."
+        feedback=feedback,
+        overall_feedback=feedback,
+        strengths=[
+            f"Literal word overlap found for {len(matched)} review concepts; verify meaning."
+        ]
+        if matched
+        else [],
+        improvements=[
+            "Explain the missing review concepts in your own words and check factual accuracy."
+            if missing
+            else "Check each claim and add a concrete example; word overlap is not proof.",
+            "Use the suggested structure to review your response with a human reviewer.",
+        ],
+        missing_concepts=missing,
+        recommended_answer_structure=(
+            [
+                "Situation: give relevant context.",
+                "Task: state your responsibility.",
+                "Action: describe what you personally did and why.",
+                "Result: describe supported outcomes without inventing metrics.",
+                "Reflection: explain what you learned and would change.",
+            ]
+            if content.profile == "behavioral"
+            else [
+                "Answer the question directly and define key terms.",
+                "Explain the reasoning with a concrete example.",
+                "Discuss limitations and trade-offs; include complexity only when relevant.",
+                "Summarize the conclusion and how you would verify it.",
+            ]
         ),
+        potential_followup=(
+            "What would you do differently next time, and why?"
+            if content.profile == "behavioral"
+            else "Which assumption in your answer would you test first, and how?"
+        ),
+        rubric_results=[
+            RubricResult(
+                dimension=dimension,
+                score=score if dimension == "completeness" and content.expected_concepts else None,
+                explanation=(
+                    f"Simulation proxy only: {len(matched)}/{len(content.expected_concepts)} "
+                    "concepts have lexical overlap; floor(4 × matched / expected). "
+                    "This does not establish semantic completeness."
+                    if dimension == "completeness" and content.expected_concepts
+                    else "Not assessed: deterministic mock cannot judge this criterion. "
+                    "Review it using the documented rubric."
+                ),
+            )
+            for dimension in dimensions(content.profile)
+        ],
     )
 
 
 class MockAIProvider(BaseProvider):
     name = "MockAIProvider"
-    # Preserve the existing assessment algorithm/version and its stored provenance.
-    version = "mock-lexical-v1"
+    version = "mock-structured-v2"
     kind: Literal["simulation", "model_assisted"] = "simulation"
     timeout_seconds = 5.0
 

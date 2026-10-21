@@ -1,3 +1,4 @@
+import { parseEvaluation } from "./evaluation";
 import type { components } from "./generated";
 import { csrfToken } from "./workspace";
 
@@ -133,6 +134,14 @@ export function parseAssessment(value: unknown): Assessment {
         correct_option_ids: list(r.correct_option_ids).map(text),
         metadata: m
           ? {
+              evaluation: parseEvaluation(m.evaluation),
+              question_rubric_version:
+                m.question_rubric_version == null
+                  ? null
+                  : text(m.question_rubric_version),
+              model: m.model == null ? null : text(m.model),
+              prompt_version:
+                m.prompt_version == null ? null : text(m.prompt_version),
               provider: text(m.provider),
               provider_version: text(m.provider_version),
               policy_version: text(m.policy_version),

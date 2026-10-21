@@ -28,14 +28,14 @@ const features: {
     icon: "roadmap",
     title: "A manageable next step",
     description:
-      "Try completing a sample task and see it stay completed when you return to your demo.",
+      "Generate a plan from your job priorities, evidence and weekly time. Complete, reopen and retain earlier work.",
     status: "Roadmap · Interactive demo",
   },
   {
     icon: "progress",
     title: "A record of the work",
     description:
-      "Review recorded activity, with simulated examples clearly separated from real preparation.",
+      "Review recorded assessment accuracy, interview ratings and task completion, with validation limits explained.",
     status: "Progress · Demo preview",
   },
 ];
@@ -166,9 +166,9 @@ export default function Home() {
             ))}
           </div>
           <p className="border-t border-line pt-6 text-sm leading-7 text-muted">
-            Also in the navigation: Question Bank and Project Defense. Question
-            browsing and repository analysis are planned; neither accepts new
-            content yet.
+            Project Defense analyzes public GitHub repositories or source ZIPs
+            without executing code. Explore cited facts and practice explaining
+            architecture, trade-offs and your contributions.
           </p>
         </section>
         <section
@@ -186,8 +186,9 @@ export default function Home() {
           <div>
             <p className="text-base leading-8 text-muted">
               The demo uses fictional information in a separate, temporary
-              workspace. It doesn’t ask for your resume, fetch your repository,
-              or send your writing to an AI service.
+              workspace. Project Defense includes an offline teaching fixture
+              and optional repository imports. Defense practice sends no source
+              or answers to an AI service.
             </p>
             <ul className="mt-6 space-y-4 text-sm text-ink">
               {[

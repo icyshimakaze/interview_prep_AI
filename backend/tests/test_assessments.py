@@ -12,7 +12,6 @@ from test_auth import account_client as account_client
 from test_candidate_context import sign_in
 
 from interview_prep.modules.assessments.evaluation import (
-    ConceptualEvaluation,
     ConceptualInput,
     MockAIProvider,
     validate_evaluation,
@@ -128,12 +127,7 @@ async def test_mock_provider_formula_and_output_validation() -> None:
     assert validate_evaluation(result, provider, concepts) == result
     with pytest.raises(ValueError):
         validate_evaluation(
-            ConceptualEvaluation.model_construct(
-                score=99,
-                kind="simulation",
-                feedback="Invalid constructed model",
-                matched_concepts=[],
-            ),
+            result.model_copy(update={"score": 99}),
             provider,
             concepts,
         )
@@ -380,7 +374,28 @@ class TimedOutProvider(InvalidProvider):
         raise TimeoutError("private-provider-timeout")
 
 
-@pytest.mark.parametrize("provider_class", [InvalidProvider, UnavailableProvider, TimedOutProvider])
+class InvalidRubricProvider(InvalidProvider):
+    async def evaluate(self, content: ConceptualInput) -> object:
+        from interview_prep.ai.mock import evaluate
+        from interview_prep.ai.schemas import AnswerInput
+
+        result = evaluate(
+            AnswerInput(
+                question=content.prompt,
+                answer=content.response,
+                expected_concepts=list(content.expected_concepts),
+                profile=content.profile,
+            )
+        ).model_dump()
+        result["kind"] = "simulation"
+        result["rubric_results"][0]["score"] = 4  # Mock cannot assess correctness.
+        return result
+
+
+@pytest.mark.parametrize(
+    "provider_class",
+    [InvalidProvider, UnavailableProvider, TimedOutProvider, InvalidRubricProvider],
+)
 async def test_provider_failure_rolls_back_and_retries(
     account_client: httpx.AsyncClient,
     database: AsyncEngine,
@@ -413,6 +428,7 @@ async def test_provider_failure_rolls_back_and_retries(
                 select(QuestionAttempt).where(QuestionAttempt.assessment_attempt_id == attempt.id)
             )
             assert stored and stored.score is None and stored.evaluation_metadata is None
+            assert stored.answer_text == attempt.questions[0].answer_text
             assert stored.status == "draft" and stored.submitted_at is None
             assert (
                 await session.scalar(

@@ -55,15 +55,20 @@ async def request_json(
                         "POST",
                         url,
                         json=payload,
-                        headers=headers,
+                        headers={**headers, "Accept-Encoding": "identity"},
                         timeout=deadline_seconds,
                         follow_redirects=False,
                     ) as response:
+                        if (
+                            response.headers.get("content-encoding", "identity").lower()
+                            != "identity"
+                        ):
+                            raise InvalidProviderOutput()
                         body = bytearray()
                         async for chunk in response.aiter_bytes():
-                            body.extend(chunk)
-                            if len(body) > MAX_RESPONSE_BYTES:
+                            if len(body) + len(chunk) > MAX_RESPONSE_BYTES:
                                 raise InvalidProviderOutput()
+                            body.extend(chunk)
                         if response.status_code == 200:
                             return bytes(body)
                         if (

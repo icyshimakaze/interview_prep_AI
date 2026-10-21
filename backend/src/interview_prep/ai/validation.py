@@ -29,9 +29,30 @@ def validate_domain(content: Input, output: Contract) -> None:
             for m in mentions
         )
     elif isinstance(content, AnswerInput) and isinstance(output, AnswerEvaluation):
-        valid = len(set(output.matched_concepts)) == len(output.matched_concepts) and set(
-            output.matched_concepts
-        ).issubset(content.expected_concepts)
+        valid = (
+            output.profile == content.profile
+            and len(set(output.matched_concepts)) == len(output.matched_concepts)
+            and set(output.matched_concepts).issubset(content.expected_concepts)
+            and output.missing_concepts
+            == [c for c in content.expected_concepts if c not in output.matched_concepts]
+        )
+        if output.score_basis == "lexical_coverage":
+            expected_score = (
+                4 * len(output.matched_concepts) // max(1, len(content.expected_concepts))
+            )
+            valid = (
+                valid
+                and output.score == expected_score
+                and all(
+                    row.score
+                    == (
+                        expected_score
+                        if row.dimension == "completeness" and content.expected_concepts
+                        else None
+                    )
+                    for row in output.rubric_results
+                )
+            )
     elif isinstance(content, FollowupInput) and isinstance(output, Followup):
         valid = output.question.strip().casefold() not in {
             q.strip().casefold() for q in [content.question, *content.recent_questions]

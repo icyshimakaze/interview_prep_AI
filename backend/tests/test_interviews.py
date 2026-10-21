@@ -15,6 +15,7 @@ from interview_prep.ai.mock import MockAIProvider
 from interview_prep.ai.schemas import AnswerEvaluation as AnswerResult
 from interview_prep.ai.schemas import AnswerInput, ProviderResult
 from interview_prep.modules.interviews.models import (
+    AnswerEvaluation,
     InterviewAnswer,
     InterviewQuestion,
     InterviewSession,
@@ -147,6 +148,79 @@ async def test_persisted_answer_before_failure_and_final_review(
     assert forbidden.status_code == 409
     async with async_sessionmaker(database)() as session:
         assert await session.scalar(select(func.count()).select_from(ProgressEvent)) == 1
+
+
+@pytest.mark.parametrize("type_,profile", [("backend", "technical"), ("behavioral", "behavioral")])
+async def test_structured_feedback_survives_reload_with_provenance(
+    account_client: httpx.AsyncClient, database: AsyncEngine, type_: str, profile: str
+) -> None:
+    await seed(database)
+    await sign_in(account_client, "alice")
+    interview = await command(account_client, await create(account_client, 1, type_), "start")
+    assert interview.current_turn
+    original = interview.current_turn.id
+    response = "I clarified the task, tested a solution, and recorded the result and learning."
+    interview = await command(
+        account_client, interview, f"turns/{original}/submit", {"answer_text": response}
+    )
+    worker = runner(account_client)
+    assert await worker.tick()
+    interview = await read(account_client, interview)
+    interview = await command(account_client, interview, "complete")
+    await worker.maintenance()
+    reviewed = InterviewReview.model_validate(
+        (await account_client.get(f"{BASE}/{interview.id}/review")).json()
+    )
+    evaluation = reviewed.turns[0].evaluation
+    assert evaluation and evaluation.evaluation
+    assert reviewed.turns[0].turn.answer_text == response
+    assert evaluation.evaluation.profile == profile
+    assert evaluation.rubric_version == "answer-rubric-v1"
+    assert evaluation.provider == "MockAIProvider" and evaluation.model is None
+    assert evaluation.provider_version == "mock-structured-v2"
+    assert evaluation.prompt_version == "answer-evaluation-v2"
+    assert evaluation.evaluated_at and evaluation.evaluated_at.tzinfo
+    async with async_sessionmaker(database)() as session:
+        stored = await session.get(AnswerEvaluation, evaluation.id)
+        assert stored and stored.result_payload == evaluation.evaluation.model_dump(mode="json")
+        assert stored.usage_metadata and stored.usage_metadata["question_rubric_version"]
+    await sign_in(account_client, "bob")
+    assert (await account_client.get(f"{BASE}/{interview.id}/review")).status_code == 404
+
+
+async def test_invalid_structured_output_preserves_submitted_answer(
+    account_client: httpx.AsyncClient, database: AsyncEngine
+) -> None:
+    await seed(database)
+    await sign_in(account_client)
+    interview = await command(account_client, await create(account_client, 1), "start")
+    assert interview.current_turn
+    text = "My submitted answer must survive invalid structured feedback."
+    interview = await command(
+        account_client,
+        interview,
+        f"turns/{interview.current_turn.id}/submit",
+        {"answer_text": text},
+    )
+
+    class InvalidRubric(MockAIProvider):
+        async def evaluate_answer(self, content: AnswerInput) -> ProviderResult[AnswerResult]:
+            result = await super().evaluate_answer(content)
+            # Exercise worker revalidation even when an adapter bypasses normal construction.
+            return result.model_copy(
+                update={"data": result.data.model_copy(update={"rubric_results": []})}
+            )
+
+    worker = runner(account_client)
+    worker.provider_factory = lambda demo, remaining: InvalidRubric()
+    assert await worker.tick()
+    current = await read(account_client, interview)
+    assert current.current_turn and current.current_turn.answer_text == text
+    assert current.progress.evaluation_failed == 1
+    async with async_sessionmaker(database)() as session:
+        stored = await session.scalar(select(AnswerEvaluation))
+        assert stored and stored.result_payload is None and stored.score is None
+        assert stored.error_code == "ai_invalid_output"
 
 
 async def test_followup_pause_resume_skip_and_ordering(

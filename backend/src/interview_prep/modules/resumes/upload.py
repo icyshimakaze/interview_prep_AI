@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import unicodedata
 from typing import Literal
 from urllib.parse import unquote_to_bytes
@@ -79,18 +80,20 @@ async def read_upload(request: Request) -> bytes:
 
 def run_worker(data: bytes) -> ParsedPdf:
     # Do not inherit database URLs, identity secrets, proxies, or credential envs.
-    environment = {
-        key: os.environ[key] for key in ("SYSTEMROOT", "WINDIR", "PATH") if key in os.environ
-    }
+    environment = {key: os.environ[key] for key in ("SYSTEMROOT", "WINDIR") if key in os.environ}
     try:
-        with subprocess.Popen(
-            [sys.executable, "-m", "interview_prep.modules.resumes.worker"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            env=environment,
-            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
-        ) as process:
+        with (
+            tempfile.TemporaryDirectory(prefix="resume-parse-") as directory,
+            subprocess.Popen(
+                [sys.executable, "-I", "-m", "interview_prep.modules.resumes.worker"],
+                cwd=directory,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                env=environment,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+            ) as process,
+        ):
             try:
                 output, _ = process.communicate(input=data, timeout=PARSE_SECONDS)
             except subprocess.TimeoutExpired:

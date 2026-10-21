@@ -1,3 +1,4 @@
+import { EvaluationFeedback } from "./evaluation-feedback";
 import type { Assessment } from "@/lib/api/assessments";
 import { Badge, DataTable } from "@/components/ui/table";
 
@@ -9,7 +10,10 @@ export function AssessmentReview({ attempt }: { attempt: Assessment }) {
         <p className="mt-2 mb-5 text-sm leading-6 text-muted">
           Counts come from this attempt’s actual responses. Objective totals
           include skipped questions. Conceptual points cover answered conceptual
-          questions only and remain separate from objective correctness.
+          questions only and remain separate from objective correctness. Mock
+          points summarize word overlap; AI-assisted points summarize rubric
+          judgments. Read the per-answer explanations below; these totals do not
+          measure readiness.
         </p>
         <DataTable
           caption="Category performance"
@@ -87,7 +91,12 @@ export function AssessmentReview({ attempt }: { attempt: Assessment }) {
                           : q.review.result_kind?.replaceAll("_", " ") ||
                             "Historical record"}
                 </Badge>
-                {q.review.feedback && (
+                {q.review.metadata?.evaluation && (
+                  <EvaluationFeedback
+                    evaluation={q.review.metadata.evaluation}
+                  />
+                )}
+                {!q.review.metadata?.evaluation && q.review.feedback && (
                   <p className="text-sm leading-7">{q.review.feedback}</p>
                 )}
                 {!!q.review.correct_option_ids.length && (
@@ -121,7 +130,11 @@ export function AssessmentReview({ attempt }: { attempt: Assessment }) {
                   <p className="text-xs leading-6 break-words text-muted">
                     {q.review.metadata.provider} ·{" "}
                     {q.review.metadata.provider_version} ·{" "}
-                    {q.review.metadata.policy_version}
+                    {q.review.metadata.policy_version} ·{" "}
+                    {q.review.metadata.model ?? "No model"} ·{" "}
+                    {q.review.metadata.prompt_version ?? "Original prompt"} ·{" "}
+                    {q.review.metadata.rubric_version ?? "Original rubric"} ·{" "}
+                    {new Date(q.review.metadata.evaluated_at).toLocaleString()}
                   </p>
                 )}
               </div>

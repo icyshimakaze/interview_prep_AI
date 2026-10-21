@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_prep.ai.provider import AIProvider
+from interview_prep.ai.schemas import AnswerEvaluation as StructuredEvaluation
 from interview_prep.modules.assessments.models import AnswerStatus
 from interview_prep.modules.context.models import TargetJob
 from interview_prep.modules.interviews.models import (
@@ -389,6 +390,11 @@ async def options(
     )
 
 
+def evaluation_time(result: AnswerEvaluation) -> datetime | None:
+    value = (result.usage_metadata or {}).get("evaluated_at")
+    return datetime.fromisoformat(value) if isinstance(value, str) else None
+
+
 async def review(session: AsyncSession, owner: UUID, identifier: UUID) -> InterviewReview:
     interview = await owned(session, owner, identifier)
     if interview.contract_version == VERSION and interview.status not in (
@@ -431,6 +437,12 @@ async def review(session: AsyncSession, owner: UUID, identifier: UUID) -> Interv
                     provider=result.provider,
                     model=result.model,
                     prompt_version=result.prompt_version,
+                    rubric_version=result.rubric_version,
+                    provider_version=result.evaluator_version,
+                    evaluated_at=evaluation_time(result),
+                    evaluation=StructuredEvaluation.model_validate(result.result_payload)
+                    if result.result_payload and result.schema_version == "answer-rubric-v1"
+                    else None,
                 )
                 if result
                 else None,

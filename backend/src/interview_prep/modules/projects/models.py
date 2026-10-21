@@ -12,6 +12,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from interview_prep.db.model_support import OwnedRecord, enum_column, owned_args, owned_fk
@@ -57,6 +58,9 @@ class ProjectAnalysis(OwnedRecord):
         ),
         CheckConstraint("archive_bytes BETWEEN 1 AND 10485760", name="archive_size"),
         CheckConstraint("upload_expires_at > created_at", name="upload_expiry"),
+        CheckConstraint(
+            "summary IS NULL OR octet_length(summary::text) <= 16384", name="summary_size"
+        ),
     )
     repository_id: Mapped[UUID] = mapped_column(index=True)
     archive_sha256: Mapped[str] = mapped_column(String(64))
@@ -70,6 +74,7 @@ class ProjectAnalysis(OwnedRecord):
         enum_column(ProcessingStatus, "project_analysis_status")
     )
     error_code: Mapped[str | None] = mapped_column(String(100))
+    summary: Mapped[dict[str, object] | None] = mapped_column(JSONB)
     files: Mapped[list["SourceFile"]] = relationship(viewonly=True, lazy="raise")
     facts: Mapped[list["ProjectFact"]] = relationship(viewonly=True, lazy="raise")
     questions: Mapped[list["ProjectQuestion"]] = relationship(viewonly=True, lazy="raise")
@@ -135,6 +140,9 @@ class ProjectQuestion(OwnedRecord):
         owned_fk("analysis_id", "project_analyses"),
         UniqueConstraint("owner_id", "id", "analysis_id"),
         UniqueConstraint("analysis_id", "question_version_id"),
+        CheckConstraint(
+            "context IS NULL OR octet_length(context::text) <= 4096", name="context_size"
+        ),
     )
     analysis_id: Mapped[UUID] = mapped_column(index=True)
     question_version_id: Mapped[UUID] = mapped_column(
@@ -142,6 +150,7 @@ class ProjectQuestion(OwnedRecord):
     )
     generation_method: Mapped[str] = mapped_column(String(100))
     generator_version: Mapped[str] = mapped_column(String(100))
+    context: Mapped[dict[str, object] | None] = mapped_column(JSONB)
     citations: Mapped[list["ProjectQuestionCitation"]] = relationship(viewonly=True, lazy="raise")
 
 

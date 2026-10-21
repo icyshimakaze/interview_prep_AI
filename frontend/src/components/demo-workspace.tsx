@@ -10,6 +10,8 @@ import { WorkspaceContext } from "@/components/workspace/workspace-context";
 import { createSkillApi } from "@/lib/api/skills";
 import { createQuestionApi } from "@/lib/api/questions";
 import { createAssessmentApi } from "@/lib/api/assessments";
+import { createPlanningApi } from "@/lib/api/planning";
+import { createProjectApi } from "@/lib/api/projects";
 import { createInterviewApi } from "@/lib/api/interviews";
 import {
   csrfToken,
@@ -22,6 +24,8 @@ import {
 const skillApi = createSkillApi(workspaceRequest, "demo");
 const questionApi = createQuestionApi(workspaceRequest, "demo");
 const assessmentApi = createAssessmentApi(workspaceRequest, "demo");
+const planningApi = createPlanningApi(workspaceRequest, "demo");
+const projectApi = createProjectApi(workspaceRequest, "demo");
 const interviewApi = createInterviewApi(workspaceRequest, "demo");
 
 export function DemoWorkspace({ children }: { children: ReactNode }) {
@@ -167,6 +171,8 @@ export function DemoWorkspace({ children }: { children: ReactNode }) {
             questionApi,
             assessmentApi,
             interviewApi,
+            projectApi,
+            planningApi,
             onComplete: (id) => void complete(id),
           }}
         >

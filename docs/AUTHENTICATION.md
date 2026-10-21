@@ -107,10 +107,11 @@ Evidence mutations and deletion include the aggregate revision; foreign IDs are 
 
 Short-lived custom JWTs can remain valid after managed sign-out until expiry plus
 clock leeway. There is no claimed instant token revocation. Signed Clerk lifecycle
-webhooks, account export/erasure with provider reconciliation, production CSP,
-public ingress, backup/restore and real file ingestion remain later release work.
-Local suspension is checked on every protected request. No real upload or AI
-operation has been opened by this slice.
+webhooks, account export/erasure with provider reconciliation, a strict script CSP,
+public ingress and backup/restore remain release work. Local suspension is checked
+on every protected request. Resume parsing, Project Defense imports and optional
+account AI evaluation are implemented; see the current [security review](SECURITY.md)
+and [AI disclosure](AI_ARCHITECTURE.md).
 
 ## Recruiter demo
 
@@ -131,8 +132,10 @@ accessible confirmation dialog before calling the same owned deletion endpoint.
 Demo APIs accept only their cookie and reject any Authorization header. Every
 visitor owns a separate principal and distinct records; neither another demo's
 UUID nor a real account resource ID grants access. Task completion is idempotent,
-requires exact Origin/CSRF, and records one simulated progress event. The allowlist
-accepts no arbitrary resume/job/repository input, uploads, external fetches or AI calls.
+requires exact Origin/CSRF, and records one simulated progress event. Demo practice accepts bounded typed responses. Project Defense accepts public
+GitHub and ZIP imports through the same bounded analyzer as accounts. Resume PDF
+upload and target-job editing remain account-only. Demo evaluation always uses
+local mock simulation; imported source and defense answers are not sent to AI.
 
 Cookies are host-only, SameSite=Lax; the session is HttpOnly and scoped to
 `/api/v1/demo`. The separate CSRF cookie is readable for request protection. Only

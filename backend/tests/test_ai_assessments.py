@@ -5,7 +5,9 @@ from test_auth import account_client as account_client
 from test_candidate_context import sign_in
 
 from interview_prep.ai.mock import MockAIProvider as SharedMock
+from interview_prep.ai.mock import evaluate
 from interview_prep.ai.remote import OpenAIProvider
+from interview_prep.ai.schemas import AnswerEvaluation, AnswerInput, Contract, Input, Operation
 from interview_prep.modules.assessments.evaluation import ProviderEvaluationAdapter
 from interview_prep.modules.assessments.router import evaluation_provider
 from interview_prep.modules.assessments.schemas import AttemptView
@@ -27,6 +29,14 @@ async def test_real_provider_bridge_persists_model_provenance_without_correctnes
         model: str | None = "test-model"
         kind = OpenAIProvider.kind
 
+        async def _generate(
+            self, operation: Operation, content: Input, schema: type[Contract]
+        ) -> str:
+            assert isinstance(content, AnswerInput)
+            data = evaluate(content).model_dump()
+            data["score_basis"] = "rubric_mean"
+            return AnswerEvaluation.model_validate(data).model_dump_json()
+
     transport = account_client._transport
     assert isinstance(transport, httpx.ASGITransport)
     # ASGITransport's app is structurally callable; narrow to the actual FastAPI class.
@@ -47,7 +57,14 @@ async def test_real_provider_bridge_persists_model_provenance_without_correctnes
         assert review and review.metadata
         assert review.result_kind == "model_assisted" and review.is_correct is None
         assert review.metadata.model == "test-model"
-        assert review.metadata.prompt_version == "ai-prompts-v1"
+        assert review.metadata.prompt_version == "answer-evaluation-v2"
+        assert review.metadata.evaluation and review.metadata.evaluation.profile == "technical"
+        assert review.metadata.rubric_version == "answer-rubric-v1"
+        assert review.metadata.evaluated_at.tzinfo is not None
+        reloaded = AttemptView.model_validate(
+            (await account_client.get(f"{BASE}/{attempt.id}")).json()
+        )
+        assert reloaded.questions[0].review == review
         matrix = (await account_client.get("/api/v1/account/skill-evidence")).json()
         assert not any(row["assessment_validated"] for row in matrix["rows"])
     finally:

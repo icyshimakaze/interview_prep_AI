@@ -1,3 +1,4 @@
+import { EvaluationFeedback } from "./evaluation-feedback";
 import type { InterviewReview } from "@/lib/api/interviews";
 
 export function InterviewReviewView({ review }: { review: InterviewReview }) {
@@ -63,18 +64,23 @@ export function InterviewReviewView({ review }: { review: InterviewReview }) {
             {evaluation && (
               <div className="bg-subtle mt-4 rounded-lg p-4 text-sm leading-6">
                 <p>
-                  {evaluation.status === "completed"
-                    ? evaluation.score === null ||
-                      evaluation.score_scale_max === null
-                      ? "Historical feedback; no aggregate score was recorded."
-                      : `${evaluation.kind === "simulation" ? "Simulated lexical" : "AI-assisted"} score: ${evaluation.score} / ${evaluation.score_scale_max}`
-                    : evaluation.status === "not_evaluable"
-                      ? "Not scored"
-                      : evaluation.status === "failed"
-                        ? `Evaluation unavailable (${evaluation.error_code ?? "unavailable"}). Your answer is retained.`
-                        : "Evaluation pending. Your answer is retained."}
+                  {evaluation.evaluation
+                    ? "Structured feedback"
+                    : evaluation.status === "completed"
+                      ? evaluation.score === null ||
+                        evaluation.score_scale_max === null
+                        ? "Historical feedback; no aggregate score was recorded."
+                        : `${evaluation.kind === "simulation" ? "Simulated lexical" : "AI-assisted"} score: ${evaluation.score} / ${evaluation.score_scale_max}`
+                      : evaluation.status === "not_evaluable"
+                        ? "Not scored"
+                        : evaluation.status === "failed"
+                          ? `Evaluation unavailable (${evaluation.error_code ?? "unavailable"}). Your answer is retained.`
+                          : "Evaluation pending. Your answer is retained."}
                 </p>
-                {evaluation.feedback && (
+                {evaluation.evaluation && (
+                  <EvaluationFeedback evaluation={evaluation.evaluation} />
+                )}
+                {!evaluation.evaluation && evaluation.feedback && (
                   <p className="mt-2 whitespace-pre-wrap">
                     {evaluation.feedback}
                   </p>
@@ -83,7 +89,10 @@ export function InterviewReviewView({ review }: { review: InterviewReview }) {
                   <p className="mt-2 text-xs text-muted">
                     {evaluation.provider}
                     {evaluation.model ? ` · ${evaluation.model}` : ""} ·{" "}
-                    {evaluation.prompt_version ?? "Original prompt version"}
+                    {evaluation.prompt_version ?? "Original prompt version"} ·{" "}
+                    {evaluation.provider_version ?? "Original provider version"}
+                    {evaluation.evaluated_at &&
+                      ` · ${new Date(evaluation.evaluated_at).toLocaleString()}`}
                   </p>
                 )}
               </div>

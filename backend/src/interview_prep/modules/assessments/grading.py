@@ -5,6 +5,9 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from interview_prep.ai.rubric import EVALUATION_PROMPT_VERSION, profile_for
+from interview_prep.ai.schemas import AnswerEvaluation, AnswerInput
+from interview_prep.ai.validation import validate_domain
 from interview_prep.modules.assessments.evaluation import (
     POLICY_VERSION,
     ConceptualInput,
@@ -13,6 +16,7 @@ from interview_prep.modules.assessments.evaluation import (
     validate_evaluation,
 )
 from interview_prep.modules.assessments.models import AnswerStatus, QuestionAttempt
+from interview_prep.modules.assessments.receipts import evaluate
 from interview_prep.modules.assessments.schemas import EvaluationMetadata
 from interview_prep.modules.assessments.scoring import score_options, score_short_answer
 from interview_prep.modules.questions.models import (
@@ -40,6 +44,7 @@ async def grade(
     matched: list[str] = []
     model: str | None = None
     prompt_version: str | None = None
+    structured: AnswerEvaluation | None = None
     provider_name, provider_version = "deterministic", POLICY_VERSION
     if version.question_type in (QuestionType.MULTIPLE_CHOICE, QuestionType.MULTIPLE_SELECT):
         correct = list(
@@ -91,15 +96,34 @@ async def grade(
                 provider.timeout_seconds if isinstance(provider, ProviderEvaluationAdapter) else 5
             )
             async with asyncio.timeout(deadline):
-                raw = await provider.evaluate(
+                raw = await evaluate(
+                    session,
+                    answer,
+                    provider,
                     ConceptualInput(
                         prompt=version.prompt or "",
                         response=answer.answer_text or "",
                         expected_concepts=tuple(concepts),
                         rubric=rubric,
-                    )
+                        profile=profile_for(version.question_type.value),
+                    ),
                 )
             evaluated = validate_evaluation(raw, provider, concepts)
+            if evaluated.profile != profile_for(version.question_type.value):
+                raise ValueError("Evaluation profile mismatch")
+            structured = AnswerEvaluation.model_validate(evaluated.model_dump(exclude={"kind"}))
+            validate_domain(
+                AnswerInput(
+                    question=version.prompt or "",
+                    answer=answer.answer_text or "",
+                    expected_concepts=concepts,
+                    rubric=list(rubric),
+                    profile=profile_for(version.question_type.value),
+                ),
+                structured,
+            )
+        except HTTPException:
+            raise
         except Exception:
             # Never persist partial grades or leak provider payloads/errors.
             raise HTTPException(status_code=503, detail="assessment_evaluation") from None
@@ -108,7 +132,7 @@ async def grade(
         provider_name, provider_version = provider.name, provider.version
         matched = evaluated.matched_concepts
         if isinstance(provider, ProviderEvaluationAdapter):
-            model, prompt_version = provider.model, "ai-prompts-v1"
+            model, prompt_version = provider.model, EVALUATION_PROMPT_VERSION
     else:
         raise HTTPException(status_code=409, detail="assessment_closed")
     now = datetime.now(UTC)
@@ -129,7 +153,9 @@ async def grade(
         provider=provider_name,
         provider_version=provider_version,
         policy_version=POLICY_VERSION,
-        rubric_version=version.rubric_version,
+        rubric_version=structured.rubric_version if structured else version.rubric_version,
+        question_rubric_version=version.rubric_version,
+        evaluation=structured,
         evaluated_at=now,
         matched_concepts=matched,
     ).model_dump(mode="json")

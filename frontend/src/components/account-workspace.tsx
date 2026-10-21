@@ -24,6 +24,8 @@ import { createTargetApi, type TargetApi } from "@/lib/api/targets";
 import { createSkillApi } from "@/lib/api/skills";
 import { createQuestionApi } from "@/lib/api/questions";
 import { createAssessmentApi, type AssessmentApi } from "@/lib/api/assessments";
+import { createPlanningApi } from "@/lib/api/planning";
+import { createProjectApi } from "@/lib/api/projects";
 import { createInterviewApi } from "@/lib/api/interviews";
 import {
   createResumeApi,
@@ -78,6 +80,58 @@ function AccountSession({ children }: { children: ReactNode }) {
       return workspaceRequest(path, { ...init, headers });
     },
     [getToken],
+  );
+  const planningApi = useMemo(
+    () => ({
+      read: (
+        ...args: Parameters<ReturnType<typeof createPlanningApi>["read"]>
+      ) => createPlanningApi(authenticatedRequest, "account").read(...args),
+      generate: (
+        ...args: Parameters<ReturnType<typeof createPlanningApi>["generate"]>
+      ) => createPlanningApi(authenticatedRequest, "account").generate(...args),
+      change: (
+        ...args: Parameters<ReturnType<typeof createPlanningApi>["change"]>
+      ) => createPlanningApi(authenticatedRequest, "account").change(...args),
+      progress: (
+        ...args: Parameters<ReturnType<typeof createPlanningApi>["progress"]>
+      ) => createPlanningApi(authenticatedRequest, "account").progress(...args),
+    }),
+    [authenticatedRequest],
+  );
+  const projectApi = useMemo(
+    () => ({
+      list: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["list"]>
+      ) => createProjectApi(authenticatedRequest, "account").list(...args),
+      read: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["read"]>
+      ) => createProjectApi(authenticatedRequest, "account").read(...args),
+      github: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["github"]>
+      ) => createProjectApi(authenticatedRequest, "account").github(...args),
+      upload: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["upload"]>
+      ) => createProjectApi(authenticatedRequest, "account").upload(...args),
+      example: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["example"]>
+      ) => createProjectApi(authenticatedRequest, "account").example(...args),
+      remove: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["remove"]>
+      ) => createProjectApi(authenticatedRequest, "account").remove(...args),
+      history: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["history"]>
+      ) => createProjectApi(authenticatedRequest, "account").history(...args),
+      start: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["start"]>
+      ) => createProjectApi(authenticatedRequest, "account").start(...args),
+      readRun: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["readRun"]>
+      ) => createProjectApi(authenticatedRequest, "account").readRun(...args),
+      command: (
+        ...args: Parameters<ReturnType<typeof createProjectApi>["command"]>
+      ) => createProjectApi(authenticatedRequest, "account").command(...args),
+    }),
+    [authenticatedRequest],
   );
   const skillApi = useMemo(
     () => ({
@@ -371,6 +425,8 @@ function AccountSession({ children }: { children: ReactNode }) {
             questionApi,
             assessmentApi,
             interviewApi,
+            projectApi,
+            planningApi,
             onReload: reload,
           }}
         >

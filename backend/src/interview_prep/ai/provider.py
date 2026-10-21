@@ -4,6 +4,7 @@ from typing import Literal, Protocol, cast, runtime_checkable
 from pydantic import ValidationError
 
 from interview_prep.ai.errors import InvalidProviderOutput
+from interview_prep.ai.rubric import EVALUATION_PROMPT_VERSION
 from interview_prep.ai.schemas import (
     AnswerEvaluation,
     AnswerInput,
@@ -67,6 +68,10 @@ class BaseProvider(ABC):
                 raise InvalidProviderOutput()
             data = schema.model_validate_json(raw)
             validate_domain(content, data)
+            if isinstance(data, AnswerEvaluation) and data.score_basis != (
+                "lexical_coverage" if self.kind == "simulation" else "rubric_mean"
+            ):
+                raise InvalidProviderOutput()
         except (ValidationError, ValueError):
             raise InvalidProviderOutput() from None
         # Bind Pydantic to the concrete schema at runtime, not the erased TypeVar.
@@ -78,6 +83,9 @@ class BaseProvider(ABC):
                 provider_version=self.version,
                 model=self.model,
                 kind=self.kind,
+                prompt_version=EVALUATION_PROMPT_VERSION
+                if operation == "evaluate_answer"
+                else "ai-prompts-v1",
                 disclosure="Demo/simulated output; not verified competence."
                 if self.kind == "simulation"
                 else "AI-assisted output; requires human review.",

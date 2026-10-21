@@ -3,11 +3,11 @@
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
-from pydantic import BaseModel, ConfigDict, Field
-
 from interview_prep.ai.mock import MockAIProvider as SharedMockAIProvider
 from interview_prep.ai.provider import AIProvider
-from interview_prep.ai.schemas import AnswerInput
+from interview_prep.ai.rubric import Profile
+from interview_prep.ai.schemas import AnswerEvaluation, AnswerInput
+from interview_prep.ai.validation import validate_domain
 
 POLICY_VERSION = "assessment-scoring-v1"
 
@@ -18,14 +18,11 @@ class ConceptualInput:
     response: str
     expected_concepts: tuple[str, ...]
     rubric: tuple[str, ...]
+    profile: Profile = "general"
 
 
-class ConceptualEvaluation(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, revalidate_instances="always")
-    score: int = Field(ge=0, le=4)
+class ConceptualEvaluation(AnswerEvaluation):
     kind: Literal["simulation", "model_assisted"]
-    feedback: str = Field(min_length=1, max_length=4000)
-    matched_concepts: list[str] = Field(max_length=12)
 
 
 class EvaluationProvider(Protocol):
@@ -52,7 +49,18 @@ class ProviderEvaluationAdapter:
                 answer=content.response,
                 expected_concepts=list(content.expected_concepts),
                 rubric=list(content.rubric),
+                profile=content.profile,
             )
+        )
+        validate_domain(
+            AnswerInput(
+                question=content.prompt,
+                answer=content.response,
+                expected_concepts=list(content.expected_concepts),
+                rubric=list(content.rubric),
+                profile=content.profile,
+            ),
+            result.data,
         )
         return ConceptualEvaluation(
             **result.data.model_dump(),
@@ -71,12 +79,18 @@ def validate_evaluation(
     raw: object, provider: EvaluationProvider, concepts: list[str]
 ) -> ConceptualEvaluation:
     result = ConceptualEvaluation.model_validate(raw)
+    if result.score_basis != (
+        "lexical_coverage" if provider.kind == "simulation" else "rubric_mean"
+    ):
+        raise ValueError("Invalid score basis for provider")
     if result.kind != provider.kind or len(set(result.matched_concepts)) != len(
         result.matched_concepts
     ):
         raise ValueError("Invalid evaluation provenance")
     if not set(result.matched_concepts).issubset(concepts):
         raise ValueError("Provider returned unknown concepts")
+    if result.missing_concepts != [c for c in concepts if c not in result.matched_concepts]:
+        raise ValueError("Provider returned inconsistent missing concepts")
     if not result.feedback.strip():
         raise ValueError("Empty evaluation feedback")
     if (

@@ -1,3 +1,4 @@
+import { parseEvaluation } from "./evaluation";
 import type { components } from "./generated";
 import { csrfToken } from "./workspace";
 
@@ -193,6 +194,13 @@ export function parseInterviewReview(value: unknown): InterviewReview {
         rationale: nullable(r.rationale),
         evaluation: e
           ? {
+              evaluation: parseEvaluation(e.evaluation),
+              rubric_version:
+                e.rubric_version == null ? null : text(e.rubric_version),
+              provider_version:
+                e.provider_version == null ? null : text(e.provider_version),
+              evaluated_at:
+                e.evaluated_at == null ? null : text(e.evaluated_at),
               id: text(e.id),
               version: number(e.version),
               status: text(e.status),

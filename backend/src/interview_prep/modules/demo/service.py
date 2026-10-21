@@ -10,6 +10,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_prep.core.config import Settings
+from interview_prep.core.security_models import EvaluationReceipt, OperationQuota
 from interview_prep.modules.demo.models import DemoCreationLimit, DemoSession, DemoWorkspace
 from interview_prep.modules.demo.seeding import initialize_demo
 from interview_prep.modules.identity.models import PrincipalKind, PrincipalStatus, User
@@ -113,4 +114,6 @@ async def delete_expired(session: AsyncSession, now: datetime | None = None) -> 
         )
     )
     await session.execute(delete(DemoCreationLimit).where(DemoCreationLimit.expires_at <= cutoff))
+    await session.execute(delete(OperationQuota).where(OperationQuota.expires_at <= cutoff))
+    await session.execute(delete(EvaluationReceipt).where(EvaluationReceipt.expires_at <= cutoff))
     await session.commit()

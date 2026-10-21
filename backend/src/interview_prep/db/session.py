@@ -23,4 +23,5 @@ def create_engine(settings: Settings) -> AsyncEngine:
 async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
     factory: async_sessionmaker[AsyncSession] = request.app.state.session_factory
     async with factory() as session:
+        session.info["settings"] = request.app.state.settings
         yield session

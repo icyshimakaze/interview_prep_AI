@@ -14,6 +14,7 @@ from interview_prep.ai.factory import create_provider
 from interview_prep.api.health import router as health_router
 from interview_prep.core.config import Settings, get_settings
 from interview_prep.core.errors import register_error_handlers
+from interview_prep.core.request_security import RequestSecurityMiddleware
 from interview_prep.db.models import Base
 from interview_prep.db.session import create_engine
 from interview_prep.modules.assessments.evaluation import MockAIProvider, ProviderEvaluationAdapter
@@ -27,10 +28,15 @@ from interview_prep.modules.identity.verification import TokenVerifier
 from interview_prep.modules.interviews.router import account_router as interview_account_router
 from interview_prep.modules.interviews.router import demo_router as interview_demo_router
 from interview_prep.modules.interviews.worker import InterviewRunner
+from interview_prep.modules.projects.ingestion import ProjectImporter
+from interview_prep.modules.projects.router import account_router as project_account_router
+from interview_prep.modules.projects.router import demo_router as project_demo_router
 from interview_prep.modules.questions.router import account_router as question_account_router
 from interview_prep.modules.questions.router import demo_router as question_demo_router
 from interview_prep.modules.resumes.router import router as resume_router
 from interview_prep.modules.resumes.upload import PdfParser
+from interview_prep.modules.roadmaps.router import account_router as roadmap_account_router
+from interview_prep.modules.roadmaps.router import demo_router as roadmap_demo_router
 from interview_prep.modules.skills.router import router as skill_router
 
 
@@ -43,7 +49,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         engine = create_engine(configuration)
         app.state.session_factory = async_sessionmaker(engine, expire_on_commit=False)
         app.state.pdf_parser = PdfParser()
+        app.state.assessment_slots = asyncio.Semaphore(2)
         async with httpx.AsyncClient(timeout=3, follow_redirects=False, trust_env=False) as http:
+            app.state.project_importer = ProjectImporter(http)
             app.state.token_verifier = TokenVerifier(configuration, http)
             app.state.ai_provider = create_provider(configuration, http)
             runner = InterviewRunner(app.state.session_factory, configuration, http)
@@ -92,6 +100,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return response
 
     register_error_handlers(app)
+    app.add_middleware(RequestSecurityMiddleware)
     app.include_router(health_router)
     app.include_router(demo_router)
     app.include_router(account_router)
@@ -105,4 +114,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(assessment_demo_router)
     app.include_router(interview_account_router)
     app.include_router(interview_demo_router)
+    app.include_router(project_account_router)
+    app.include_router(project_demo_router)
+    app.include_router(roadmap_account_router)
+    app.include_router(roadmap_demo_router)
     return app

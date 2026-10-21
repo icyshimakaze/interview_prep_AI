@@ -8,7 +8,9 @@ import {
   ProgressView,
   RoadmapView,
 } from "./workspace/history-view";
-import { PlannedView } from "./workspace/planned-view";
+import { PersonalRoadmap } from "./workspace/personal-roadmap";
+import { ProgressAnalytics } from "./workspace/progress-analytics";
+import { ProjectsWorkspace } from "./workspace/projects-workspace";
 import { SettingsView } from "./workspace/settings-view";
 import type { WorkspaceContextValue } from "./workspace/workspace-context";
 import type { WorkspaceSection } from "./workspace/navigation";
@@ -63,9 +65,17 @@ export function WorkspaceView({
         <InterviewsView data={data} />
       );
     case "roadmap":
-      return <RoadmapView {...workspace} />;
+      return workspace.planningApi ? (
+        <PersonalRoadmap api={workspace.planningApi} />
+      ) : (
+        <RoadmapView {...workspace} />
+      );
     case "progress":
-      return <ProgressView data={data} />;
+      return workspace.planningApi ? (
+        <ProgressAnalytics api={workspace.planningApi} />
+      ) : (
+        <ProgressView data={data} />
+      );
     case "questions":
       return workspace.questionApi ? (
         <QuestionBankView api={workspace.questionApi} mode={data.mode} />
@@ -77,7 +87,15 @@ export function WorkspaceView({
         />
       );
     case "projects":
-      return <PlannedView mode={data.mode} section={section} />;
+      return workspace.projectApi ? (
+        <ProjectsWorkspace api={workspace.projectApi} />
+      ) : (
+        <SectionHeader
+          title="Project Repository"
+          eyebrow="Know your work"
+          description="Project repositories are unavailable. Reload your workspace to try again."
+        />
+      );
     case "settings":
       return <SettingsView {...workspace} />;
   }

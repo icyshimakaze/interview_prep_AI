@@ -5,6 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from interview_prep.ai.schemas import AnswerEvaluation
+
 
 class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -179,6 +181,10 @@ class InterviewHistory(Contract):
 
 
 class InterviewEvaluationView(Contract):
+    evaluation: AnswerEvaluation | None = None
+    rubric_version: str | None = None
+    provider_version: str | None = None
+    evaluated_at: datetime | None = None
     id: UUID
     version: int
     status: str

@@ -1,8 +1,11 @@
 """Bounded contracts shared by all providers; provider identity is never model output."""
 
+import json
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+
+from interview_prep.ai.rubric import Dimension, Profile, dimensions
 
 Text = Annotated[str, StringConstraints(min_length=1, max_length=4000, pattern=r"\S")]
 Label = Annotated[str, StringConstraints(min_length=1, max_length=100, pattern=r"\S")]
@@ -43,6 +46,7 @@ class AnswerInput(Contract):
     answer: AnswerText
     expected_concepts: list[Concept] = Field(default_factory=list, max_length=12)
     rubric: list[Concept] = Field(default_factory=list, max_length=12)
+    profile: Profile = "general"
 
     @model_validator(mode="after")
     def unique_concepts(self) -> "AnswerInput":
@@ -94,10 +98,45 @@ class JobAnalysis(Contract):
     review_notes: list[Text] = Field(min_length=1, max_length=6)
 
 
+CoachingText = Annotated[str, StringConstraints(min_length=1, max_length=600, pattern=r"\S")]
+
+
+class RubricResult(Contract):
+    dimension: Dimension
+    score: int | None = Field(ge=0, le=4)
+    explanation: CoachingText
+
+
 class AnswerEvaluation(Contract):
+    rubric_version: Literal["answer-rubric-v1"]
+    profile: Profile
+    score_basis: Literal["lexical_coverage", "rubric_mean"]
     score: int = Field(ge=0, le=4)
     feedback: Text
     matched_concepts: list[Concept] = Field(max_length=12)
+    overall_feedback: CoachingText
+    strengths: list[CoachingText] = Field(max_length=6)
+    improvements: list[CoachingText] = Field(min_length=1, max_length=6)
+    missing_concepts: list[Concept] = Field(max_length=12)
+    recommended_answer_structure: list[CoachingText] = Field(min_length=1, max_length=6)
+    potential_followup: CoachingText
+    rubric_results: list[RubricResult] = Field(min_length=5, max_length=10)
+
+    @model_validator(mode="after")
+    def consistent_rubric(self) -> "AnswerEvaluation":
+        if [row.dimension for row in self.rubric_results] != list(dimensions(self.profile)):
+            raise ValueError("Rubric dimensions must match the ordered profile")
+        if self.feedback != self.overall_feedback:
+            raise ValueError("Legacy feedback must preserve the overall explanation")
+        scores = [row.score for row in self.rubric_results if row.score is not None]
+        if self.score_basis == "rubric_mean" and (
+            not scores or self.score != sum(scores) // len(scores)
+        ):
+            raise ValueError("Aggregate must be the rounded-down mean of assessed criteria")
+        # Conservative ASCII serialization also bounds PostgreSQL JSONB's spaced text.
+        if len(json.dumps(self.model_dump(mode="json")).encode("utf-8")) > 15000:
+            raise ValueError("Evaluation exceeds storage budget")
+        return self
 
 
 class Followup(Contract):
@@ -132,7 +171,7 @@ class Provenance(Contract):
     provider_version: str
     model: str | None
     kind: Literal["simulation", "model_assisted"]
-    prompt_version: Literal["ai-prompts-v1"] = "ai-prompts-v1"
+    prompt_version: Literal["ai-prompts-v1", "answer-evaluation-v2"] = "ai-prompts-v1"
     disclosure: str
 
 

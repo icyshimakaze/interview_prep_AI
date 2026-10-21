@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     ai_provider: Literal["mock", "ollama", "openai"] = "mock"
     ai_timeout_seconds: float = Field(default=30, ge=0.1, le=60)
     ai_max_retries: int = Field(default=1, ge=0, le=2)
+    ai_owner_hourly_calls: int = Field(default=60, ge=1, le=10000)
+    ai_owner_daily_calls: int = Field(default=200, ge=1, le=100000)
+    ai_global_daily_calls: int = Field(default=2000, ge=1, le=1000000)
     interview_worker_enabled: bool = True
     ollama_base_url: str = Field(default="", max_length=2000)
     ollama_model: str = Field(default="", max_length=100, pattern=r"^[^\r\n]*$")

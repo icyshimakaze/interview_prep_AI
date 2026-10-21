@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from typing import Annotated
-from uuid import UUID, uuid5
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy import delete, select
@@ -25,13 +25,12 @@ from interview_prep.modules.identity.schemas import (
     RoadmapItemView,
     TargetView,
 )
-from interview_prep.modules.interviews.models import EvaluationKind
 from interview_prep.modules.roadmaps.models import (
-    ProgressEvent,
-    ProgressEventType,
+    Roadmap,
     RoadmapItem,
-    TaskStatus,
 )
+from interview_prep.modules.roadmaps.schemas import ChangeItem
+from interview_prep.modules.roadmaps.service import change, lock_owner
 
 router = APIRouter(
     prefix="/api/v1/demo",
@@ -79,28 +78,24 @@ async def demo_target(resource_id: UUID, user: Demo, session: Session) -> Target
 async def complete_demo_task(
     resource_id: UUID, body: EmptyRequest, user: Demo, session: Session
 ) -> RoadmapItemView:
+    await lock_owner(session, user.id)
     item = await session.scalar(
-        select(RoadmapItem)
-        .where(RoadmapItem.id == resource_id, RoadmapItem.owner_id == user.id)
-        .with_for_update()
+        select(RoadmapItem).where(
+            RoadmapItem.id == resource_id,
+            RoadmapItem.owner_id == user.id,
+        )
     )
     if item is None:
         raise HTTPException(status_code=404)
-    if item.status != TaskStatus.COMPLETED:
-        item.status = TaskStatus.COMPLETED
-        item.completed_at = datetime.now(UTC)
-        await session.flush()
-        session.add(
-            ProgressEvent(
-                owner_id=user.id,
-                event_type=ProgressEventType.ROADMAP_ITEM_COMPLETED,
-                result_kind=EvaluationKind.SIMULATION,
-                roadmap_item_id=item.id,
-                deduplication_key=uuid5(item.id, "demo-task-complete"),
-                occurred_at=item.completed_at,
-            )
+    plan = await session.scalar(
+        select(Roadmap).where(
+            Roadmap.id == item.roadmap_id,
+            Roadmap.owner_id == user.id,
         )
-    await session.commit()
+    )
+    if plan is None:
+        raise HTTPException(status_code=404)
+    await change(session, user, item.id, ChangeItem(revision=plan.revision, action="complete"))
     await session.refresh(item)
     return RoadmapItemView.model_validate(item)
 

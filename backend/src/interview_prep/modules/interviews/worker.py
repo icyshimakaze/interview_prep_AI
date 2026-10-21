@@ -9,16 +9,19 @@ from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
 import httpx
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from interview_prep.ai.errors import ProviderError, ProviderUnavailable
 from interview_prep.ai.factory import create_provider
 from interview_prep.ai.provider import AIProvider
+from interview_prep.ai.rubric import profile_for
 from interview_prep.ai.schemas import AnswerEvaluation as AnswerResult
 from interview_prep.ai.schemas import AnswerInput, Followup, FollowupInput, Provenance
 from interview_prep.ai.validation import validate_domain
 from interview_prep.core.config import Settings
+from interview_prep.core.quotas import reserve
 from interview_prep.modules.identity.models import PrincipalKind, PrincipalStatus, User
 from interview_prep.modules.interviews import commands, queries
 from interview_prep.modules.interviews.models import (
@@ -92,6 +95,8 @@ class InterviewRunner:
         provenance: Provenance | None = None
         error: str | None = None
         try:
+            if dispatch.provider.kind == "model_assisted":
+                await reserve(self.factory, self.settings, dispatch.owner_id, "ai")
             async with asyncio.timeout(min(dispatch.provider.timeout_seconds, 60)):
                 if dispatch.operation == "evaluate":
                     evaluated = await dispatch.provider.evaluate_answer(dispatch.content)
@@ -108,6 +113,10 @@ class InterviewRunner:
                         generated.provenance,
                     )
                 validate_domain(dispatch.content, result)
+                if isinstance(result, AnswerResult) and result.score_basis != (
+                    "lexical_coverage" if dispatch.provider.kind == "simulation" else "rubric_mean"
+                ):
+                    raise ValueError("Score basis mismatch")
                 if (
                     provenance.provider != dispatch.provider.name
                     or provenance.provider_version != dispatch.provider.version
@@ -117,6 +126,8 @@ class InterviewRunner:
                     raise ValueError("Provenance mismatch")
         except ProviderError as exc:
             error = exc.code
+        except HTTPException:
+            error = "ai_rate_limited"
         except TimeoutError:
             error = "ai_timeout"
         except Exception:
@@ -222,6 +233,7 @@ class InterviewRunner:
                     answer=answer.answer_text,
                     expected_concepts=expected,
                     rubric=rubric,
+                    profile=profile_for(str(version.question_type)),
                 )
                 evaluation = (
                     await session.get(AnswerEvaluation, job.evaluation_id)
@@ -344,6 +356,11 @@ class InterviewRunner:
                     return
                 evaluation.score, evaluation.feedback = result.score, result.feedback
                 evaluation.result_payload = result.model_dump(mode="json")
+                evaluation.usage_metadata = {
+                    **(evaluation.usage_metadata or {}),
+                    "evaluated_at": now.isoformat(),
+                    "provider_version": provenance.provider_version,
+                }
                 evaluation.status, turn.status, job.state = (
                     EvaluationStatus.COMPLETED,
                     TurnStatus.EVALUATED,

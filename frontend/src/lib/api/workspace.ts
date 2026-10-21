@@ -222,7 +222,7 @@ export async function workspaceRequest(
       403: "This workspace request is not permitted.",
       409: "This record changed in another tab. Reload and try again.",
       422: "Check the field values and try again. Your changes have not been saved.",
-      429: "Demo creation limit reached. Please try again in an hour.",
+      429: "Operation limit reached. Try again after the hourly or daily quota resets.",
       503: "The workspace is temporarily unavailable. Please try again.",
     };
     const payload: unknown = await response.json().catch(() => null);
@@ -255,6 +255,8 @@ export async function workspaceRequest(
           "This assessment expired. Your saved responses are retained. Start a new attempt.",
         assessment_closed:
           "This assessment is closed. Reload to review its saved state.",
+        assessment_evaluation_limit:
+          "This answer's evaluation failed twice or its dispatch was interrupted. Your drafts are saved. Start a new assessment to request fresh feedback.",
         assessment_revision:
           "This assessment changed in another request. Reload the saved attempt before continuing.",
         question_changed:

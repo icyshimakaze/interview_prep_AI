@@ -1,8 +1,299 @@
 # Project Status
 
-Updated: 2026-10-19 (Asia/Calcutta).
+Updated: 2026-10-22 (Asia/Calcutta).
 
-## Complete mock interviews (current phase)
+## Application security and privacy review (current phase)
+
+Implemented the [security review plan](.agent/plans/security-review.md).
+[SECURITY.md](docs/SECURITY.md) ranks findings from Critical to Informational,
+records the actual trust boundaries and deletion/retention behavior, and separates
+verified fixes from remaining production requirements. Prior uncommitted
+evaluation, Project Defense and roadmap work is preserved.
+
+- Fixed **one Critical dependency finding**: certifi 2026.7.22 trusted the root
+  affected by GHSA-6q48-6c7w-9gw2 / PYSEC-2026-4320. Updated only certifi to
+  **2026.10.19** and added a regression against HTTPX's actual CA trust store.
+  Exploitation requires compromised intermediate keys and network interception;
+  this review found no evidence of an actual compromise. Existing images need
+  rebuilding to consume the patched lockfile. No dependencies were added.
+- Fixed **two High application findings**: request bodies are now bounded before
+  JSON parsing by byte/time/concurrency limits; paid assessment work has durable
+  validated-result receipts, bounded retries and shared principal/global budgets.
+  Rollback no longer loses earlier successful paid feedback. Failed or deleted
+  imports still consume shared hourly budgets. Quota/database failure prevents
+  dispatch; simulations remain local and do not consume provider budgets.
+- Fixed exception-message exposure to server logs, automatic HTTP decompression
+  before response limits, slow-drip JWKS discovery, misleading privacy/settings
+  copy, normalized dot-only repository names and Compose ignoring APP_ENV. Added
+  a baseline CSP, isolated PDF worker imports/cwd and hostile provider-output
+  rendering coverage. Source code and archive members are never executed.
+- Migration **0010_security_budgets** adds pseudonymous quota counters and owned
+  evaluation receipts without rewriting candidate data. Receipts expire after
+  48 hours; counters expire at the hour/day boundary; hourly cleanup removes
+  expired rows. Principal deletion cascades receipts. Downgrade refuses live
+  quota/receipt rows so rollback cannot silently refund budgets or lose retry
+  state. API readiness now requires this revision.
+
+### Verification
+
+- Final full backend harness: **510 passed in 430.32 seconds**, including **21
+  new security regression cases**. One cryptography deprecation warning arose
+  while inspecting a legacy CA's nonpositive serial number; no warning filter
+  or assertion was suppressed. Ruff lint/format (**181 files**), strict mypy
+  (**170 source files**), fresh migrations, populated downgrade refusals, full
+  downgrade/re-upgrade, schema drift, OpenAPI consistency and legacy preservation
+  all passed. The application database was not used for these checks.
+- Frontend: **123 tests across 14 files passed**, including the new malicious
+  generated-content rendering case. Zero-warning ESLint, strict TypeScript and
+  the production Next.js build passed. The test run used two workers; initial
+  frontend/backend overlap caused resource-contention timeouts, and both suites
+  were rerun separately without changing assertions, test timeouts or rules.
+- Live production npm audit: **121 dependencies including optional packages,
+  zero advisories**. Live post-fix OSV scan: **43 locked PyPI packages, zero
+  advisories**. Earlier network/approval failures were resolved. These checks do
+  not cover base-image/OS packages, archived V1 dependencies or unknown issues.
+- Whole-repository Prettier and `git diff --check` passed. An HTTP smoke check
+  against the built frontend verified the privacy page, retention disclosure,
+  CSP, nosniff and frame denial; its temporary process was stopped. Compose
+  environment resolution honored development and production APP_ENV overrides.
+- Scoped post-build credential scan: **383 working files, 585 reachable history
+  blobs, 24 browser assets, 22 local logs and two current local secret values;
+  zero matches**. This checks named patterns and exact local values without
+  printing credentials; it is not a guarantee for every credential format or
+  remote/unreachable history. The report describes the excluded locations.
+- Docker Desktop was stopped after verification, restoring its original state.
+  Automatic approval review initially blocked that cleanup because of a usage
+  limit; the resumed cleanup completed successfully on 22 October.
+- Tests use disposable PostgreSQL databases and mocked external integrations.
+  No live AI, Clerk, GitHub or browser E2E was exercised. The application database
+  was not migrated or seeded. No push or deployment was performed.
+
+### Remaining requirements and next task
+
+- Roll out migration **0010** and rebuild backend images before using the updated
+  application; configure the shared quota key/settings and hourly cleanup. No
+  confirmed Critical/High finding remains unfixed in this working tree. Provider
+  ceilings count attempted calls, not currency; configure provider spend limits.
+- Production still requires full account erasure/export and identity lifecycle
+  reconciliation, a restricted parser OS sandbox, public-ingress limits/TLS,
+  separated migration/runtime database roles and documented backup/log retention.
+  Existing granular and demo deletion are tested; deleting a profile does not
+  erase account practice history or third-party data. These are explicit release
+  limitations, not claims of complete privacy compliance or sandboxing.
+- Next: operator rollout and live authentication/browser verification in the
+  intended environment, then close the documented production release gaps.
+
+## Personalized roadmap and persisted progress analytics (preceding phase)
+
+Implemented the [roadmap/progress plan](.agent/plans/personalized-roadmap-progress.md).
+[ROADMAP_PROGRESS.md](docs/ROADMAP_PROGRESS.md) documents recommendation rules,
+scheduling, preservation, aggregation denominators, provenance and coverage limits.
+
+- Account/demo roadmaps use the selected owned target and priority, reviewed job
+  requirements versus lexical mentions, resume/profile context, assessment and
+  interview evidence, latest Project Defense statuses, explicit weekly time and
+  an optional interview date. All recommendation/aggregation logic is deterministic;
+  no AI provider is called and no readiness or hiring-company claim is calculated.
+- Versioned `personal-roadmap-v1` tasks expose topic, rationale, ordinal priority,
+  objective, estimated effort, recommended activity, planned week and status.
+  Existing skill-evidence rules guide practice/validation/maintenance. Unscored
+  defense answers suggest explanation review without inventing performance grades.
+- Generate/regenerate, complete/reopen and rationale/history views are implemented.
+  Regeneration archives the prior version without deleting its tasks or completion
+  events. Stable evidence/activity keys omit completed work; fresh source identities
+  can justify new activity on the same topic. Reopening retains previous events,
+  and recompletion appends a new one. Revisions, idempotent generation keys,
+  ownership, principal locks, CSRF and immutable metadata guards protect writes.
+- Weekly scheduling respects the entered budget and queues work outside estimated
+  capacity before an interview date. Starts use the saved timezone (UTC without a
+  profile), resolved through PostgreSQL timezone data for Windows portability.
+  Estimates are editorial weekly buckets, not calendar appointments or speed claims.
+- `progress-analytics-v1` reads real persisted records: completed objective
+  assessment accuracy/category counts, newest interview rubric rating series,
+  current/historical roadmap completion, repeated concept misses, recent sessions,
+  validated strengths in tested scope and areas requiring further validation.
+  Latest failed evaluations cannot resurrect older ratings. Null/ungraded is
+  distinct from zero; simulations never validate skills or create missed-concept
+  claims. Model suggestions and objective misses remain separately labelled.
+- Charts require three comparable sessions on three distinct UTC dates; assessment
+  charts also require one grading policy. Interview series partition by kind,
+  provider/model/version, rubric, profile and assessed dimensions. Sparse histories
+  use tables/empty explanations. Accessible loading/error/retry states and privacy /
+  landing-page disclosures are updated. No new dependencies were added.
+- Migration `0009_personal_roadmaps` adds nullable bounded snapshot/recommendation
+  JSON and generation identity, preserving old tasks without invented rationale.
+  Populated downgrade refuses data loss. Old demo task completion delegates to the
+  same revision-aware service. Prior Project Defense and evaluation work is kept.
+
+### Verification
+
+- Full backend run: **488 passed, 1 failed**. That new regression case failed
+  because its test session expired ORM records after commit; its fixture now uses
+  the application's `expire_on_commit=False` setting. Final focused verification
+  passed **23 tests, 466 deselected**, including that corrected case and all new
+  planning/aggregation cases. All **489 tests** passed across these runs; this is
+  not a single clean full 489-test run. This phase adds **18 backend cases**.
+- Final disposable harness passed Ruff lint/format (**174 files**), strict mypy
+  (**164 files**), upgrades, schema drift checks, full downgrade/re-upgrade,
+  populated downgrade refusal, OpenAPI consistency and legacy hashes/seeds.
+- Frontend full run: **122 tests across 14 files**, including **10 new cases**.
+  Final focused run: **10 passed** after the form-selection correction. Zero-warning
+  ESLint, strict TypeScript and the production build passed. Tests cover rationale,
+  completion/reopen, preserved history, request failures, null versus zero, sparse
+  chart suppression, sufficient history and authenticated/demo API contracts.
+- Whole-repository Prettier and `git diff --check` passed. Docker Desktop was
+  stopped after verification, restoring its original state.
+- Tests use disposable databases; the application database was not migrated or
+  seeded. No live AI, Clerk integration or browser E2E was exercised. No test,
+  lint rule, type check or database guard was weakened. No commit, push or
+  deployment was performed.
+
+### Limits and next task
+
+- Apply `0009_personal_roadmaps` (and preceding migrations) before starting the
+  updated API. Next: operator rollout and a browser smoke check in the intended
+  environment. Existing source windows and validation limits remain explicit.
+- Plans retain at most 50 generated versions per principal, with 12 tasks per
+  generation. Account history has no automatic expiry or individual generation
+  deletion. Demo expiry/deletion removes owned records. Historical rationale/source
+  identifiers remain saved even if source evidence is later removed.
+- Scheduling is greedy and can leave unused time. Missing/unscored/partial data
+  creates validation activities, never fabricated weaknesses or readiness scores.
+  Numeric trends are descriptive observations with disclosed sample sizes and
+  provenance, not calibrated competence or predictions.
+
+## Project Defense Mode (preceding phase)
+
+Implemented the [Project Defense plan](.agent/plans/project-defense.md).
+[PROJECT_DEFENSE.md](docs/PROJECT_DEFENSE.md) documents the workflow, extraction
+coverage, security boundaries, limits, retention, API and migration recovery.
+
+- Public GitHub URL and raw ZIP import, plus a labelled offline teaching fixture,
+  work in account and recruiter demo workspaces. All use the same deterministic
+  `project-static-v1` analyzer; no LLM, repository execution or new dependency is
+  required. GitHub snapshots pin the default-branch commit and persist provenance.
+- Static facts cover languages, manifests, dependencies/frameworks, probable
+  frontend/backend components, database/auth clues, route/model declarations,
+  tests, CI, Docker and documentation. Architecture/technology views distinguish
+  observed declarations from inference and cite file paths/lines. File lists
+  preserve archive-relative directory structure and disclose omissions/truncation.
+- Imports use fixed GitHub hosts without redirects, tokens or inherited proxies;
+  bounded downloads/uploads; ZIP path/link/duplicate/bomb checks; and a trusted
+  isolated Python worker with memory/time/concurrency bounds. Archives are never
+  extracted and source bodies are never retained. This is not a complete OS
+  sandbox or comprehensive secret scanner; those limits are explicit in the docs.
+- `project-prompts-v1` generates ten private draft questions about architecture,
+  framework choice, auth, persistence, scaling, security, tests, dependencies,
+  AI-assisted ownership and reflection. Drafts never become reviewed curriculum.
+  Optional AI enrichment is not enabled. Defense practice is explicitly unscored.
+- Saved defense sessions support draft/submit/skip/pause/resume/end, durable history,
+  revision conflict protection and recovery of local drafts. Server-side ownership,
+  composite foreign keys, principal locks, quotas and database guards protect
+  isolation and terminal answers. Failed imports/saves do not overwrite saved work.
+- Migration `0008_project_defense` adds nullable snapshot metadata and owned
+  run/answer tables without rewriting existing records. Populated downgrade is
+  refused. Snapshot deletion removes generated questions and defense history.
+  Demo data expires with its workspace; account snapshots have no automatic expiry.
+- Updated account/demo navigation wiring, generated API contracts, landing-page and
+  privacy disclosures. Preserved the preceding structured-evaluation work.
+
+### Verification
+
+- Full backend regression: **469 passed**. Final focused run: **39 passed,
+  432 deselected**, including two additional cases and the final path/order edits.
+  All **471 backend tests** passed across these runs (not one full 471-test run).
+  This phase adds **36 backend cases** covering archive/network boundaries,
+  extraction, ownership, quotas, replay/revisions, durable answers, demo CSRF,
+  deletion and refusal of a lossy migration rollback.
+- Ruff lint/format passed for **161 files**; strict mypy passed for **152 files**.
+  Disposable database upgrade, drift check, full downgrade/re-upgrade, OpenAPI
+  consistency and legacy source hashes/seeds passed in both final harness runs.
+- Frontend: **112 tests across 13 files** (7 new cases), zero-warning ESLint,
+  strict TypeScript and production build passed. Tests include truthful evidence
+  labels, demo import, durable pause, failed-save preservation and stale-tab draft
+  recovery. No tests or type checks were weakened.
+- Application database migration/seeding, live GitHub requests, live AI providers,
+  Clerk integration and browser E2E were not run. GitHub boundary tests use mocked
+  HTTP; parser tests execute the real isolated worker. Test databases were removed
+  by the harness. No commit, push or deployment was performed.
+- Whole-repository Prettier and `git diff --check` passed. Docker Desktop was
+  stopped after verification, restoring its original state.
+
+### Limits and next task
+
+- Apply `0008_project_defense` before running the updated API; the application
+  database remains unchanged. Next: operator rollout and a browser/live-public-
+  GitHub smoke check in the intended environment, with gateway request/rate limits.
+- Static heuristics are deliberately partial and do not establish runtime behavior,
+  security, authorship or competence. GitHub unauthenticated rate limits and large
+  archives/metadata can require ZIP import. Per-process concurrency is not a
+  distributed rate limiter. Source paths/declarations can still contain sensitive
+  information despite filename exclusions.
+
+## Structured, versioned answer evaluation (preceding phase)
+
+Implemented following the [evaluation plan](.agent/plans/answer-evaluation.md).
+[Evaluation rubric](docs/EVALUATION_RUBRIC.md) documents every criterion, exact
+score meanings, aggregation, simulation behavior, storage and compatibility.
+
+- New `answer-rubric-v1` evaluations include overall feedback, strengths,
+  improvements, missing concepts, recommended answer structure, a potential
+  follow-up and explained criterion results. General criteria always apply;
+  technical and behavioral profiles add the requested specialized criteria.
+  Profiles come from authored question types, not answer instructions.
+- Model judgments use anchored 0–4 scores and a rounded-down mean of assessed
+  criteria. Null means not assessed/not applicable, with a required reason.
+  `MockAIProvider` (`mock-structured-v2`) remains deterministic: only lexical
+  completeness coverage receives a proxy score; correctness, STAR, ownership
+  and other semantic criteria remain explicitly unassessed. No fake ML or
+  competence/readiness claims were introduced.
+- Structured contracts enforce versions, complete ordered profiles, score bounds,
+  aggregate consistency, concept membership/complements, explanations, provider
+  scoring basis and payload byte bounds before persistence. Dedicated prompt
+  version is `answer-evaluation-v2`; existing untrusted-input boundaries remain.
+- Assessment metadata and interview result JSON persist the evaluation, rubric,
+  provider/version, configured model and completion timestamp. The authored
+  question rubric version stays separate. Existing JSON columns suffice: no
+  migration, backfill, dependency or rewrite of historical evaluations.
+- Shared accessible feedback UI renders coaching, criterion explanations, score
+  meanings and provenance in both reviews. API/client contracts and runtime
+  parsers are updated; old records remain readable without invented breakdowns.
+- Interviews retain their committed submitted answer on provider failure;
+  assessments retain their committed draft and revision when grading rolls back.
+  Existing ownership, demo isolation, fencing/retry and evidence exclusions remain.
+
+### Verification
+
+- Full backend regression: **432 passed**. Final focused verification passed
+  **166 tests, 269 deselected**, including the additional adapter validation and
+  three added cases. All **435 tests** passed across these runs; this is not a
+  single full 435-test run. Added **37 backend cases** in this phase.
+- Ruff lint/format passed for **147 files**; strict mypy passed for **139 files**.
+  Disposable database upgrade, drift check, full downgrade/re-upgrade, OpenAPI
+  drift and legacy source hashes/seeds passed in the full harness.
+- Frontend final verification: **105 tests across 12 files** (15 added cases),
+  zero-warning ESLint, strict TypeScript and production build passed.
+- Whole-repository Prettier and `git diff --check` passed. Windows sandbox
+  restrictions on Docker startup and Vite child processes were resolved through
+  reviewed local execution; no check or test was weakened.
+- Verification uses disposable PostgreSQL databases; the application database
+  was not migrated or seeded. The harness removed its test databases and Docker
+  Desktop was stopped afterward, restoring its original state. Live
+  OpenAI/Ollama, Clerk and browser E2E were not exercised. Schema/transport tests
+  do not establish real-model scoring quality.
+
+### Limits and next task
+
+- Historical results and generated follow-up answers are not regraded. Old
+  in-progress interviews pin their original provider descriptor: the mock version
+  change can produce `provider_changed`; answers remain saved and the session can
+  finish with partial feedback. New sessions use the new version.
+- The rubric is editorial and uncalibrated. Next: review representative technical
+  and behavioral answers with humans before evaluating optional live providers.
+  Broader reviewed question inventory remains separate work.
+- No commit, push or deployment was performed.
+
+## Complete mock interviews (preceding phase)
 
 Implemented the approved [state-machine design](docs/MOCK_INTERVIEW_STATE_MACHINE.md),
 following the [implementation plan](.agent/plans/mock-interview-implementation.md).

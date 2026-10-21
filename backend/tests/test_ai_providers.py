@@ -146,11 +146,13 @@ async def test_all_remote_operations_structured_output_and_trusted_prompt_bounda
     kind: str,
 ) -> None:
     mock_results = await all_results(MockAIProvider())
+    expected = [r.model_dump()["data"] for r in mock_results]
+    expected[2]["score_basis"] = "rubric_mean"
     captures: list[httpx.Request] = []
 
     def handle(request: httpx.Request) -> httpx.Response:
         captures.append(request)
-        data = mock_results[len(captures) - 1].model_dump()["data"]
+        data = expected[len(captures) - 1]
         wire = openai_wire if kind == "openai" else ollama_wire
         return httpx.Response(200, json=wire(json.dumps(data)))
 
@@ -159,7 +161,7 @@ async def test_all_remote_operations_structured_output_and_trusted_prompt_bounda
         assert isinstance(provider, AIProvider)
         results = await all_results(provider)
     for index, result in enumerate(results):
-        assert result.model_dump()["data"] == mock_results[index].model_dump()["data"]
+        assert result.model_dump()["data"] == expected[index]
         assert result.model_dump()["provenance"]["kind"] == "model_assisted"
         assert result.model_dump()["provenance"]["model"] == "test-model"
         payload = json.loads(captures[index].content)
@@ -275,7 +277,9 @@ async def test_only_transient_statuses_retry(kind: str, status: int) -> None:
 
 
 async def test_transient_then_success_and_quota_is_not_retried() -> None:
-    data = (await MockAIProvider().evaluate_answer(ANSWER)).data.model_dump_json()
+    payload = (await MockAIProvider().evaluate_answer(ANSWER)).data.model_dump()
+    payload["score_basis"] = "rubric_mean"
+    data = json.dumps(payload)
     responses = [
         httpx.Response(503, headers={"Retry-After": "0"}),
         httpx.Response(200, json=openai_wire(data)),
