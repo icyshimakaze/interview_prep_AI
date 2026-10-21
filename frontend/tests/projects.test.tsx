@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ProjectsWorkspace } from "@/components/workspace/projects-workspace";
@@ -104,6 +104,42 @@ function api(): ProjectApi {
 }
 
 describe("Project Defense", () => {
+  it("waits for the repository list before showing an empty state", async () => {
+    const service = api();
+    const pending = Promise.withResolvers<Project[]>();
+    vi.mocked(service.list).mockReturnValueOnce(pending.promise);
+    render(<ProjectsWorkspace api={service} />);
+    expect(screen.getByText(/Loading saved repositories/)).toBeInTheDocument();
+    expect(
+      screen.queryByText("No saved project snapshots yet."),
+    ).not.toBeInTheDocument();
+    await act(async () => pending.resolve([]));
+    expect(
+      screen.getByText("No saved project snapshots yet."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Loading saved repositories/),
+    ).not.toBeInTheDocument();
+  });
+  it("recovers a failed repository list without claiming the account is empty", async () => {
+    const user = userEvent.setup();
+    const service = api();
+    vi.mocked(service.list)
+      .mockRejectedValueOnce(new Error("Repository list unavailable"))
+      .mockResolvedValueOnce([]);
+    render(<ProjectsWorkspace api={service} />);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Repository list unavailable",
+    );
+    expect(
+      screen.queryByText("No saved project snapshots yet."),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(
+      await screen.findByText("No saved project snapshots yet."),
+    ).toBeInTheDocument();
+    expect(service.list).toHaveBeenCalledTimes(2);
+  });
   it("validates response structure and classifications", () => {
     expect(parseProject(project)).toEqual(project);
     expect(parseDefense(run())).toEqual(run());

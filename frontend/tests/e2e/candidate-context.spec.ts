@@ -1,6 +1,5 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { expect, test } from "@playwright/test";
+import { accountFormPreview } from "./form-previews";
+import { expect, test } from "./fixtures";
 import AxeBuilder from "@axe-core/playwright";
 
 for (const name of ["profile", "target", "resume", "skills"] as const) {
@@ -11,10 +10,7 @@ for (const name of ["profile", "target", "resume", "skills"] as const) {
     const styles = await page
       .locator('link[rel="stylesheet"]')
       .evaluateAll((links) => links.map((link) => link.outerHTML).join(""));
-    const markup = await readFile(
-      resolve(process.cwd(), `../.cache/ui-previews/${name}.html`),
-      "utf8",
-    );
+    const markup = accountFormPreview(name);
     await page.setContent(
       `<!doctype html><html lang="en"><head><title>${name} static test preview</title>${styles}</head><body class="font-sans antialiased">${markup}</body></html>`,
     );

@@ -78,7 +78,8 @@ first: `docker compose stop frontend backend cleanup`. Both workflows use the
 same persisted application database. After a schema change, apply its migration
 before restarting services; the API does not auto-create tables.
 
-The interview workflow requires migration `0007_mock_interviews`. The API starts
+The current application requires migrations through `0010_security_budgets`,
+including `0007_mock_interviews` for the interview workflow. The API starts
 two bounded database-backed worker loops by default (`INTERVIEW_WORKER_ENABLED=true`).
 They evaluate already-saved main answers, prepare optional follow-ups and recover
 expired/interrupted work. Default/demo use stays local with `AI_PROVIDER=mock`.
@@ -86,85 +87,45 @@ See [interview operations and recovery](MOCK_INTERVIEWS.md).
 
 ## Quality gates
 
-Run from the root with PostgreSQL available:
+Run the actual complete pipeline with PostgreSQL available:
 
 ```sh
-uv run --project backend python scripts/check_backend.py
-pnpm lint
-pnpm format:check
-pnpm typecheck
-pnpm test
-pnpm build
-```
-
-`pnpm start` runs the generated standalone server with its static/public assets
-and binds to localhost. Set `FRONTEND_HOSTNAME` explicitly to change the native
-production listener. The container runs that same generated server directly.
-
-The backend script creates a new random `interview_prep_<hex>_test` database, migrates it, and runs Ruff,
-formatting, strict mypy, pytest, Alembic metadata drift, migration round-trip,
-OpenAPI drift, and legacy preservation checks. It clears domain tables only
-in that disposable test database and removes the database afterward. Never point `TEST_DATABASE_URL` at personal or
-production data. Names must end `_test` and differ from the configured application
-database. Direct pytest intentionally fails rather than skipping DB tests when no
-migrated `TEST_DATABASE_URL` is supplied.
-
-Equivalent direct backend commands (working directory `backend/`):
-
-```sh
-uv run ruff check . ../scripts
-uv run ruff format --check . ../scripts
-uv run mypy src tests ../scripts
-uv run pytest
-uv run alembic check
-```
-
-With the API/frontend running, verify real connectivity and browser behavior:
-
-```sh
-uv run --project backend python scripts/smoke_stack.py
 pnpm --filter @interview-prep/frontend exec playwright install chromium
-pnpm test:e2e
+pnpm check
 ```
 
-An already installed Chrome or Edge can be used instead of downloading Chromium:
-set `E2E_BROWSER_CHANNEL=chrome` or `msedge` before `pnpm test:e2e`. For PowerShell,
-use `$env:E2E_BROWSER_CHANNEL = 'chrome'`. CI uses the default bundled Chromium.
+This runs backend Ruff/mypy/pytest/migration/contract checks, frontend
+lint/format/types/component tests, generated-contract consistency, the production
+build and the live browser suite. MockAIProvider is forced and inherited provider
+credentials are cleared. Tests use fresh disposable databases; the application
+database is not migrated or truncated. The browser runner owns and stops both
+local servers, with no manual fixture preparation or prior Vitest run required.
+It refuses occupied ports instead of stopping an existing service.
 
-Browser checks cover live frontend-to-API-to-PostgreSQL connectivity, keyboard
-navigation/mobile overflow, WCAG A/AA automated checks, and a labeled intercepted
-503 failure case. Automated accessibility checks do not establish complete WCAG
-conformance. CI installs Chromium with Linux OS dependencies, runs the same gates,
-and builds containers; it does not publish or deploy.
-
-For repeatable local browser checks, leave the built native frontend running and
-stop the existing API first (`docker compose stop backend cleanup` for Compose).
-Run `pnpm test` first: the component suite writes ignored static form previews to
-`.cache/ui-previews/` for browser layout/accessibility checks. Those previews use
-actual components and test fixtures; they provide no account authentication bypass
-or interactive account session.
-Profile, target-job, and resume upload/evidence forms are included in these fixtures.
-Then run:
+To keep normal services running, use:
 
 ```sh
-uv run --project backend python scripts/check_browser.py
+pnpm check --api-port 8100 --frontend-port 3100
 ```
 
-This creates a fresh disposable PostgreSQL database, migrates it, starts a temporary
-API on port 8000, runs the browser suite, then stops only its API process and removes
-that database. It refuses an occupied API port. Native frontends must use the default
-local backend URL; Clerk keys must be absent for the account setup-state test.
-Restart the normal API afterward. No production quota or application data is reset.
+Focused gates are `pnpm check:backend`, `pnpm lint`, `pnpm typecheck`, `pnpm test`,
+`pnpm format:check`, `pnpm build` and `pnpm check:e2e`. The backend runner accepts
+`--phase lint`, `--phase tests` and `--phase migrations`; the default runs all.
+`pnpm check:e2e --skip-build` uses a matching existing production build and checks
+its compiled API destination before creating the database. `pnpm test:e2e` is the
+raw Playwright command for an already prepared isolated stack.
 
-To leave existing services running, build with
-`BACKEND_INTERNAL_URL=http://127.0.0.1:8100`, start that native frontend with
-`PORT=3100`, then run the harness with `--api-port 8100 --frontend-port 3100`.
-The harness sets the test API's allowed origin to that frontend, refuses an occupied
-API port, and removes only the disposable database/process it created. Stop the
-temporary frontend and rebuild without the override afterward to restore the default
-API destination. These are process environment variables, not changes to `.env`.
-On Windows, use `$env:NAME='value'` to set a process environment variable, and
-`$env:E2E_BROWSER_CHANNEL='chrome'` when testing with installed Chrome.
+Windows may use installed Chrome or Edge instead of bundled Chromium. Set
+`$env:E2E_BROWSER_CHANNEL = 'chrome'` or `msedge`; CI installs bundled Chromium
+with `--with-deps`. See [TESTING.md](TESTING.md) for the full coverage map, the
+live/intercepted/static browser boundaries, report paths and exact CI gates.
+Automated accessibility checks do not establish complete WCAG conformance.
+
+`pnpm start` runs the generated standalone server with static/public assets and
+binds to localhost. Set `FRONTEND_HOSTNAME` explicitly to change the listener.
+The container runs that same generated server directly. With a normal stack
+running, `scripts/smoke_stack.py` verifies liveness, schema readiness and frontend
+API forwarding. `docker compose build` verifies image packaging without deployment.
 
 ## Contracts and migration discipline
 
@@ -204,8 +165,9 @@ demo access. Tokens are stored as SHA-256 hashes; creation is limited to two new
 workspaces per network identifier/hour. Demo access expires within 24 hours;
 cleanup deletes principals, all their private records and credentials with FK
 cascade, plus expired hashed rate identifiers. The fictional recruiter workspace
-has a dashboard, history and idempotent task completion; it accepts no candidate
-uploads, arbitrary content or AI requests. Exit deletes that visitor's records.
+has a dashboard, saved practice, roadmap and local Project Defense imports.
+It accepts fictional user-entered answers and repository data, always uses mock
+AI, and does not accept resume PDFs. Exit deletes that visitor's records.
 Expired credentials can be cleared with a same-origin reset; resetting a live
 workspace still requires CSRF and does not bypass creation quotas.
 
@@ -229,7 +191,7 @@ rate-limit keys. These safeguards do not authorize a public deployment.
 
 Question browsing and assessments require migration `0006_real_assessments` and the explicit catalogue
 seed. See [validation/publication and recovery commands](QUESTION_BANK.md).
-Readiness requires 0005. The browser harness seeds only its freshly created
+Readiness requires `0010_security_budgets`. The browser harness seeds only its freshly created
 disposable database; existing application services are not automatically replaced.
 
 - A stopped Docker daemon: start Docker Desktop and rerun `docker version`.

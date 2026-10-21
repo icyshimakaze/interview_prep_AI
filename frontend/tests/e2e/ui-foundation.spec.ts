@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import AxeBuilder from "@axe-core/playwright";
 import { workspaceFixture } from "../workspace-fixture";
+import { roadmap, progress } from "../planning-fixture";
 import {
   sectionHref,
   workspaceSections,
@@ -9,6 +10,15 @@ import {
 // These fixtures exercise frontend states only; the real service/ownership
 // regression remains in demo.spec.ts against an isolated PostgreSQL database.
 async function mockDemo(page: Page) {
+  await page.route("**/api/v1/demo/roadmap", (route) =>
+    route.fulfill({ json: { ...roadmap(), mode: "demo" } }),
+  );
+  await page.route("**/api/v1/demo/progress", (route) =>
+    route.fulfill({ json: { ...progress(), mode: "demo" } }),
+  );
+  await page.route("**/api/v1/demo/projects", (route) =>
+    route.fulfill({ json: { items: [] } }),
+  );
   await page.route("**/api/v1/demo/sessions", (route) =>
     route.fulfill({ json: {} }),
   );
@@ -219,9 +229,11 @@ test("failed workspace load exposes a retry and recovers to the requested sectio
   );
   await page.getByRole("button", { name: "Try again" }).click();
   await expect(
-    page.getByRole("heading", { name: "Progress", exact: true }),
+    page.getByRole("heading", { name: "Progress analytics", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("table", { name: "Preparation activity" }),
+    page.getByText(
+      "No completed assessments with reviewed objective grades yet.",
+    ),
   ).toBeVisible();
 });

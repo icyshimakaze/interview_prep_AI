@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import AxeBuilder from "@axe-core/playwright";
 
 export async function checkInterviews(page: Page): Promise<void> {
@@ -67,7 +67,7 @@ export async function checkInterviews(page: Page): Promise<void> {
     page.getByText(/1 of 1 submitted main answers evaluated/),
   ).toBeVisible();
   await expect(page.getByText("Not scored", { exact: true })).toBeVisible();
-  await expect(page.getByText(/Simulated lexical score:/)).toBeVisible();
+  await expect(page.getByText(/^Lexical coverage: [0-4] \/ 4\./)).toBeVisible();
   expect(
     (
       await new AxeBuilder({ page })

@@ -11,6 +11,9 @@
     "prettier-plugin-tailwindcss": "0.8.1"
   },
   "scripts": {
+    "check": "uv run --project backend python scripts/check_all.py",
+    "check:backend": "uv run --project backend python scripts/check_backend.py",
+    "check:e2e": "uv run --project backend python scripts/check_browser.py",
     "dev": "pnpm --filter @interview-prep/frontend dev",
     "start": "pnpm --filter @interview-prep/frontend start",
     "lint": "pnpm --filter @interview-prep/frontend lint",

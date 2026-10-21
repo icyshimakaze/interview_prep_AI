@@ -13,10 +13,17 @@ export default defineConfig({
   workers: 3,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  reporter: "list",
+  reporter: [
+    ["list", { printSteps: true }],
+    ["html", { open: "never" }],
+    ["junit", { outputFile: "../.cache/playwright-junit.xml" }],
+  ],
   use: {
     baseURL: process.env.FRONTEND_URL ?? "http://127.0.0.1:3000",
     trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+    actionTimeout: 10000,
+    navigationTimeout: 15000,
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"], channel } },

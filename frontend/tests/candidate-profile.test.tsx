@@ -1,20 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ProfileForm } from "@/components/workspace/profile-form";
 import { ProfileDeletion } from "@/components/workspace/profile-deletion";
 import { workspaceFixture } from "./workspace-fixture";
-import { writeUiPreview } from "./ui-preview";
-
-afterAll(async () =>
-  writeUiPreview(
-    "profile",
-    <>
-      <h1 className="page-title mb-8">Candidate profile</h1>
-      <ProfileForm profile={null} onSave={async () => undefined} />
-    </>,
-  ),
-);
 
 describe("optional candidate context", () => {
   it("stores supplied optional fields and converts hours to whole minutes", async () => {

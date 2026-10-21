@@ -231,6 +231,91 @@ describe("mock interviews", () => {
       vi.mocked(api.command).mock.calls[0]?.[2].command_key,
     );
   });
+  it("handles both worker claim and completion revisions with bounded fresh commands", async () => {
+    const user = userEvent.setup(),
+      api = apiFixture(),
+      initial = fixture();
+    vi.mocked(api.command)
+      .mockRejectedValueOnce(
+        new WorkspaceError("Worker claimed", "interview_revision"),
+      )
+      .mockRejectedValueOnce(
+        new WorkspaceError("Worker completed", "interview_revision"),
+      )
+      .mockResolvedValueOnce({
+        ...initial,
+        revision: 5,
+        status: "paused",
+        allowed_actions: ["resume", "end"],
+      });
+    vi.mocked(api.read)
+      .mockResolvedValueOnce({ ...initial, revision: 3 })
+      .mockResolvedValueOnce({ ...initial, revision: 4 });
+    render(<InterviewSession initial={initial} api={api} onBack={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: "Pause interview" }));
+    await screen.findByRole("button", { name: "Resume interview" });
+    const calls = vi.mocked(api.command).mock.calls;
+    expect(calls.map((call) => call[2].revision)).toEqual([2, 3, 4]);
+    expect(new Set(calls.map((call) => call[2].command_key)).size).toBe(3);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+  it.each(["answer", "turn", "status", "followup"] as const)(
+    "requires reconciliation when another writer changes the %s",
+    async (changed) => {
+      const user = userEvent.setup(),
+        api = apiFixture(),
+        initial = fixture();
+      if (!initial.current_turn)
+        throw new Error("The fixture needs a current turn.");
+      vi.mocked(api.command).mockRejectedValue(
+        new WorkspaceError("Saved state changed", "interview_revision"),
+      );
+      vi.mocked(api.read).mockResolvedValue({
+        ...initial,
+        revision: 3,
+        status: changed === "status" ? "paused" : initial.status,
+        followup_decision:
+          changed === "followup" ? "pending" : initial.followup_decision,
+        current_turn: {
+          ...initial.current_turn,
+          id: changed === "turn" ? "different-turn" : initial.current_turn.id,
+          answer_text:
+            changed === "answer"
+              ? "Another tab's answer"
+              : initial.current_turn.answer_text,
+        },
+      });
+      render(<InterviewSession initial={initial} api={api} onBack={vi.fn()} />);
+      await user.type(screen.getByLabelText("Your answer"), "My unsaved draft");
+      await user.click(screen.getByRole("button", { name: "Pause interview" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Saved state changed",
+      );
+      expect(api.command).toHaveBeenCalledOnce();
+      expect(screen.getByLabelText("Your answer")).toHaveValue(
+        "My unsaved draft",
+      );
+      expect(
+        screen.getByRole("button", { name: "Reload saved state" }),
+      ).toBeEnabled();
+    },
+  );
+  it("stops automatic revision retries after three total attempts", async () => {
+    const user = userEvent.setup(),
+      api = apiFixture(),
+      initial = fixture();
+    vi.mocked(api.command).mockRejectedValue(
+      new WorkspaceError("Still changing", "interview_revision"),
+    );
+    vi.mocked(api.read).mockResolvedValue({ ...initial, revision: 3 });
+    render(<InterviewSession initial={initial} api={api} onBack={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: "Pause interview" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Still changing",
+    );
+    expect(api.command).toHaveBeenCalledTimes(3);
+    expect(api.read).toHaveBeenCalledTimes(2);
+  });
   it("does not show next/submit controls on a paused session and restores saved text", () => {
     const initial = fixture();
     render(

@@ -1,9 +1,8 @@
 # Interview Prep V2
 
-A Next.js, FastAPI, and PostgreSQL foundation for evidence-based interview
-preparation. The current phase provides a public product site, a responsive
-workspace, typed contracts, a normalized relational model, Clerk account integration
-and an isolated fictional recruiter demo. Accounts can save preparation profiles,
+An interview preparation workspace built with Next.js, FastAPI and PostgreSQL.
+It combines a responsive product site, typed API contracts, a normalized relational
+model, Clerk account integration and an isolated fictional recruiter demo. Accounts can save preparation profiles,
 manage target jobs, upload PDF resumes and review editable candidate evidence.
 The Skill Matrix separates resume mentions from demonstrated results and explains
 deterministic preparation priorities without readiness percentages.
@@ -17,6 +16,10 @@ the recruiter demo, which always uses mock.
 The [mock-interview workflow](docs/MOCK_INTERVIEWS.md) adds persisted adaptive
 sessions, typed answers, optional contextual follow-ups, pause/resume and final
 review across seven interview types. Answers are saved before optional evaluation.
+[Project Defense](docs/PROJECT_DEFENSE.md) analyzes public GitHub/ZIP snapshots
+without executing supplied code and saves unscored explanation practice.
+[Personalized roadmaps and progress](docs/ROADMAP_PROGRESS.md) use persisted
+evidence, preserve completed work and keep simulation separate from validation.
 
 ```text
 frontend/    Next.js App Router, React, strict TypeScript, Tailwind, UI primitives
@@ -50,6 +53,21 @@ checks actual service connectivity. The API's
 process and database/schema checks. All published Compose ports bind to localhost.
 No cloud credentials are required for the demo. Real account sign-up/sign-in uses
 Clerk and requires [the documented configuration](docs/AUTHENTICATION.md).
+
+For the full automated quality pipeline, start PostgreSQL and run:
+
+```sh
+pnpm --filter @interview-prep/frontend exec playwright install chromium
+pnpm check
+```
+
+The suite uses disposable databases and mock AI, checks migrations and generated
+contracts, builds the production frontend, and runs live Playwright journeys.
+Use `pnpm check --api-port 8100 --frontend-port 3100` if normal services occupy
+the default ports. See the [test coverage and CI guide](docs/TESTING.md),
+[contribution guide](CONTRIBUTING.md), [security policy](SECURITY.md) and
+[changelog](CHANGELOG.md). Exact executed results are in
+[PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 For native hot reload, quality gates, database migrations, configuration, and
 troubleshooting, see [development instructions](docs/DEVELOPMENT.md). The

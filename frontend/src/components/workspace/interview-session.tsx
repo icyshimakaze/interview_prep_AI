@@ -70,44 +70,44 @@ export function InterviewSession({
       setError(null);
       try {
         let result: Interview;
-        try {
-          result = await api.command(
-            interview.id,
-            command.action,
-            command.body,
-            command.method,
-          );
-        } catch (reason: unknown) {
-          if (
-            !(reason instanceof WorkspaceError) ||
-            reason.code !== "interview_revision"
-          )
-            throw reason;
-          const latest = await api.read(interview.id);
-          // A worker may only have advanced evaluation state. Never overwrite a tab's draft.
-          if (
-            latest.status !== interview.status ||
-            latest.current_turn?.id !== interview.current_turn?.id ||
-            latest.current_turn?.answer_text !==
-              interview.current_turn?.answer_text ||
-            latest.followup_decision !== interview.followup_decision
-          )
-            throw reason;
-          const retry = {
-            ...command,
-            body: {
-              ...command.body,
-              revision: latest.revision,
-              command_key: crypto.randomUUID(),
-            },
-          };
-          setPending(retry);
-          result = await api.command(
-            interview.id,
-            retry.action,
-            retry.body,
-            retry.method,
-          );
+        let request = command;
+        // Claim and completion can each advance a worker revision. Retry only
+        // unchanged candidate state, with a hard limit of three total attempts.
+        for (let retries = 0; ; retries += 1) {
+          try {
+            result = await api.command(
+              interview.id,
+              request.action,
+              request.body,
+              request.method,
+            );
+            break;
+          } catch (reason: unknown) {
+            if (
+              retries >= 2 ||
+              !(reason instanceof WorkspaceError) ||
+              reason.code !== "interview_revision"
+            )
+              throw reason;
+            const latest = await api.read(interview.id);
+            if (
+              latest.status !== interview.status ||
+              latest.current_turn?.id !== interview.current_turn?.id ||
+              latest.current_turn?.answer_text !==
+                interview.current_turn?.answer_text ||
+              latest.followup_decision !== interview.followup_decision
+            )
+              throw reason;
+            request = {
+              ...request,
+              body: {
+                ...request.body,
+                revision: latest.revision,
+                command_key: crypto.randomUUID(),
+              },
+            };
+            setPending(request);
+          }
         }
         if (mounted.current) {
           apply(result);

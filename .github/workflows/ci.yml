@@ -1,27 +1,137 @@
-name: V2 foundation checks
+name: Full-stack quality
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# Tests never receive repository secrets or opt into a provider from local config.
 env:
+  APP_ENV: test
+  AUTH_ENABLED: "false"
   AI_PROVIDER: mock
   OPENAI_API_KEY: ""
   OPENAI_MODEL: ""
   OLLAMA_BASE_URL: ""
   OLLAMA_MODEL: ""
+  CLERK_SECRET_KEY: ""
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ""
+  NEXT_TELEMETRY_DISABLED: "1"
+  DEMO_RATE_LIMIT_KEY: disposable-ci-only-key-at-least-32-characters
+  DATABASE_URL: postgresql+asyncpg://interview_prep:disposable-ci-password@127.0.0.1:5433/interview_prep
+  BACKEND_INTERNAL_URL: http://127.0.0.1:8000
 
 concurrency:
-  group: checks-${{ github.ref }}
+  group: quality-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  checks:
+  backend:
+    name: Backend lint, tests and migrations
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+        env:
+          POSTGRES_USER: interview_prep
+          POSTGRES_DB: interview_prep
+          POSTGRES_PASSWORD: disposable-ci-password
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U interview_prep -d interview_prep"
+          --health-interval 5s --health-timeout 3s --health-retries 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.12.24"
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install locked backend dependencies
+        run: uv sync --project backend --frozen
+      - name: Backend lint, format and strict types
+        run: uv run --project backend python scripts/check_backend.py --phase lint
+      - name: Pytest against a fresh migrated PostgreSQL database
+        run: uv run --project backend python scripts/check_backend.py --phase tests
+      - name: Migration round-trip, schema drift and contract validation
+        run: uv run --project backend python scripts/check_backend.py --phase migrations
+      - name: Backend test results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: backend-test-results
+          include-hidden-files: true
+          path: .cache/backend-junit.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+  frontend:
+    name: Frontend lint, types, tests and production build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24"
+      - name: Install locked frontend dependencies
+        run: |
+          npm install --global --allow-scripts=pnpm pnpm@12.8.1
+          pnpm install --frozen-lockfile
+      - name: Repository formatting
+        run: pnpm format:check
+      - name: GitHub Actions workflow lint
+        run: |
+          curl --fail --location --retry 3 --max-time 60 --output "$RUNNER_TEMP/actionlint.tar.gz" https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" .github/workflows/ci.yml
+      - name: Frontend lint
+        run: pnpm lint
+      - name: Strict frontend typecheck
+        run: pnpm typecheck
+      - name: Component and API-contract tests
+        run: pnpm test
+      - name: Generated TypeScript contract consistency
+        run: |
+          pnpm api:types
+          git diff --exit-code -- frontend/src/lib/api/generated.ts
+      - name: Production frontend build
+        run: pnpm build
+      - name: Package the exact production build for browser checks
+        run: |
+          mkdir -p .cache
+          tar -czf .cache/frontend-build.tgz -C frontend .next/standalone .next/static .next/routes-manifest.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: frontend-production-build
+          include-hidden-files: true
+          path: .cache/frontend-build.tgz
+          retention-days: 1
+      - name: Frontend test results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: frontend-test-results
+          include-hidden-files: true
+          path: .cache/frontend-junit.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+  browser:
+    name: Playwright on the production build and container packaging
+    needs: [backend, frontend]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
@@ -46,37 +156,38 @@ jobs:
           version: "0.12.24"
           python-version: "3.12"
           enable-cache: true
-      - name: Install locked dependencies
+      - name: Install locked test dependencies
         run: |
           npm install --global --allow-scripts=pnpm pnpm@12.8.1
           pnpm install --frozen-lockfile
           uv sync --project backend --frozen
-      - name: Local-only configuration
-        run: python scripts/init_env.py
-      - name: Backend quality and real database checks
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: frontend-production-build
+          path: .cache
+      - name: Restore the verified production build
+        run: tar -xzf .cache/frontend-build.tgz -C frontend
+      - name: Install Chromium and required system libraries
+        run: pnpm --filter @interview-prep/frontend exec playwright install --with-deps chromium
+      - name: Live browser journeys with isolated PostgreSQL and MockAIProvider
+        run: uv run --project backend python scripts/check_browser.py --skip-build
+      - name: Validate container builds
         env:
-          DATABASE_URL: postgresql+asyncpg://interview_prep:disposable-ci-password@127.0.0.1:5433/interview_prep
-          TEST_DATABASE_URL: postgresql+asyncpg://interview_prep:disposable-ci-password@127.0.0.1:5433/interview_prep_test
-        run: uv run --project backend python scripts/check_backend.py
-      - name: Frontend quality and production build
-        run: |
-          pnpm lint
-          pnpm format:check
-          pnpm typecheck
-          pnpm test
-          pnpm api:types
-          git diff --exit-code -- frontend/src/lib/api/generated.ts
-          pnpm build
-      - name: Start services and run live browser checks
-        env:
-          DATABASE_URL: postgresql+asyncpg://interview_prep:disposable-ci-password@127.0.0.1:5433/interview_prep
-        run: |
-          uv run --project backend alembic -c backend/alembic.ini upgrade head
-          uv run --project backend uvicorn interview_prep.main:create_app --factory --host 127.0.0.1 --port 8000 --no-proxy-headers --no-access-log > /tmp/interview-api.log 2>&1 &
-          pnpm --filter @interview-prep/frontend start > /tmp/interview-web.log 2>&1 &
-          uv run --project backend python scripts/wait_services.py
-          uv run --project backend python scripts/smoke_stack.py
-          pnpm --filter @interview-prep/frontend exec playwright install --with-deps chromium
-          pnpm test:e2e
-      - name: Container builds
+          POSTGRES_USER: interview_prep
+          POSTGRES_DB: interview_prep
+          POSTGRES_PASSWORD: disposable-ci-password
         run: docker compose build
+      - name: Browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: browser-failure-diagnostics
+          include-hidden-files: true
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+            .cache/playwright-junit.xml
+            .cache/browser-api.log
+            .cache/browser-frontend.log
+          if-no-files-found: ignore
+          retention-days: 7

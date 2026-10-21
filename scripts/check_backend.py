@@ -1,5 +1,6 @@
 "Run backend gates against a disposable PostgreSQL database, never the application DB."
 
+import argparse
 import asyncio
 import os
 import re
@@ -11,6 +12,7 @@ from uuid import uuid4
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
+from test_support import mock_environment
 
 from interview_prep.core.config import get_settings
 
@@ -57,6 +59,21 @@ def run(arguments: list[str], environment: dict[str, str], cwd: Path = BACKEND) 
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--phase", choices=("all", "lint", "tests", "migrations"), default="all")
+    phase = parser.parse_args().phase
+    os.environ.update(mock_environment())
+    get_settings.cache_clear()
+    python = sys.executable
+    if phase in {"all", "lint"}:
+        run([python, "-m", "ruff", "check", ".", "../scripts"], dict(os.environ))
+        run(
+            [python, "-m", "ruff", "format", "--check", ".", "../scripts"],
+            dict(os.environ),
+        )
+        run([python, "-m", "mypy", "src", "tests", "../scripts"], dict(os.environ))
+    if phase == "lint":
+        return
     application_url = make_url(get_settings().database_url.get_secret_value())
     template = make_url(
         os.environ.get("TEST_DATABASE_URL") or application_url.render_as_string(hide_password=False)
@@ -70,23 +87,30 @@ def main() -> None:
         "DATABASE_URL": test_url,
         "TEST_DATABASE_URL": test_url,
     }
-    python = sys.executable
     try:
-        run([python, "-m", "ruff", "check", ".", "../scripts"], environment)
-        run([python, "-m", "ruff", "format", "--check", ".", "../scripts"], environment)
-        run([python, "-m", "mypy", "src", "tests", "../scripts"], environment)
         run([python, "-m", "alembic", "upgrade", "head"], environment)
         run([python, "-m", "alembic", "check"], environment)
-        run([python, "-m", "pytest"], environment)
-        # Round-trip only this fresh disposable DB, after tests clean their rows.
-        run([python, "-m", "alembic", "downgrade", "base"], environment)
-        run([python, "-m", "alembic", "upgrade", "head"], environment)
-        run([python, "-m", "alembic", "check"], environment)
+        if phase in {"all", "tests"}:
+            (ROOT / ".cache").mkdir(exist_ok=True)
+            run(
+                [
+                    python,
+                    "-m",
+                    "pytest",
+                    f"--junitxml={ROOT / '.cache/backend-junit.xml'}",
+                ],
+                environment,
+            )
+        if phase in {"all", "migrations"}:
+            # Round-trip only this fresh disposable DB, after tests clean their rows.
+            run([python, "-m", "alembic", "downgrade", "base"], environment)
+            run([python, "-m", "alembic", "upgrade", "head"], environment)
+            run([python, "-m", "alembic", "check"], environment)
         run([python, "../scripts/export_openapi.py", "--check"], environment)
         run([python, "../scripts/export_legacy.py", "--check"], environment)
     finally:
         asyncio.run(drop_created_database(test_url))
-    print("Backend, migrations, contracts, and legacy preservation checks passed.")
+    print(f"Backend {phase} checks, contracts, and legacy preservation passed.")
 
 
 if __name__ == "__main__":

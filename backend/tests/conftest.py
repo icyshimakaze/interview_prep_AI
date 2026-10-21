@@ -1,6 +1,7 @@
 import os
 from collections.abc import AsyncIterator
 
+import httpx
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
@@ -22,6 +23,26 @@ def isolated_ai_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AI_PROVIDER", "mock")
     for key in ("OPENAI_API_KEY", "OPENAI_MODEL", "OLLAMA_BASE_URL", "OLLAMA_MODEL"):
         monkeypatch.setenv(key, "")
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Block real HTTP before collection, including accidental module-level calls."""
+    monkeypatch = pytest.MonkeyPatch()
+    config.add_cleanup(monkeypatch.undo)
+    monkeypatch.setenv("AI_PROVIDER", "mock")
+    for key in ("OPENAI_API_KEY", "OPENAI_MODEL", "OLLAMA_BASE_URL", "OLLAMA_MODEL"):
+        monkeypatch.setenv(key, "")
+
+    def blocked_sync(_transport: httpx.HTTPTransport, _request: httpx.Request) -> httpx.Response:
+        raise AssertionError("Live HTTP is forbidden in pytest; use an in-memory transport")
+
+    async def blocked_async(
+        _transport: httpx.AsyncHTTPTransport, _request: httpx.Request
+    ) -> httpx.Response:
+        raise AssertionError("Live HTTP is forbidden in pytest; use an in-memory transport")
+
+    monkeypatch.setattr(httpx.HTTPTransport, "handle_request", blocked_sync)
+    monkeypatch.setattr(httpx.AsyncHTTPTransport, "handle_async_request", blocked_async)
 
 
 def test_settings(

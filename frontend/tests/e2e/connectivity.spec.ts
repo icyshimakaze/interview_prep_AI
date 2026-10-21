@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import AxeBuilder from "@axe-core/playwright";
 
 test("frontend reaches the real backend and PostgreSQL", async ({ page }) => {
@@ -8,7 +8,17 @@ test("frontend reaches the real backend and PostgreSQL", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText(
     "API connected · PostgreSQL connected",
   );
-  await expect(page.getByRole("status")).toContainText("0007_mock_interviews");
+  const readiness = await page.request.get("/api/v1/health/ready");
+  expect(readiness.status()).toBe(200);
+  const payload: unknown = await readiness.json();
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    !("schema_revision" in payload) ||
+    typeof payload.schema_revision !== "string"
+  )
+    throw new Error("Readiness must expose its migrated schema revision.");
+  await expect(page.getByRole("status")).toContainText(payload.schema_revision);
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();

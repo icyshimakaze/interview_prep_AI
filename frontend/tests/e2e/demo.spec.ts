@@ -1,18 +1,28 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, restrictToLocal } from "./fixtures";
+import { checkCandidateContext } from "./candidate-flow";
+import { checkProjectDefense } from "./project-defense-flow";
+import { checkRoadmap, checkProgress } from "./planning-flow";
+import { parseRoadmap } from "../../src/lib/api/planning";
 import AxeBuilder from "@axe-core/playwright";
 import { parseDashboard } from "../../src/lib/api/workspace";
 import { checkQuestionBank } from "./question-bank-flow";
 import { checkAssessments } from "./assessment-flow";
 import { checkInterviews } from "./interview-flow";
 
+// Two real demo creations consume the production hourly budget. Retrying this
+// journey would test quota exhaustion instead of the original failure.
+test.describe.configure({ retries: 0 });
+
 test("isolated fictional demo persists edits, rejects foreign IDs, and erases on exit", async ({
   page,
   browser,
   baseURL,
 }) => {
-  // This scenario now covers both question practice and two-visitor demo lifecycle.
-  test.setTimeout(90000);
+  // One candidate journey uses two visitors without bypassing the production demo quota.
+  test.setTimeout(180000);
+  if (!baseURL) throw new Error("A local frontend baseURL is required.");
   const secondContext = await browser.newContext();
+  const blocked = await restrictToLocal(secondContext, baseURL);
   const second = await secondContext.newPage();
   try {
     await page.goto("/");
@@ -37,9 +47,14 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
     const firstResume = first.resumes[0];
     if (!firstResume)
       throw new Error("The demo must include its sample resume.");
-    await checkQuestionBank(page);
-    const firstAssessment = await checkAssessments(page);
-    await checkInterviews(page);
+    await checkCandidateContext(page, first);
+    await test.step("question filtering, bookmarks and self-review", () =>
+      checkQuestionBank(page));
+    const firstAssessment =
+      await test.step("saved assessments and objective scoring", () =>
+        checkAssessments(page));
+    await test.step("mock interview pause, follow-up and completion", () =>
+      checkInterviews(page));
     await page.getByRole("link", { name: "Skill Matrix", exact: true }).click();
     await expect(page.getByRole("table")).toContainText("Python");
     const target = first.targets[0];
@@ -65,31 +80,18 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
     await expect(
       page.getByText("4 saved attempts", { exact: true }),
     ).toBeVisible();
-    await page.getByRole("link", { name: "Roadmap", exact: true }).click();
-    await page
-      .getByRole("button", {
-        name: "Mark complete: Practice SQL joins with a small sample dataset",
-      })
-      .click();
-    await expect(
-      page.getByRole("button", { name: "Mark complete" }),
-    ).toHaveCount(1);
-    await page.reload();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Roadmap",
-    );
-    await expect(
-      page.getByRole("link", { name: "Roadmap", exact: true }),
-    ).toHaveAttribute("aria-current", "page");
-    await expect(
-      page.getByRole("button", { name: "Mark complete" }),
-    ).toHaveCount(1);
-    const accessibility = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-      .analyze();
-    expect(accessibility.violations).toEqual([]);
+    const firstProject = await checkProjectDefense(page);
+    const firstRoadmap = await checkRoadmap(page);
+    await checkProgress(page);
+    expect(
+      (
+        await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+          .analyze()
+      ).violations,
+    ).toEqual([]);
     await page.screenshot({
-      path: test.info().outputPath("recruiter-demo.png"),
+      path: test.info().outputPath("persisted-progress.png"),
       fullPage: true,
     });
     await second.goto(`${baseURL}/demo`);
@@ -98,8 +100,23 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
     );
     await second.getByRole("link", { name: "Roadmap", exact: true }).click();
     await expect(
-      second.getByRole("button", { name: "Mark complete" }),
-    ).toHaveCount(2);
+      second.getByRole("heading", {
+        name: "Personal preparation roadmap",
+        exact: true,
+      }),
+    ).toBeVisible();
+    const isolatedPlan = parseRoadmap(
+      await (await second.request.get(`${baseURL}/api/v1/demo/roadmap`)).json(),
+    );
+    expect(isolatedPlan.current?.id).not.toBe(firstRoadmap);
+    expect(isolatedPlan.history).toHaveLength(0);
+    expect(
+      (
+        await second.request.get(
+          `${baseURL}/api/v1/demo/projects/${firstProject}`,
+        )
+      ).status(),
+    ).toBe(404);
     const foreign = await second.request.get(
       `${baseURL}/api/v1/demo/resumes/${firstResume.id}`,
     );
@@ -133,6 +150,7 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
         });
     }
     await secondContext.close();
+    expect(blocked(), "Second visitor must also remain local").toEqual([]);
   }
 });
 

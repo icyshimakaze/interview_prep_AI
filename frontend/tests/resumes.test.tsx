@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ResumeUpload } from "@/components/workspace/resume-upload";
 import { ResumeEvidence } from "@/components/workspace/resume-evidence";
 import { EvidenceForm } from "@/components/workspace/evidence-form";
@@ -13,7 +13,6 @@ import {
 } from "@/lib/api/resumes";
 import { WorkspaceError, workspaceRequest } from "@/lib/api/workspace";
 import { resumeFixture } from "./resume-fixture";
-import { writeUiPreview } from "./ui-preview";
 
 const pdf = () =>
   new File(["%PDF-1.7\nfixture"], "candidate.pdf", { type: "application/pdf" });
@@ -29,30 +28,6 @@ function apiFixture(): ResumeApi {
     remove: vi.fn().mockResolvedValue(undefined),
   };
 }
-afterAll(async () =>
-  writeUiPreview(
-    "resume",
-    <>
-      <h1 className="page-title mb-8">Resume & candidate evidence</h1>
-      <ResumeUpload busy={false} onUpload={async () => undefined} />
-      <section className="section-rule">
-        <h2 className="section-title">Review your evidence</h2>
-        <ResumeEvidence
-          resume={resumeFixture}
-          busy={false}
-          onEdit={() => undefined}
-          onDelete={() => undefined}
-        />
-        <EvidenceForm
-          evidence={resumeFixture.evidence[0]}
-          busy={false}
-          onSave={async () => undefined}
-          onReload={async () => undefined}
-        />
-      </section>
-    </>,
-  ),
-);
 
 describe("secure resume UI", () => {
   it("checks PDF type, extension, size and malformed server evidence", () => {

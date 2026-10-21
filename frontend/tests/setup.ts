@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 
 // jsdom lacks native dialog lifecycle methods. Browser tests exercise actual
@@ -10,6 +10,19 @@ HTMLDialogElement.prototype.showModal = function () {
 HTMLDialogElement.prototype.close = function () {
   this.removeAttribute("open");
 };
+
+beforeEach(() => {
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn<typeof fetch>()
+      .mockRejectedValue(
+        new Error(
+          "Live fetch is forbidden in component tests; provide an explicit mock.",
+        ),
+      ),
+  );
+});
 
 afterEach(() => {
   cleanup();

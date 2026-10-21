@@ -2,7 +2,91 @@
 
 Updated: 2026-10-22 (Asia/Calcutta).
 
-## Application security and privacy review (current phase)
+## Full-stack automated quality pipeline (current phase)
+
+Implemented the [quality pipeline plan](.agent/plans/full-stack-quality.md).
+[TESTING.md](docs/TESTING.md) maps the existing backend/component suites to the
+requested domains and documents the real, intercepted and static browser checks.
+
+- `pnpm check` runs the complete sequential backend/frontend/build/browser pipeline.
+  Focused backend phases expose lint/types, pytest and migration validation as
+  separate CI steps. The browser runner now owns both servers, a fresh database,
+  migrations and catalogue seeding; it checks the compiled API rewrite and cleans
+  up only resources it created. Alternate ports preserve normal running services.
+- Pytest forbids real HTTP before collection, component tests reject unstubbed
+  fetch, and browsers block external origins. Runners replace inherited provider
+  and Clerk settings with mock/disabled configuration. Provider protocol tests
+  use in-memory HTTP and dummy credentials. CI receives no repository secrets.
+- GitHub Actions separates backend, frontend and browser gates, with real
+  PostgreSQL, frozen dependencies and pinned actions. Browser checks consume the
+  exact production build artifact. JUnit reports and bounded failure artifacts
+  provide diagnostics. Container packaging remains a build-only gate.
+- Browser steps cover the demo candidate journey through target/resume context,
+  question filters, saved assessments, mock interviews, local repository analysis,
+  Project Defense, generated roadmaps/history and persisted progress. Two visitors
+  check ownership and erasure without bypassing creation quotas. Account form
+  layout/axe fixtures now render directly, independent of Vitest output files.
+- New regressions cover test isolation and connectivity failures, demo lifecycle,
+  repository loading/retry/empty states and interview revision races. A live
+  browser failure exposed worker claim/completion advancing revisions twice;
+  guarded UI retries now allow three total attempts and still refuse any changed
+  candidate state. Repository-list failures no longer masquerade as an empty list.
+- Added contribution guidance, root security policy, changelog, PR/issue templates
+  and expanded weekly Dependabot coverage to Compose images as well as the existing
+  package/lockfile, Dockerfile and action ecosystems. No application dependencies,
+  schema migrations or API contracts were added.
+
+### Verification
+
+- A single complete `scripts/check_all.py --api-port 18101 --frontend-port 13101`
+  run passed against real disposable PostgreSQL databases on Windows, using the
+  locked backend virtualenv and installed Chrome (`E2E_BROWSER_CHANNEL=chrome`).
+- Backend: **521 passed in 480.56 seconds**, including **11 new isolation/smoke
+  cases**. Ruff lint/format (**185 files**), strict mypy (**174 source files**),
+  populated migration guards, full downgrade/re-upgrade, schema drift, OpenAPI
+  and legacy preservation passed. Separate CI `--phase lint` and
+  `--phase migrations` invocations also passed. No pytest warnings or skipped
+  cases. The CA trust test retains its original trust-store assertions and now
+  reads OpenSSL-decoded subjects without the previous cryptography warning.
+- Frontend: **134 tests across 15 files passed**, including **11 new cases** for
+  demo lifecycle, truthful repository states, worker-only revision retries,
+  retry bounds and cross-tab draft/state protection. Zero-warning ESLint,
+  strict TypeScript, generated-contract consistency, repository Prettier and
+  the production build passed. JUnit reports record zero failures/errors.
+- Playwright: **23 passed across four specs**, with all eight live candidate
+  journey steps, same-origin API/database smoke, desktop/mobile form axe checks,
+  focus/navigation and intercepted recovery states. The final full run passed
+  without retries or skipped tests. Earlier failures led to the two UI fixes
+  and corrected stale smoke/schema/feedback expectations, accessible selectors
+  and response barriers; assertions were retained rather than bypassed.
+- `docker compose build` passed for backend, cleanup, migration and frontend
+  images, including the Linux production frontend build. Images were built
+  without starting or deploying the updated application. Official actionlint
+  **1.7.12** validated the workflow; its Linux CI binary is checksum-pinned.
+  The production artifact packaging command also passed: **2,005 members**, with
+  server, static CSS and rewrite manifest present and **no environment files**.
+- Scoped credential scan found **zero matches** in **404 working files, 585
+  reachable historical blobs, 24 browser assets and 28 local logs**, checking
+  two current local secrets without printing them. UTF-16 PowerShell logs were
+  decoded for scanning. Scope/pattern limitations still apply.
+- The runners stopped their owned servers and removed their disposable databases.
+  The application database was not migrated, seeded or truncated by these checks.
+  Docker Desktop was stopped afterward, restoring its original state.
+
+### Limits and next task
+
+- Live browser verification uses a disposable database and mock AI. Real Clerk
+  sign-in and authenticated account browser flows remain separate integration
+  checks; static account previews do not claim interactive login coverage.
+- Hosted GitHub Actions results and branch protection cannot be established by
+  local runs. Scheduled Dependabot configuration must reach the default branch
+  (`main`) to activate there. Private security reporting is a repository setting.
+- Commit scope: `test: add full-stack automated quality pipeline`. No push or
+  deployment is requested for this phase. Next: review/push when authorized, then
+  observe hosted checks and configure the documented repository settings. Existing security release limitations remain in
+  [SECURITY.md](docs/SECURITY.md).
+
+## Application security and privacy review (preceding phase)
 
 Implemented the [security review plan](.agent/plans/security-review.md).
 [SECURITY.md](docs/SECURITY.md) ranks findings from Critical to Informational,

@@ -29,6 +29,10 @@ in page memory. A stale draft is retained in memory for reconciliation on reload
 it is never silently applied to another tab's version. Lost command replies can
 be retried with the identical command key/body. The UI can safely retry a confirmed
 worker-only revision conflict after checking that the saved draft/cursor agree.
+It allows at most two automatic revision rebases (three total API command
+attempts), covering separate worker claim/completion updates. Changed session
+status, turn, saved answer or follow-up decision requires explicit reconciliation.
+These retries do not grant another provider evaluation or bypass its budgets.
 
 Complete after all main questions and any exposed follow-up resolve. End early
 explicitly chooses whether to retain an unsubmitted draft, submit it, or skip it.

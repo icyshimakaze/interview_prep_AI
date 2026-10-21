@@ -1,6 +1,6 @@
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { TargetForm } from "@/components/workspace/target-form";
 import { TargetJobsView } from "@/components/workspace/target-jobs-view";
 import { createTargetApi, type TargetApi } from "@/lib/api/targets";
@@ -11,21 +11,6 @@ import {
   type Target,
 } from "@/lib/api/workspace";
 import { workspaceFixture } from "./workspace-fixture";
-import { writeUiPreview } from "./ui-preview";
-
-afterAll(async () =>
-  writeUiPreview(
-    "target",
-    <>
-      <h1 className="page-title">Add target job</h1>
-      <TargetForm
-        target={null}
-        onSave={async () => undefined}
-        onCancel={() => undefined}
-      />
-    </>,
-  ),
-);
 
 const sample = workspaceFixture.targets[0];
 if (!sample) throw new Error("Missing target fixture");

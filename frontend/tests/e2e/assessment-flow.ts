@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import AxeBuilder from "@axe-core/playwright";
 import { parseAssessment } from "../../src/lib/api/assessments";
 

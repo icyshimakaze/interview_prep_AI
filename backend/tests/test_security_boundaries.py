@@ -4,8 +4,6 @@ from collections.abc import AsyncIterator
 import httpx
 import pytest
 from conftest import test_settings as make_settings
-from cryptography import x509
-from cryptography.x509.oid import NameOID
 from fastapi import FastAPI
 from starlette.types import Message, Receive, Scope, Send
 from test_auth import ISSUER, signed_token
@@ -20,15 +18,20 @@ from interview_prep.modules.identity.verification import AuthenticationUnavailab
 def test_outbound_tls_does_not_trust_compromised_emsign_root() -> None:
     # GHSA-6q48-6c7w-9gw2: validate the actual trust store used by outbound HTTP,
     # not merely a package version string. Environment CA overrides are disabled.
-    certificates = httpx.create_ssl_context(trust_env=False).get_ca_certs(binary_form=True)
+    certificates = httpx.create_ssl_context(trust_env=False).get_ca_certs()
     assert len(certificates) > 100
-    common_names = {
-        attribute.value
-        for certificate in certificates
-        for attribute in x509.load_der_x509_certificate(certificate).subject.get_attributes_for_oid(
-            NameOID.COMMON_NAME
-        )
-    }
+    common_names: set[str] = set()
+    for certificate in certificates:
+        subject: object = certificate["subject"]
+        assert isinstance(subject, tuple)
+        for relative_name in subject:
+            assert isinstance(relative_name, tuple)
+            for attribute in relative_name:
+                assert isinstance(attribute, tuple) and len(attribute) == 2
+                name, value = attribute
+                assert isinstance(name, str) and isinstance(value, str)
+                if name == "commonName":
+                    common_names.add(value)
     assert "emSign ECC Root CA - G3" not in common_names
 
 

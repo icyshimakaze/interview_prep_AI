@@ -1,80 +1,67 @@
-"""Run browser checks with a fresh database and a temporary localhost API."""
+"""Build and test the real app with an owned database and temporary local servers."""
 
 import argparse
 import asyncio
+import json
 import os
 import shutil
-import socket
 import subprocess
 import sys
-import time
+from contextlib import ExitStack
 from pathlib import Path
 from uuid import uuid4
 
-import httpx
 from check_backend import drop_created_database, prepare_test_database
 from sqlalchemy.engine import make_url
+from test_support import (
+    mock_environment,
+    require_free_port,
+    stop_owned_process,
+    wait_for_server,
+)
 
 from interview_prep.core.config import get_settings
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def stop_owned_process(process: subprocess.Popen[bytes]) -> None:
-    if process.poll() is not None:
-        return
-    if os.name == "nt":
-        # The Windows virtualenv launcher has a Python child. Terminate only this
-        # process tree created by us, not an existing listener or unrelated Python.
-        subprocess.run(
-            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
-            check=False,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-    else:
-        process.terminate()
-    try:
-        process.wait(timeout=5)
-    except subprocess.TimeoutExpired:
-        process.kill()
-        process.wait(timeout=5)
-
-
-def wait_for_api(process: subprocess.Popen[bytes], port: int) -> None:
-    deadline = time.monotonic() + 45
-    with httpx.Client(timeout=2, trust_env=False) as client:
-        while time.monotonic() < deadline:
-            if process.poll() is not None:
-                raise RuntimeError("Temporary API failed to start; see .cache/browser-api.log")
-            try:
-                if client.get(f"http://127.0.0.1:{port}/api/v1/health/ready").is_success:
-                    return
-            except httpx.HTTPError:
-                pass
-            time.sleep(0.5)
-    raise RuntimeError("Temporary API did not become ready")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--api-port", type=int, default=8000)
     parser.add_argument("--frontend-port", type=int, default=3000)
+    parser.add_argument("--skip-build", action="store_true", help="Use a matching production build")
+    parser.add_argument("playwright_args", nargs=argparse.REMAINDER)
     arguments = parser.parse_args()
-    if not all(1024 <= port <= 65535 for port in (arguments.api_port, arguments.frontend_port)):
-        parser.error("Ports must be between 1024 and 65535")
-    # Build/start the frontend with BACKEND_INTERNAL_URL matching the API port.
-    # Refuse an existing API rather than silently test against its database.
-    with socket.socket() as listener:
-        try:
-            listener.bind(("127.0.0.1", arguments.api_port))
-        except OSError:
-            raise SystemExit(
-                "Stop the existing local API before running isolated browser checks"
-            ) from None
-    pnpm = shutil.which("pnpm")
-    if pnpm is None:
-        raise SystemExit("pnpm must be installed")
+    if arguments.api_port == arguments.frontend_port:
+        parser.error("API and frontend must use different ports")
+    for port in (arguments.api_port, arguments.frontend_port):
+        require_free_port(port)
+    pnpm, node = shutil.which("pnpm"), shutil.which("node")
+    if pnpm is None or node is None:
+        raise SystemExit("node and pnpm must be installed")
+    os.environ.update(mock_environment())
+    get_settings.cache_clear()
+    api = f"http://127.0.0.1:{arguments.api_port}"
+    frontend = f"http://127.0.0.1:{arguments.frontend_port}"
+    environment = {
+        **os.environ,
+        "INTERVIEW_WORKER_ENABLED": "true",
+        "BACKEND_INTERNAL_URL": api,
+        "BACKEND_URL": api,
+        "FRONTEND_URL": frontend,
+        "FRONTEND_ORIGIN": frontend,
+        "PORT": str(arguments.frontend_port),
+        "FRONTEND_HOSTNAME": "127.0.0.1",
+        "ALLOWED_ORIGINS": json.dumps([frontend]),
+    }
+    if not arguments.skip_build:
+        subprocess.run([pnpm, "build"], cwd=ROOT, env=environment, check=True, timeout=300)
+    # Next rewrites are fixed at build time; never silently use a different API.
+    manifest = ROOT / "frontend/.next/routes-manifest.json"
+    routes = json.loads(manifest.read_text(encoding="utf-8"))
+    expected = f"{api}/api/v1/:path*"
+    if not any(r["destination"] == expected for r in routes["rewrites"]["afterFiles"]):
+        raise SystemExit("Production build uses another backend origin; rerun without --skip-build")
     settings = get_settings()
     test_url = (
         make_url(settings.database_url.get_secret_value())
@@ -82,77 +69,84 @@ def main() -> None:
         .render_as_string(hide_password=False)
     )
     asyncio.run(prepare_test_database(test_url))
-    environment = {
-        **os.environ,
-        "DATABASE_URL": test_url,
-        "APP_ENV": "test",
-        "AUTH_ENABLED": "false",
-        "AI_PROVIDER": "mock",
-        "OPENAI_API_KEY": "",
-        "OPENAI_MODEL": "",
-        "OLLAMA_BASE_URL": "",
-        "OLLAMA_MODEL": "",
-        "INTERVIEW_WORKER_ENABLED": "true",
-        "FRONTEND_URL": f"http://127.0.0.1:{arguments.frontend_port}",
-        "FRONTEND_ORIGIN": f"http://127.0.0.1:{arguments.frontend_port}",
-        "ALLOWED_ORIGINS": f'["http://127.0.0.1:{arguments.frontend_port}"]',
-    }
-    process: subprocess.Popen[bytes] | None = None
+    environment["DATABASE_URL"] = test_url
+    cache = ROOT / ".cache"
+    cache.mkdir(exist_ok=True)
     try:
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "alembic",
-                "-c",
-                "backend/alembic.ini",
-                "upgrade",
-                "head",
-            ],
-            cwd=ROOT,
-            env=environment,
-            check=True,
-            timeout=60,
-        )
-        subprocess.run(
-            [sys.executable, "-m", "interview_prep.modules.questions.seed", "--apply"],
-            cwd=ROOT,
-            env=environment,
-            check=True,
-            timeout=60,
-        )
-        cache = ROOT / ".cache"
-        cache.mkdir(exist_ok=True)
-        with (cache / "browser-api.log").open("wb") as log:
-            process = subprocess.Popen(
+        with ExitStack() as resources:
+            for command in (
                 [
                     sys.executable,
                     "-m",
-                    "uvicorn",
-                    "interview_prep.main:create_app",
-                    "--factory",
-                    "--host",
-                    "127.0.0.1",
-                    "--port",
-                    str(arguments.api_port),
-                    "--no-proxy-headers",
-                    "--no-access-log",
+                    "alembic",
+                    "-c",
+                    "backend/alembic.ini",
+                    "upgrade",
+                    "head",
                 ],
+                [
+                    sys.executable,
+                    "-m",
+                    "interview_prep.modules.questions.seed",
+                    "--apply",
+                ],
+            ):
+                subprocess.run(command, cwd=ROOT, env=environment, check=True, timeout=60)
+            for name, command, readiness in (
+                (
+                    "api",
+                    [
+                        sys.executable,
+                        "-m",
+                        "uvicorn",
+                        "interview_prep.main:create_app",
+                        "--factory",
+                        "--host",
+                        "127.0.0.1",
+                        "--port",
+                        str(arguments.api_port),
+                        "--no-proxy-headers",
+                        "--no-access-log",
+                    ],
+                    f"{api}/api/v1/health/ready",
+                ),
+                ("frontend", [node, "scripts/start_frontend.mjs"], frontend),
+            ):
+                log = resources.enter_context((cache / f"browser-{name}.log").open("wb"))
+                process = subprocess.Popen(
+                    command,
+                    cwd=ROOT,
+                    env=environment,
+                    stdout=log,
+                    stderr=log,
+                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                )
+                resources.callback(stop_owned_process, process)
+                wait_for_server(process, readiness)
+            subprocess.run(
+                [sys.executable, "scripts/smoke_stack.py"],
                 cwd=ROOT,
                 env=environment,
-                stdout=log,
-                stderr=log,
+                check=True,
+                timeout=45,
             )
-            wait_for_api(process, arguments.api_port)
+            extras = arguments.playwright_args
+            if extras[:1] == ["--"]:
+                extras = extras[1:]
             print(
-                "Running browser checks with a fresh isolated PostgreSQL database.",
+                "Browser checks: fresh PostgreSQL, production frontend, MockAIProvider.",
                 flush=True,
             )
-            subprocess.run([pnpm, "test:e2e"], cwd=ROOT, env=environment, check=True, timeout=180)
+            subprocess.run(
+                [pnpm, "test:e2e", *extras],
+                cwd=ROOT,
+                env=environment,
+                check=True,
+                timeout=600,
+            )
     finally:
-        if process is not None:
-            stop_owned_process(process)
         asyncio.run(drop_created_database(test_url))
+    print("Browser checks passed; owned servers stopped and disposable database removed.")
 
 
 if __name__ == "__main__":

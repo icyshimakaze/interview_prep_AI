@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ErrorDisplay } from "@/components/ui/states";
 import type {
   Defense,
   Project,
@@ -20,6 +21,8 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [loading, setLoading] = useState(true),
+    [listError, setListError] = useState("");
   const lock = useRef(false),
     startKey = useRef<string | null>(null);
   useEffect(() => {
@@ -27,16 +30,29 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
     void api
       .list()
       .then((r) => {
-        if (active) setItems(r);
+        if (active) {
+          setItems(r);
+          setListError("");
+          setLoading(false);
+        }
       })
       .catch((e: unknown) => {
-        if (active)
-          setError(e instanceof Error ? e.message : "Projects could not load.");
+        if (active) {
+          setListError(
+            e instanceof Error ? e.message : "Projects could not load.",
+          );
+          setLoading(false);
+        }
       });
     return () => {
       active = false;
     };
   }, [api, refresh]);
+  function reloadList() {
+    setLoading(true);
+    setListError("");
+    setRefresh((v) => v + 1);
+  }
   async function perform(action: () => Promise<void>) {
     if (lock.current) return;
     lock.current = true;
@@ -56,7 +72,7 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
     setProject(p);
     setHistory(h);
     startKey.current = null;
-    setRefresh((v) => v + 1);
+    reloadList();
   }
   if (run)
     return (
@@ -153,7 +169,18 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
       </section>
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Saved repositories</h2>
-        {!items.length && <p>No saved project snapshots yet.</p>}
+        {loading && <p role="status">Loading saved repositories…</p>}
+        {listError && (
+          <ErrorDisplay
+            title="Saved repositories could not load"
+            message={listError}
+            busy={loading}
+            onRetry={reloadList}
+          />
+        )}
+        {!loading && !listError && !items.length && (
+          <p>No saved project snapshots yet.</p>
+        )}
         {items.map((p) => (
           <div
             key={p.id}
@@ -185,7 +212,7 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
                       setProject(null);
                       setHistory([]);
                     }
-                    setRefresh((v) => v + 1);
+                    reloadList();
                   });
               }}
             >

@@ -11,5 +11,8 @@ export default defineConfig({
     include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     clearMocks: true,
     restoreMocks: true,
+    maxWorkers: 2,
+    reporters: ["default", "junit"],
+    outputFile: { junit: "../.cache/frontend-junit.xml" },
   },
 });
