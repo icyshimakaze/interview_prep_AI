@@ -1,5 +1,27 @@
 # Relational data model
 
+## Current schema at a glance
+
+As verified from the SQLAlchemy registry on 22 October 2026, revision
+`0010_security_budgets` contains **52 application tables**, excluding Alembic's
+version table. Readiness requires that head, not 0005/0007 mentioned in historical
+revision notes below. [Current architecture](ARCHITECTURE.md#data-model-and-consistency)
+summarizes implemented aggregates and JSON context/feedback boundaries.
+
+Subsequent additions include four interview work/content/receipt/pool tables in
+0007, two Project Defense run/answer tables in 0008, roadmap metadata in 0009,
+and quota/evaluation-receipt tables in 0010. See [Project Defense](PROJECT_DEFENSE.md),
+[roadmap/progress](ROADMAP_PROGRESS.md) and [security budgets](SECURITY.md).
+Current workflows retain metadata/citations rather than full repository sources;
+granular source/deployment behavior supersedes earlier foundation intentions.
+
+## Historical revision specifications
+
+The following sections preserve the earlier model rollout notes. Their table
+counts, future-work statements and readiness requirements describe those revisions,
+not the complete current application. Current versioned guards/migrations remain
+the authority; do not edit released migration history to match later behavior.
+
 Revision `0007_mock_interviews` extends the existing interview aggregate and adds
 four owned tables for frozen candidates, follow-up content, command receipts and
 durable work. It preserves legacy sessions and prevents destructive populated

@@ -10,8 +10,20 @@ editorial heuristics awaiting curriculum review and evaluation.
 Every new account/demo assessment uses the engine. Existing attempts retain their
 frozen questions. Selection happens once at assessment start; results influence
 the next assessment. The pure `select_questions(SelectionInput)` function can also
-select a single question for a future interview workflow. It performs no I/O and
+select a single question for the implemented interview workflow. It performs no I/O and
 has no clock, mutable global state or random-number dependency.
+
+Implementation: [pure selector](../backend/src/interview_prep/modules/adaptive/engine.py),
+[bounded schemas](../backend/src/interview_prep/modules/adaptive/schemas.py),
+[assessment adapter](../backend/src/interview_prep/modules/adaptive/service.py),
+[interview selection](../backend/src/interview_prep/modules/interviews/selection.py).
+See [current architecture](ARCHITECTURE.md) for the persistence boundaries.
+
+Interviews freeze the initial question pool, skill context and eligible performance,
+then call the selector for each main turn with updated exposure history and coverage
+feasibility checks. They do not consume new AI judgments as performance or change
+difficulty from the current session's answers. Follow-ups use a separate bounded
+provider operation and are unscored. This differs from the frozen assessment batch.
 
 | Input                       | Source and interpretation                                                                                                                                                                                                                             |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -179,9 +191,10 @@ erasure; demo history expires with its workspace. No external sharing is added.
 - A multi-skill question uses one driver and may contain another skill at a less
   suitable level. Automatic role-title matching is deliberately absent; the
   selected job's skill evidence provides relevance.
-- Selection is between assessments, not an adaptive standardized test. The
-  existing interview schema contributes eligible history, but a production
-  interview workflow is separate work. No learning-outcome improvement is claimed.
+- Assessment selection is between attempts; interview main questions are chosen
+  turn by turn from frozen starting evidence plus new exposures. Neither workflow
+  is a standardized adaptive test. Current simulation/model interview feedback is
+  excluded from eligible difficulty history. No learning-outcome improvement is claimed.
 - Future versions can add reviewed prerequisites, explicit accommodations,
   independently calibrated question difficulty, exposure events, and evidence
   aging. Evaluate changes using reproducible scenarios, coverage/repetition and

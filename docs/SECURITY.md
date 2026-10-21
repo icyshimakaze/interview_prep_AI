@@ -8,6 +8,28 @@ application. It is not a penetration-test certification or authorization to expo
 the local Compose stack publicly. Archival `app.py` is outside the V2 runtime and
 must not be deployed as an alternative API.
 
+## Portfolio reading guide
+
+Documentation was cross-checked with the current implementation on 22 October 2026. This refresh preserves the dated review/findings below; it is not a new
+penetration test or a renewed live dependency audit. Start with the
+[current architecture](ARCHITECTURE.md), then inspect the findings and
+[privacy/deletion inventory](#privacy-and-deletion-inventory). Report suspected
+vulnerabilities using the [root security policy](../SECURITY.md).
+
+Key design decisions are server-resolved ownership plus database constraints,
+pre-parser/request/HTTP budgets, isolated expiring demo principals, transient raw
+uploads, text-only generated-content rendering and optional server-side AI with
+validated provenance. Simulation/model judgments never establish validated skill
+performance. Project Defense performs static in-memory analysis without source
+execution or provider dispatch.
+
+Open production requirements include full account erasure/export and identity
+reconciliation, trusted ingress/TLS/client IP handling, separate database roles,
+backup/log retention and stronger parser OS isolation. The worker subprocess and
+prompt boundaries reduce authority but are not complete sandbox/injection proofs.
+The [testing guide](TESTING.md) distinguishes local/mocked/live browser coverage;
+dated passing tests do not establish hosted CI, live provider quality or compliance.
+
 ## Findings and disposition
 
 Severity reflects exploit prerequisites and confidentiality, integrity,

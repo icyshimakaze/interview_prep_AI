@@ -4,6 +4,22 @@ Project Defense helps candidates explain projects they built, including work
 created with AI assistance. It is deterministic source inspection and interview
 practice, not a code audit, authorship detector, competence score or ML prediction.
 
+## Implementation walkthrough
+
+Follow [fixed-host acquisition and subprocess dispatch](../backend/src/interview_prep/modules/projects/ingestion.py),
+[in-memory archive validation](../backend/src/interview_prep/modules/projects/archive.py),
+[static inspection](../backend/src/interview_prep/modules/projects/analyzer.py),
+[question templates](../backend/src/interview_prep/modules/projects/questions.py)
+and [defense commands](../backend/src/interview_prep/modules/projects/defense.py).
+The [UI](../frontend/src/components/workspace/projects-workspace.tsx) exposes the
+same account/demo contracts. [Architecture](ARCHITECTURE.md) connects this boundary
+to ownership and persistence.
+
+This workflow uses archive download, not `git clone`. It performs no LLM calls,
+even when account feedback uses a remote provider. Its main engineering choices
+are cited static observations over runtime claims, no extraction/execution, and
+saved unscored explanations over unsupported competence judgments.
+
 ## Using the feature
 
 Open **Project Defense → Project Repository** in the account or recruiter demo
@@ -181,6 +197,12 @@ denial-of-service risk but do not prove immunity to interpreter/library flaws.
 Production operators should also enforce request-size/rate/concurrency limits at
 the gateway and run the API/parser with least privilege and network restrictions.
 The two-slot limit is per process, not a distributed quota or per-user rate limit.
+
+Separately, [database-backed import budgets](../backend/src/interview_prep/core/quotas.py)
+allow ten attempts per owner/hour and 200 globally/hour. Failed downloads/parses
+and delete/reimport loops still consume reservations. These shared attempt budgets
+complement the per-process semaphore and five-snapshot retention cap; they do not
+replace ingress protection or a restricted parser OS environment.
 
 ### Privacy and trust limitations
 

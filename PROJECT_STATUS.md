@@ -2,7 +2,78 @@
 
 Updated: 2026-10-22 (Asia/Calcutta).
 
-## Full-stack automated quality pipeline (current phase)
+## Engineering portfolio presentation (current phase)
+
+Implemented the [portfolio presentation plan](.agent/plans/portfolio-presentation.md)
+after checking the actual routes, policy engines, models, provider wiring, workers,
+UI, migrations, setup/verification scripts and clean Git baseline `59e3507`.
+That preceding quality-pipeline commit has been pushed to `rebuild/professional-v2`.
+
+- Rewrote [README.md](README.md) with the problem/motivation, recruiter journey,
+  feature boundaries, current architecture/Mermaid diagram, algorithms, Project
+  Defense, zero-key/provider behavior, stack/schema/API, environment/setup,
+  Docker/migrations/deployment, testing, privacy, limitations and next work.
+  The hosted-demo URL is explicitly unconfigured, with replacement/configuration
+  instructions; no unverified badge, adoption/performance claim or testimonial.
+- Added [current architecture](docs/ARCHITECTURE.md), separate from the historical
+  V2 proposal, and source-linked implementation maps in every requested domain
+  guide. Corrected stale claims that interview selection/creation were future
+  work, old readiness/table counts and outdated HTTP decompression language.
+  The current registry has 52 application tables; readiness head is
+  `0010_security_budgets`; catalogue dry-run validates 29 authored prompts.
+- Added [interview notes](docs/INTERVIEW_NOTES.md) with short/extended explanations,
+  architecture/data/security/concurrency/cost/failure/scaling discussion and
+  **34 implementation-backed interviewer questions and answers**. Added
+  [resume bullet options](docs/RESUME_BULLETS.md), contribution caveats and an
+  inspectable evidence map. Quantified test bullets cite the dated prior run,
+  without claiming all tests were authored in one change or by one person.
+- Published four visually inspected original browser screenshots: landing,
+  Skill Matrix, saved objective assessment and mock interview review. They were
+  copied unchanged from the retained successful 22 October quality-run artifacts;
+  [provenance/reproduction](docs/screenshots/README.md) distinguishes live demo
+  screens from the public interface preview. No new capture or hosted deployment
+  is claimed; fictional-data and simulation disclosures remain visible.
+- Preserved the ranked security audit and its open production/privacy requirements.
+  Clarified that only answer evaluation/follow-ups use optional remote providers;
+  local source/evidence/planning workflows do not use the other interface methods.
+  Updated the changelog and related development/data-model entry points. No
+  application behavior, schema, API contract, dependency or CI changes were made.
+
+### Verification for this documentation phase
+
+- **101 focused pytest cases passed** across `test_adaptive.py`,
+  `test_skill_engine.py`, `test_evaluation_rubric.py` and `test_planning_rules.py`.
+  These existing pure-policy/schema tests required no database/provider service.
+- Backend `--phase lint` passed: Ruff lint, format check (185 files), strict mypy
+  (174 source files). Whole-repository Prettier and `git diff --check` passed.
+- Local link/anchor validation passed across all 55 repository Markdown files.
+  All four published PNGs are byte-identical to their original retained artifacts
+  and have the documented 1280-pixel width; they were also visually inspected.
+- The README's frozen `uv sync --project backend --frozen` and
+  `pnpm install --frozen-lockfile` passed. This shell needed the installed uv
+  executable added to PATH; sandbox cache/editable-package access required reviewed
+  permissions. An initial sandbox/offline sync failed and the regular frozen
+  sync restored the editable package successfully; no lockfile changed.
+- Initializer preserved the existing ignored `.env`; Compose configuration passed
+  with `--quiet` without exposing values. Check runners' CLI flags, Uvicorn entry
+  point/help, Alembic head/history and catalogue validation (`writes: false`)
+  passed. OpenAPI and legacy preservation checks passed; TypeScript contract
+  regeneration was byte-identical. Playwright discovery found 23 tests in four
+  specs; discovery is not a new browser execution.
+
+### Limits and next task
+
+Docker Desktop was stopped and left stopped. This documentation phase did not
+start/migrate/seed the application database, launch the full Compose/native stack,
+or rerun the full backend/frontend/browser/container suite. The prior complete
+521/134/23 test run and builds below remain dated evidence, not fresh results.
+No live Clerk, AI, public GitHub import, hosted CI or public deployment was verified.
+Portfolio changes are prepared for the subsequently authorized commit/push to
+`rebuild/professional-v2`; deployment is outside this request. Next: observe the
+hosted checks, address the documented release gaps and configure a verified HTTPS
+demo URL when deployment is explicitly authorized.
+
+## Full-stack automated quality pipeline (preceding phase)
 
 Implemented the [quality pipeline plan](.agent/plans/full-stack-quality.md).
 [TESTING.md](docs/TESTING.md) maps the existing backend/component suites to the

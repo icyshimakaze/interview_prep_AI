@@ -12,6 +12,22 @@ biographical verification, readiness percentage or prediction of hiring outcomes
 Model-assisted and simulated results remain excluded from validated skill
 performance and adaptive difficulty evidence.
 
+## Reading a result
+
+| Result                             | Meaning                                                                 | Can validate skill evidence?                                           |
+| ---------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Objective answer correctness       | Exact option-set or authored literal-key match, graded locally          | Only with the complete reviewed-content/single-skill eligibility rules |
+| Mock lexical coverage              | Word overlap with expected concepts; most rubric criteria remain null   | No                                                                     |
+| Model rubric judgment              | Anchored criterion explanations and a coarse aggregate requiring review | No                                                                     |
+| Follow-up / Project Defense answer | Saved explanation practice with no reviewed scoring rubric              | No score is assigned                                                   |
+
+Implementation anchors: [rubric definitions](../backend/src/interview_prep/ai/rubric.py),
+[strict result schema](../backend/src/interview_prep/ai/schemas.py),
+[domain validation](../backend/src/interview_prep/ai/validation.py),
+[objective scoring](../backend/src/interview_prep/modules/assessments/scoring.py)
+and [feedback rendering](../frontend/src/components/workspace/evaluation-feedback.tsx).
+These categories remain separate in persisted provenance and the UI.
+
 ## Required feedback
 
 Every new successful evaluation contains:

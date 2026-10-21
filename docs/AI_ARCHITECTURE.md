@@ -7,6 +7,13 @@ or a prediction of competence. Optional account integrations are available for a
 configured Ollama server and OpenAI's Responses API. Recruiter demo evaluation is
 always pinned to mock independently of the account provider.
 
+For a portfolio walkthrough, start with [current architecture](ARCHITECTURE.md),
+then inspect [the factory](../backend/src/interview_prep/ai/factory.py),
+[shared validation](../backend/src/interview_prep/ai/validation.py) and
+[transport](../backend/src/interview_prep/ai/transport.py). The detailed
+[evaluation rubric](EVALUATION_RUBRIC.md) distinguishes objective scoring, lexical
+simulation and model judgment.
+
 ## Interface and boundaries
 
 `backend/src/interview_prep/ai/provider.py` defines the asynchronous `AIProvider`
@@ -44,8 +51,8 @@ owner-ID capability. Callers must resolve authenticated ownership before supplyi
 private context. The existing assessment workflow does so before evaluating saved
 answers. The later [interview workflow](MOCK_INTERVIEWS.md) also connects answer
 evaluation and contextual follow-up generation through durable owned work. The
-other four operations remain internal services for future workflows. Resume upload still uses the
-existing local PDF/evidence pipeline; it does not automatically call AI. No raw
+other four operations remain internal services for future workflows. Resume
+upload still uses the existing local PDF/evidence pipeline; it does not automatically call AI. No raw
 resume, JD or project is sent by the assessment workflow.
 
 ## MockAIProvider
@@ -193,8 +200,9 @@ validated performance. No AI output is persisted before validation.
 ## Deadlines, retries and unavailable providers
 
 Each remote call has one configurable total deadline (default 30 seconds, maximum 60) covering connection, body reads, retries and backoff. There are at most two
-additional retries; default is one. The HTTP body is limited to 256 KiB after
-decoding, and the domain JSON text to 128 KiB. Redirect following and environment
+additional retries; default is one. The HTTP body is limited to 256 KiB with
+identity encoding required; encoded responses are rejected before reading. Domain
+JSON text is limited to 128 KiB. Redirect following and environment
 proxy inheritance are disabled on the application HTTP client.
 
 Retry only connection establishment failures and HTTP 408, 429, 500, 502, 503, 504. A 429 `insufficient_quota` result is not retried. Respect numeric/date
@@ -228,6 +236,37 @@ closes the client on shutdown. No provider health request occurs at startup.
 The assessment adapter maps `evaluate_answer()` to the existing conceptual grading
 contract. Objective MCQ/multiple-select/literal short-answer grading stays entirely
 deterministic, local and independent of optional AI availability.
+
+The interview runner also dispatches `evaluate_answer()` and `generate_followup()`
+after saving owned answers/work. The other four operations are implemented/tested
+provider capabilities, not user-facing integrations: current PDF evidence, job
+mentions, personalized roadmaps and Project Defense use their local deterministic
+services. Enabling a provider does not reroute those workflows to AI.
+
+## Cost control and durable failures
+
+[Shared quotas](../backend/src/interview_prep/core/quotas.py) reserve all possible
+transport attempts before model-assisted dispatch: `1 + AI_MAX_RETRIES` units.
+Defaults are 60 owner-hourly, 200 owner-daily and 2,000 global-daily units; the
+database makes these budgets shared across API processes. Quota failure prevents
+dispatch; simulations consume no provider budget. These are conservative attempted
+call ceilings, not measured token spend or currency accounting.
+
+[Assessment receipts](../backend/src/interview_prep/modules/assessments/receipts.py)
+persist validated paid results independently of grading rollback. Their identity
+includes owned attempt/allocation, content and provider/prompt configuration.
+Completed results can be reused if a later answer fails; failed evaluation permits
+one further explicit dispatch, and ambiguous `started` work is not replayed.
+Receipts expire after 48 hours and are removed by cleanup. They minimize duplicate
+calls without guaranteeing exactly-once remote computation or billing.
+
+Interview work uses leases and fenced completion outside provider transactions;
+saved answers survive timeout/refusal/invalid output and can receive partial review.
+Assessment feedback remains synchronous and can exceed the browser wait for a
+large slow batch. Provider-side spending caps and production ingress controls
+remain operator requirements. [Security budgets and privacy](SECURITY.md).
+
+## Data disclosure and retention
 
 The assessment configuration screen identifies the active provider and discloses
 OpenAI/Ollama sharing before starting. Only written responses invoke AI on submit;

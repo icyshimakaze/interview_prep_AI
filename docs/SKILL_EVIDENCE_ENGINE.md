@@ -4,6 +4,22 @@ Policy: `skill-evidence-v1`. This deterministic preparation aid does not predict
 hiring success, proficiency, or job readiness. No ML, model calls, embeddings,
 probabilities, hidden weights, or readiness percentages are used.
 
+## Implementation map
+
+The pure [state engine](../backend/src/interview_prep/modules/skills/engine.py)
+consumes facts loaded by [owned context adapters](../backend/src/interview_prep/modules/skills/context.py)
+and the [performance eligibility adapter](../backend/src/interview_prep/modules/skills/performance.py).
+The [service](../backend/src/interview_prep/modules/skills/service.py) assembles
+the response; the [Skill Matrix UI](../frontend/src/components/workspace/skill-matrix.tsx)
+renders explanations and sources. [Current architecture](ARCHITECTURE.md) explains
+where this read-only engine feeds assessment/interview selection and roadmaps.
+
+For example, a resume mention of Python plus a latest eligible incorrect objective
+result yields **Some evidence** in the resume column and **Needs additional
+practice** in competence. Without that eligible grade it yields **Needs assessment
+validation**. A simulated/model grade does not change either case into validation.
+These are rule examples, not reported candidate outcomes.
+
 ## Independent evidence states
 
 Each row separates job importance, resume mentions, demonstrated competence and
@@ -141,5 +157,8 @@ and textual states support mobile/keyboard use without relying on color.
 Concrete tests cover conflicts, missing/repeated evidence, breadth, retakes,
 importance, aliases, excluded provenance, ownership, source versions, rubric
 boundaries, malformed responses and UI races/retries. Exact verification is in
-PROJECT_STATUS.md. Production assessment/interview creation remains a separate
-workflow; this engine never manufactures results to populate an empty matrix.
+[PROJECT_STATUS.md](../PROJECT_STATUS.md). Saved assessment and interview creation
+are implemented in their own services; this engine consumes eligible persisted
+results and never manufactures them to populate an empty matrix. Current interview
+providers produce simulation/model-assisted feedback, so they do not create the
+deterministic interview evidence accepted by the existing eligibility contract.

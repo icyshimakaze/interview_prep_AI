@@ -40,8 +40,9 @@ curl http://127.0.0.1:8000/api/v1/health/ready
 
 Compose starts PostgreSQL, applies Alembic migrations in a one-shot service, starts
 FastAPI, and gates Next.js on database/schema readiness. A small cleanup process
-uses the backend image and deletes expired demo rows hourly. This is maintenance,
-not the future background job worker. API/frontend containers run as non-root.
+uses the backend image and removes expired demo rows, quotas and evaluation
+receipts hourly. Interview work runs separately in the API's database-backed
+loops described below. API/frontend containers run as non-root.
 
 The frontend's backend destination is resolved at build time. Rebuild its image
 when changing that destination. Services are local development configurations;

@@ -7,6 +7,9 @@ describe implemented source changes, not a published production release.
 
 ### Added
 
+- Implementation-backed portfolio README, current architecture diagrams,
+  recruiter walkthrough, screenshot provenance, interview preparation notes with
+  34 technical Q&A and factual resume bullet options.
 - Full-stack quality pipeline with real PostgreSQL tests, migration round-trips,
   frontend lint/types/component tests, production build and Playwright journeys.
 - Self-contained browser setup, deterministic mock AI, network guards, JUnit
@@ -19,6 +22,10 @@ describe implemented source changes, not a published production release.
 
 ### Changed
 
+- Documentation now distinguishes implemented interview selection from earlier
+  phase plans, provider interface capabilities from connected product workflows,
+  and current schema requirements from historical model notes. Hosted-demo and
+  production/privacy limitations remain explicit.
 - CI separates backend, frontend and browser gates and tests the frontend build
   produced by the frontend job. Frozen installs and pinned actions remain required.
 - Dependabot covers workspace JavaScript, locked Python, Dockerfiles, Compose
