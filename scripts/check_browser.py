@@ -113,13 +113,16 @@ def main() -> None:
                 ("frontend", [node, "scripts/start_frontend.mjs"], frontend),
             ):
                 log = resources.enter_context((cache / f"browser-{name}.log").open("wb"))
+                creation_flags = 0
+                if sys.platform == "win32":
+                    creation_flags = subprocess.CREATE_NO_WINDOW
                 process = subprocess.Popen(
                     command,
                     cwd=ROOT,
                     env=environment,
                     stdout=log,
                     stderr=log,
-                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                    creationflags=creation_flags,
                 )
                 resources.callback(stop_owned_process, process)
                 wait_for_server(process, readiness)

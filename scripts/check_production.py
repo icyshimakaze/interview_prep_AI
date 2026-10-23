@@ -3,11 +3,11 @@
 import argparse
 import asyncio
 import json
-import os
 import secrets
 import shutil
 import ssl
 import subprocess
+import sys
 import time
 from contextlib import ExitStack
 from pathlib import Path
@@ -466,6 +466,9 @@ def main() -> None:
                     for value in (secret, quota, owner_password, runtime_password)
                 ), "Server credential found in browser bundle"
             log = stack.enter_context((directory / "frontend.log").open("wb"))
+            creation_flags = 0
+            if sys.platform == "win32":
+                creation_flags = subprocess.CREATE_NO_WINDOW
             process = subprocess.Popen(
                 [node, "scripts/start_frontend.mjs"],
                 cwd=ROOT,
@@ -477,7 +480,7 @@ def main() -> None:
                 },
                 stdout=log,
                 stderr=log,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=creation_flags,
             )
             stack.callback(stop_owned_process, process)
             wait_for_server(process, f"http://127.0.0.1:{args.frontend_port}")

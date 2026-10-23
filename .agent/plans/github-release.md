@@ -36,4 +36,10 @@ sign-in and DNS are prerequisites when no authorized connection is available.
 
 ## Outcome
 
-In progress.
+Release commit `19999f7` pushed and remote SHA verified. Its Linux CI exposed four
+Windows-only subprocess flag references that passed native Windows type checking.
+Use statement-level `sys.platform` guards so mypy skips Windows constants on Linux;
+retain the same hidden-window behavior on Windows. Verify native and Linux-target
+strict types, lint/format, existing worker tests, then push the correction and
+observe the complete hosted CI. Hosting plugins were found and suggested but are
+not connected; no hosted resources have been created.

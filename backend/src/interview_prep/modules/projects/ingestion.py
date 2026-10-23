@@ -134,6 +134,9 @@ async def read_zip(request: Request) -> bytes:
 
 def run_worker(data: bytes) -> StaticAnalysis:
     environment = {key: os.environ[key] for key in ("SYSTEMROOT", "WINDIR") if key in os.environ}
+    creation_flags = 0
+    if sys.platform == "win32":
+        creation_flags = subprocess.CREATE_NO_WINDOW
     try:
         with (
             tempfile.TemporaryDirectory(prefix="project-static-") as directory,
@@ -144,7 +147,7 @@ def run_worker(data: bytes) -> StaticAnalysis:
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
-                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+                creationflags=creation_flags,
             ) as process,
         ):
             try:

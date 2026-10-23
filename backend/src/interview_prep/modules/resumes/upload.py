@@ -81,6 +81,9 @@ async def read_upload(request: Request) -> bytes:
 def run_worker(data: bytes) -> ParsedPdf:
     # Do not inherit database URLs, identity secrets, proxies, or credential envs.
     environment = {key: os.environ[key] for key in ("SYSTEMROOT", "WINDIR") if key in os.environ}
+    creation_flags = 0
+    if sys.platform == "win32":
+        creation_flags = subprocess.CREATE_NO_WINDOW
     try:
         with (
             tempfile.TemporaryDirectory(prefix="resume-parse-") as directory,
@@ -91,7 +94,7 @@ def run_worker(data: bytes) -> ParsedPdf:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
                 env=environment,
-                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+                creationflags=creation_flags,
             ) as process,
         ):
             try:

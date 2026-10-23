@@ -2,6 +2,32 @@
 
 Updated: 2026-10-23 (Asia/Calcutta).
 
+## GitHub release publication
+
+The user authorized committing/pushing the prepared changes and completing
+available deployment work on 23 October 2026. Release `19999f7` was committed and
+pushed to `origin/rebuild/professional-v2`; remote SHA was verified. The index scan
+checked 139 release files against three configured private values and credential
+patterns with zero findings. Actual dotenv files remain ignored and unchanged.
+
+The first hosted Linux CI run exposed four Windows-only `CREATE_NO_WINDOW`
+references that native Windows mypy accepted. Replaced conditional expressions
+with statement-level `sys.platform` guards, preserving hidden Windows subprocess
+behavior. Ruff lint/format and strict mypy pass for native Windows and the Linux
+target (196 sources). Existing focused resume-worker tests (5) and project-analysis
+tests (32) pass. An initial direct invocation of DB-backed tests lacked their
+required disposable DB and produced 28 setup errors; hosted CI supplies that DB.
+The correction is published separately and its hosted workflow must be checked.
+
+Built the release Docker image locally as `interview-prep-api:release` and
+`interview-prep-api:19999f7`; rebuild after the subprocess correction before using
+it for deployment. No hosted resources, real database migrations or live AI calls
+were made in this release step. No browser session, linked Vercel project or cloud
+CLI credentials were available. Neon, Render and Vercel integrations were found
+but are not installed/connected; the user must connect them to enable hosted work.
+The remaining account-mode release gaps below are unchanged. See the
+[release plan](.agent/plans/github-release.md).
+
 Deployment-guide follow-up: checked current provider documentation and moved the
 Blueprint's `DATABASE_URL` and `ALLOWED_ORIGINS` prompts from the environment group
 to the service. Render ignores group-level `sync: false`; generated keys and other
