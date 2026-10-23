@@ -1,6 +1,39 @@
 # Project Status
 
-Updated: 2026-10-23 (Asia/Calcutta).
+Updated: 2026-10-24 (Asia/Calcutta).
+
+## Hosted Neon initialization — 24 October 2026
+
+All three direct hosting connections are authenticated. Verified account access
+through Codex's documented app-server API without starting any model turns;
+the current chat still does not expose the remote MCP tools directly.
+Release `12daed1` has a green complete GitHub Actions run.
+
+Initialized the user's selected existing Free Neon database after verifying it
+had no public tables or runtime role. The first migration attempt exceeded its
+180-second operator deadline and rolled back; reinspection confirmed an empty
+schema. A bounded retry completed every reviewed migration through
+`0012_ai_context_reviews`, and Alembic reported zero schema drift. Catalogue
+validation found 29 questions, initial publication added 29 versions and repeat
+publication added zero.
+
+Created the restricted runtime role through SQL, applied the reviewed grants and
+verified runtime login, no schema CREATE privilege, no migration-history UPDATE
+privilege and no `neon_superuser` membership. The application's actual production
+readiness function passed using that runtime role and verified TLS. An initial
+operator call supplied an engine instead of the required session factory; the
+corrected invocation passed. Owner credentials stayed in memory; generated runtime
+and gateway credentials are in ignored private deployment configuration. Actual
+dotenv files were not edited and no live AI request was made.
+
+The existing Neon region is Singapore (`ap-southeast-1`); aligned the Render
+Blueprint/runbook default to Singapore. No Render service or Vercel project has
+been created for this app. The unrelated existing student-management service and
+existing Vercel projects were preserved. Render's connector explicitly requires
+the user to identify a workspace before creation. Awaiting confirmation of
+"My Workspace" and the personal Vercel Hobby account; then create the Free Docker
+backend and production Next frontend, configure their shared gateway/origin,
+and verify the hosted demo. Account/Clerk release gaps remain as documented below.
 
 ## GitHub release publication
 

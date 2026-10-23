@@ -33,10 +33,17 @@ profile for initial verification and existing Clerk/xKiro account prerequisites.
 
 ## Outcome
 
-Release CI is green. Added official Render, Vercel and project-scoped Neon remote
-MCP entries using Codex CLI. Render requires its documented public OAuth client
-ID `codex`; its initial default-registration attempt failed, then the documented
-client configuration started OAuth successfully. All three browser authorization
-flows are pending user completion. No credentials were printed or copied into
-the repository. No hosted database or service was modified. Reload the extension
-after authorization so the new account tools can be discovered and used.
+Updated 24 October 2026. All three provider OAuth logins are complete. Remote tools
+are usable through the documented Codex app-server protocol without a model turn.
+Neon was verified empty, initialized through 0012 and checked for zero schema
+drift. Its first migration attempt timed out and rolled back; the bounded retry
+passed. Published 29 reviewed versions, with zero repeat writes. Runtime role
+creation, grants, verified TLS and actual application readiness passed. Owner
+credentials remain in memory, and generated deployment secrets remain ignored.
+
+Matched the Render default to the existing Singapore database. Release 12daed1's
+complete hosted CI is green. Existing unrelated hosting resources were preserved.
+Render's connector reports no selected workspace and explicitly requires a user
+choice before creation. Awaiting confirmation of My Workspace and the personal
+Vercel Hobby account; then provision/verify the two free-profile hosts. No hosted
+backend or frontend for this app has been created yet.

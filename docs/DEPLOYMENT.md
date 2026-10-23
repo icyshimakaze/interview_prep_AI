@@ -55,7 +55,7 @@ traffic all consume limited resources. Monitor every provider's usage dashboard.
 
 ## B. Create the Neon database — after authorization
 
-Create one **Free** Neon project near Render Frankfurt (or choose matching regions
+Create one **Free** Neon project near Render Singapore (or choose matching regions
 in both), database `neondb`, PostgreSQL 18 if available. Keep preview/development
 in separate projects/branches within free limits. Do not choose a paid plan or
 extra paid resources to bypass limits. Do not create a Render database or SQLite.
@@ -122,7 +122,7 @@ and configure the matching frontend in K. No second paid service is required.
 | Setting              | Repository value                                                                                         |
 | -------------------- | -------------------------------------------------------------------------------------------------------- |
 | Service type / plan  | Web Service / **Free** / one instance                                                                    |
-| Region               | Frankfurt by default; match Neon                                                                         |
+| Region               | Singapore by default; match Neon                                                                         |
 | Runtime              | Docker                                                                                                   |
 | Root Directory       | Repository root; leave blank, **not** `backend/`                                                         |
 | Dockerfile           | `./deploy/backend.Dockerfile`                                                                            |

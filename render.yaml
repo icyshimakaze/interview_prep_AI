@@ -4,7 +4,8 @@ services:
     name: interview-prep-api
     runtime: docker
     plan: free
-    region: frankfurt
+    # Match the existing Neon database's ap-southeast-1 region.
+    region: singapore
     dockerfilePath: ./deploy/backend.Dockerfile
     dockerContext: .
     autoDeployTrigger: "off"
