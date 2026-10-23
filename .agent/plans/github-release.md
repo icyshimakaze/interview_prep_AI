@@ -41,5 +41,8 @@ Windows-only subprocess flag references that passed native Windows type checking
 Use statement-level `sys.platform` guards so mypy skips Windows constants on Linux;
 retain the same hidden-window behavior on Windows. Verify native and Linux-target
 strict types, lint/format, existing worker tests, then push the correction and
-observe the complete hosted CI. Hosting plugins were found and suggested but are
-not connected; no hosted resources have been created.
+observe the complete hosted CI. Native and Linux-target strict checks passed,
+37 focused worker tests passed and the corrected non-root Linux release image
+passed PDF/project worker smoke within 512 MiB. Hosting plugins were found and
+suggested but are not connected; no hosted resources have been created. GitHub
+publication is complete; hosted provisioning awaits those account connections.

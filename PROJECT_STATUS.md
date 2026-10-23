@@ -17,11 +17,14 @@ behavior. Ruff lint/format and strict mypy pass for native Windows and the Linux
 target (196 sources). Existing focused resume-worker tests (5) and project-analysis
 tests (32) pass. An initial direct invocation of DB-backed tests lacked their
 required disposable DB and produced 28 setup errors; hosted CI supplies that DB.
-The correction is published separately and its hosted workflow must be checked.
+The correction is published as `b86ebb8`. Hosted results are available in the
+[branch's quality workflow](https://github.com/icyshimakaze/interview_prep_AI/actions/workflows/ci.yml?query=branch%3Arebuild%2Fprofessional-v2);
+confirm a green run for the selected release revision before production.
 
-Built the release Docker image locally as `interview-prep-api:release` and
-`interview-prep-api:19999f7`; rebuild after the subprocess correction before using
-it for deployment. No hosted resources, real database migrations or live AI calls
+Built the corrected release image locally as `interview-prep-api:release` and
+`interview-prep-api:b86ebb8`. Its Linux PDF/project subprocess smoke passed as a
+non-root user with 512 MiB memory, and no dotenv files were present in the image.
+No hosted resources, real database migrations or live AI calls
 were made in this release step. No browser session, linked Vercel project or cloud
 CLI credentials were available. Neon, Render and Vercel integrations were found
 but are not installed/connected; the user must connect them to enable hosted work.
