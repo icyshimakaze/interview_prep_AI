@@ -1,5 +1,23 @@
 # Security and privacy review
 
+Phase 23B preparation, 23 October 2026: the current deployment default is one
+Render Free API with a mock recruiter profile and an optional Clerk + xKiro
+account profile on the same app. Production startup checks database/schema
+readiness without DDL/seeding; selected credentials and auth are mandatory.
+Debug docs/OpenAPI are disabled. Request logs contain only method, matched route
+template, status, duration and random request ID, with no raw paths/queries,
+bodies, headers or identities. Raw access logging remains off.
+
+Free-hosting cleanup is best effort at startup/hourly while running; physical
+deletion can be delayed while asleep/suspended. Expired demo authorization is
+denied regardless. Idle polling and shared file capacity are bounded in the free
+profile. HSTS supplements the existing object/base/frame CSP. A strict script CSP,
+account export/erasure and Clerk deletion reconciliation remain release gaps;
+do not imply that the account profile is cleared for broad sensitive-data use.
+See [the current deployment runbook](DEPLOYMENT.md) for exact controls and manual
+release steps. The dated review below remains historical evidence, not a new
+penetration-test or dependency-vulnerability certification.
+
 Reviewed 21 October 2026; verification finalized 22 October 2026 against the actual
 working tree, including the previously
 uncommitted evaluation, Project Defense and roadmap features. This is a source,
@@ -9,6 +27,17 @@ the local Compose stack publicly. Archival `app.py` is outside the V2 runtime an
 must not be deployed as an alternative API.
 
 ## Portfolio reading guide
+
+23 October provider integration: xKiro Chat Completions is now the primary real
+provider, with explicitly authorized account sharing and backend-only credentials.
+Public-demo deployments stay mock. New opt-in resume-evidence/Defense feedback
+uses owned, bounded 30-day receipts, source cascades and existing shared AI budgets.
+Resume evidence edits invalidate saved reviews. This extends the earlier static
+Defense workflow with separate optional feedback, not automatic source sharing.
+Phase 23A adds consent-based job/roadmap/static-project reviews under the same
+owned receipts and budgets, plus four concurrent transport slots per API client.
+A single synthetic Max-free request passed (HTTP 200, validated JSON); no private
+data was transmitted in this smoke check. See [xKiro setup](XKIRO.md).
 
 Documentation was cross-checked with the current implementation on 22 October 2026. This refresh preserves the dated review/findings below; it is not a new
 penetration test or a renewed live dependency audit. Start with the
@@ -31,6 +60,13 @@ The [testing guide](TESTING.md) distinguishes local/mocked/live browser coverage
 dated passing tests do not establish hosted CI, live provider quality or compliance.
 
 ## Findings and disposition
+
+Production preparation on 23 October adds verified database TLS, a shared-secret
+frontend gateway, restricted-role grant instructions and a mock-only public
+profile; see [DEPLOYMENT.md](DEPLOYMENT.md). These configurations were verified
+locally, not on hosted ingress/Neon/Clerk. The dated findings below remain the
+audit record; account privacy, backup/restore and platform operating controls
+still require their own release verification.
 
 Severity reflects exploit prerequisites and confidentiality, integrity,
 availability or financial impact. One Critical dependency finding and two High

@@ -227,6 +227,33 @@ export async function workspaceRequest(
     };
     const payload: unknown = await response.json().catch(() => null);
     if (payload && typeof payload === "object" && "code" in payload) {
+      const aiMessages: Record<string, string> = {
+        ai_analysis_pending:
+          "This review is running, was interrupted, or reached its retry limit. Saved work is retained; no duplicate AI call was sent.",
+        ai_provider_changed:
+          "The AI provider changed. Reload before agreeing to share data.",
+        ai_no_evidence:
+          "Add retained resume evidence before requesting a review.",
+        ai_no_review_context:
+          "No suitable saved context to review. Add unfinished roadmap tasks or static project facts.",
+        ai_unavailable:
+          "The AI provider is unavailable. Saved work is retained.",
+        ai_timeout: "The AI request timed out. Saved work is retained.",
+        ai_invalid_output:
+          "The AI response failed validation. Saved work is retained.",
+        ai_refusal:
+          "The AI provider declined this request. Saved work is retained.",
+        ai_rate_limited:
+          "The AI provider's rate limit was reached. Try again later; saved work is retained.",
+      };
+      if (
+        typeof payload.code === "string" &&
+        Object.hasOwn(aiMessages, payload.code)
+      )
+        throw new WorkspaceError(
+          aiMessages[payload.code] ?? "AI review request failed.",
+          payload.code,
+        );
       const questionMessages: Record<string, string> = {
         interview_revision:
           "The interview changed. Reload and reconcile your saved answer.",

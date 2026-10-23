@@ -17,7 +17,7 @@ export function SettingsView({
     <>
       <SectionHeader
         title="Settings / Profile"
-        eyebrow="Make it your own"
+        eyebrow="Preparation preferences"
         description="Your preparation direction, study preferences, and account information."
       />
       {data.mode === "account" && onSaveProfile ? (
@@ -42,7 +42,18 @@ export function SettingsView({
             {[
               ["Display name", profile?.display_name ?? "Not provided"],
               ["Target role", profile?.target_role ?? "Not provided"],
-              ["Experience level", profile?.experience_band ?? "Not provided"],
+              [
+                "Experience level",
+                profile?.experience_band
+                  ? ({
+                      student: "Student",
+                      entry: "Entry level",
+                      mid: "Mid level",
+                      senior: "Senior",
+                    }[profile.experience_band] ??
+                    profile.experience_band.replaceAll("_", " "))
+                  : "Not provided",
+              ],
               ["Timezone", profile?.timezone ?? "Not provided"],
               [
                 "Weekly study budget",

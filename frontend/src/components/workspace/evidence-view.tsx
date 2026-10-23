@@ -120,18 +120,6 @@ export function EvidenceView({
               ))}
         </div>
       )}
-      <section className="section-rule">
-        <h2 className="section-title">
-          {targets
-            ? "A useful target is specific."
-            : "Prepare to explain the details."}
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
-          {targets
-            ? "Look for the responsibilities you would own, the skills the role calls for, and the examples from your work that connect to them."
-            : "Think about what you built, the decisions you made, the alternatives you considered, and what you would change. A concrete explanation is more useful than a long list of tools."}
-        </p>
-      </section>
     </>
   );
 }

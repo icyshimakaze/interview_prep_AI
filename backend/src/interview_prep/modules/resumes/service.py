@@ -3,10 +3,11 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from interview_prep.ai.analysis_models import AIAnalysis
 from interview_prep.modules.context.models import (
     EvidenceCategory,
     EvidenceOrigin,
@@ -208,6 +209,9 @@ async def save_evidence(
     evidence.category = body.category
     evidence.review_status = body.review_status
     resume.revision += 1
+    await session.execute(
+        delete(AIAnalysis).where(AIAnalysis.owner_id == owner, AIAnalysis.resume_id == id)
+    )
     await session.commit()
     return await get_resume(session, owner, id)
 
@@ -219,6 +223,9 @@ async def delete_evidence(
     evidence = await owned_evidence(session, owner, id, evidence_id)
     await session.delete(evidence)
     resume.revision += 1
+    await session.execute(
+        delete(AIAnalysis).where(AIAnalysis.owner_id == owner, AIAnalysis.resume_id == id)
+    )
     await session.commit()
     return await get_resume(session, owner, id)
 

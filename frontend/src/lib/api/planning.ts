@@ -1,5 +1,6 @@
 import type { components } from "./generated";
 import { csrfToken } from "./workspace";
+import { createAIReviewApi } from "./ai-review";
 
 export type Roadmap = components["schemas"]["RoadmapWorkspace"];
 export type Plan = components["schemas"]["PlanView"];
@@ -212,6 +213,7 @@ export function createPlanningApi(
     return response.json();
   }
   return {
+    ...(mode === "account" ? { ai: createAIReviewApi(request) } : {}),
     read: async () => parseRoadmap(await call("/roadmap")),
     generate: async (body: GeneratePlan) =>
       parseRoadmap(await call("/roadmap/generate", body)),

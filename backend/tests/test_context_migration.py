@@ -75,7 +75,7 @@ async def test_context_migration_preserves_legacy_profile_and_target(database: A
                 )
                 assert (
                     await connection.scalar(text("SELECT version_num FROM alembic_version"))
-                    == "0010_security_budgets"
+                    == "0012_ai_context_reviews"
                 )
         finally:
             await engine.dispose()

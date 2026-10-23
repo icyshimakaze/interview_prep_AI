@@ -52,6 +52,9 @@ class BaseProvider(ABC):
     model: str | None = None
     timeout_seconds: float = 30.0
 
+    def model_for(self, operation: Operation) -> str | None:
+        return self.model
+
     @abstractmethod
     async def _generate(self, operation: Operation, content: Input, schema: type[Contract]) -> str:
         """Return untrusted JSON. Validation and provenance are imposed afterward."""
@@ -81,7 +84,7 @@ class BaseProvider(ABC):
             provenance=Provenance(
                 provider=self.name,
                 provider_version=self.version,
-                model=self.model,
+                model=self.model_for(operation),
                 kind=self.kind,
                 prompt_version=EVALUATION_PROMPT_VERSION
                 if operation == "evaluate_answer"

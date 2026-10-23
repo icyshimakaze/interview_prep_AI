@@ -91,7 +91,7 @@ test("public product sections, privacy and footer are usable and accessible", as
 }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Walk in witha clearer head.",
+    "Prepare for your next interview.",
   );
   for (const id of ["product", "how-it-works", "features", "privacy"])
     await expect(page.locator(`#${id}`)).toBeVisible();
@@ -133,29 +133,84 @@ for (const section of workspaceSections) {
         .getByRole("link", { name: section.label, exact: true }),
     ).toHaveAttribute("aria-current", "page");
     await checkAccessibility(page);
-    if (
-      section.slug === "dashboard" ||
-      section.slug === "assessments" ||
-      section.slug === "settings"
-    )
+    await page.screenshot({
+      path: test.info().outputPath(`${section.slug}-desktop.png`),
+      fullPage: true,
+    });
+    for (const width of [375, 320]) {
+      await page.setViewportSize({ width, height: 812 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await checkAccessibility(page);
       await page.screenshot({
-        path: test.info().outputPath(`${section.slug}-desktop.png`),
+        path: test.info().outputPath(`${section.slug}-${width}.png`),
         fullPage: true,
       });
-    await page.setViewportSize({ width: 375, height: 812 });
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-    ).toBe(true);
-    await checkAccessibility(page);
-    if (section.slug === "dashboard" || section.slug === "assessments")
-      await page.screenshot({
-        path: test.info().outputPath(`${section.slug}-mobile.png`),
-        fullPage: true,
-      });
+    }
   });
 }
+
+test("mobile question filters preserve selections when collapsed and remain keyboard operable", async ({
+  page,
+}) => {
+  await mockDemo(page);
+  await page.setViewportSize({ width: 320, height: 812 });
+  await page.goto("/demo/questions");
+  const toggle = page.getByRole("button", { name: "Filters", exact: true });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  const difficulty = page.getByRole("combobox", {
+    name: "Difficulty",
+    exact: true,
+  });
+  await expect(difficulty).not.toBeVisible();
+  await toggle.focus();
+  await page.keyboard.press("Enter");
+  await expect(difficulty).toBeVisible();
+  await difficulty.selectOption("hard");
+  const activeToggle = page.getByRole("button", {
+    name: "Filters (1 active)",
+    exact: true,
+  });
+  await activeToggle.click();
+  await expect(difficulty).not.toBeVisible();
+  await activeToggle.focus();
+  await page.keyboard.press("Space");
+  await expect(difficulty).toHaveValue("hard");
+  await expect(activeToggle).toHaveAttribute("aria-expanded", "true");
+  await checkAccessibility(page);
+  await page.getByRole("button", { name: "Clear filters" }).click();
+  await expect(difficulty).toHaveValue("");
+  expect(
+    await page
+      .getByLabel("Search questions")
+      .evaluate((element) => element.getBoundingClientRect().width),
+  ).toBeGreaterThanOrEqual(240);
+});
+
+test("keyboard skip link and reduced motion remain available", async ({
+  page,
+}) => {
+  await mockDemo(page);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/demo");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await page.keyboard.press("Tab");
+  await expect(
+    page.getByRole("link", { name: "Skip to main content" }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#main-content")).toBeFocused();
+  expect(
+    await page
+      .getByRole("link", { name: "Dashboard", exact: true })
+      .evaluate((element) =>
+        parseFloat(getComputedStyle(element).transitionDuration),
+      ),
+  ).toBeLessThanOrEqual(0.01);
+});
 
 test("mobile menu and deletion dialog contain focus, close on Escape, and recover from failure", async ({
   page,

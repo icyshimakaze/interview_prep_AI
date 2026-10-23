@@ -9,6 +9,7 @@ import type {
   Roadmap,
 } from "@/lib/api/planning";
 import { SectionHeader } from "./section-header";
+import { AIReview } from "./ai-review";
 
 function PlanTasks({
   plan,
@@ -52,10 +53,7 @@ function PlanTasks({
       )}
       <ul className="space-y-4">
         {plan.items.map((i) => (
-          <li
-            key={i.id}
-            className="rounded-xl border border-line bg-surface p-5"
-          >
+          <li key={i.id} className="border-t border-line py-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h3 className="font-semibold">{i.topic}</h3>
@@ -187,13 +185,12 @@ export function PersonalRoadmap({ api }: { api: PlanningApi }) {
       {data && (
         <>
           {data.mode === "demo" && (
-            <p className="rounded-lg border p-3">
-              Demo workspace · fictional context and simulated history. These
-              tasks do not validate real competence.
+            <p className="text-sm text-muted">
+              Completing a demo task records practice, not verified competence.
             </p>
           )}
           <form
-            className="space-y-4 rounded-xl border border-line p-5"
+            className="space-y-4 border-y border-line bg-surface p-5 sm:p-6"
             onSubmit={(e) => {
               e.preventDefault();
               const minutes = Number(hours) * 60;
@@ -226,10 +223,10 @@ export function PersonalRoadmap({ api }: { api: PlanningApi }) {
             }}
           >
             <div className="grid gap-4 sm:grid-cols-3">
-              <label>
+              <label className="min-w-0 text-sm font-medium">
                 Target job
                 <select
-                  className="mt-2 block w-full rounded-lg border p-2"
+                  className="input mt-2"
                   value={target}
                   disabled={busy}
                   onChange={(e) => setTarget(e.target.value)}
@@ -242,10 +239,10 @@ export function PersonalRoadmap({ api }: { api: PlanningApi }) {
                   ))}
                 </select>
               </label>
-              <label>
+              <label className="min-w-0 text-sm font-medium">
                 Available hours per week
                 <input
-                  className="mt-2 block w-full rounded-lg border p-2"
+                  className="input mt-2"
                   type="number"
                   min="0.25"
                   max="168"
@@ -256,10 +253,10 @@ export function PersonalRoadmap({ api }: { api: PlanningApi }) {
                   onChange={(e) => setHours(e.target.value)}
                 />
               </label>
-              <label>
+              <label className="min-w-0 text-sm font-medium">
                 Interview date (optional)
                 <input
-                  className="mt-2 block w-full rounded-lg border p-2"
+                  className="input mt-2"
                   type="date"
                   value={date}
                   disabled={busy}
@@ -268,10 +265,8 @@ export function PersonalRoadmap({ api }: { api: PlanningApi }) {
               </label>
             </div>
             <p className="text-sm text-muted">
-              Uses job priorities, resume context, assessment and interview
-              history, and unscored Project Defense practice. Earlier versions
-              and completed tasks stay in history. New evidence can recommend a
-              fresh activity on the same topic.
+              Regenerating keeps completed tasks and earlier plans in history.
+              Each task explains which saved evidence informed it.
             </p>
             <Button type="submit" disabled={busy}>
               {busy
@@ -289,7 +284,15 @@ export function PersonalRoadmap({ api }: { api: PlanningApi }) {
           )}
           {data.current && (
             <section className="space-y-4">
-              <h2 className="text-xl font-semibold">Current roadmap</h2>
+              <h2 className="section-title">Current roadmap</h2>
+              {data.mode === "account" && api.ai && (
+                <AIReview
+                  key={`${data.current.id}:${data.current.revision}`}
+                  api={api.ai}
+                  resource={`roadmaps/${data.current.id}`}
+                  label="Suggest roadmap activities"
+                />
+              )}
               <PlanTasks
                 plan={data.current}
                 busy={busy}
@@ -298,7 +301,7 @@ export function PersonalRoadmap({ api }: { api: PlanningApi }) {
             </section>
           )}
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold">Preserved history</h2>
+            <h2 className="section-title">Preserved history</h2>
             {!data.history.length && (
               <p>
                 Earlier generations will appear here. Regeneration does not
@@ -306,7 +309,7 @@ export function PersonalRoadmap({ api }: { api: PlanningApi }) {
               </p>
             )}
             {data.history.map((p) => (
-              <details className="rounded-xl border p-4" key={p.id}>
+              <details className="border-t border-line py-4" key={p.id}>
                 <summary className="cursor-pointer font-medium">
                   {p.title} · {new Date(p.created_at).toLocaleDateString()} ·{" "}
                   {p.items.filter((i) => i.status === "completed").length}{" "}

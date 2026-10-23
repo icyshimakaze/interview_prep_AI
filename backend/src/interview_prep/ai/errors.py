@@ -17,6 +17,11 @@ class ProviderTimeout(ProviderError):
         super().__init__("ai_timeout")
 
 
+class ProviderRateLimited(ProviderUnavailable):
+    def __init__(self) -> None:
+        ProviderError.__init__(self, "ai_rate_limited")
+
+
 class InvalidProviderOutput(ProviderError):
     def __init__(self) -> None:
         super().__init__("ai_invalid_output")

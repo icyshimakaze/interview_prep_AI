@@ -32,7 +32,7 @@ function Trend({
     )
     .join(" ");
   return (
-    <figure className="my-4 rounded-xl border border-line bg-surface p-4">
+    <figure className="my-4 border-y border-line bg-surface p-4">
       <svg
         viewBox="0 0 460 155"
         role="img"
@@ -87,9 +87,9 @@ function Evidence({
   empty: string;
 }) {
   return items.length ? (
-    <ul className="space-y-3">
+    <ul className="divide-y divide-line border-y border-line">
       {items.map((s, i) => (
-        <li className="rounded-lg border p-4" key={`${s.topic}-${i}`}>
+        <li className="py-4" key={`${s.topic}-${i}`}>
           <h3 className="font-semibold">{s.topic}</h3>
           <p className="mt-2">{s.description}</p>
           <p className="mt-2 text-sm text-muted">
@@ -106,11 +106,10 @@ function Evidence({
 export function ProgressReport({ data }: { data: Progress }) {
   const objective = data.assessments.filter((a) => a.graded > 0);
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-sm leading-7">
       {data.mode === "demo" && (
-        <p className="rounded-lg border p-3">
-          Demo workspace · persisted fictional context and sample history.
-          Simulations do not establish real strengths.
+        <p className="text-muted">
+          Simulated history does not establish real strengths.
         </p>
       )}
       <section>
@@ -200,7 +199,7 @@ export function ProgressReport({ data }: { data: Progress }) {
           </p>
         )}
         {data.interview_series.map((s) => (
-          <article className="rounded-xl border p-4" key={s.key}>
+          <article className="border-t border-line py-4" key={s.key}>
             <h3 className="font-semibold">
               {s.provider || s.kind} · {s.model ?? "No model"} · {s.profile}
             </h3>
@@ -267,7 +266,7 @@ export function ProgressReport({ data }: { data: Progress }) {
           <ul className="space-y-3">
             {data.frequently_missed.map((m) => (
               <li
-                className="rounded-lg border p-4"
+                className="border-t border-line py-4"
                 key={`${m.basis}:${m.concept}`}
               >
                 <strong>{m.concept}</strong>

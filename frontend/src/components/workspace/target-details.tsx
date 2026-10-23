@@ -1,7 +1,15 @@
 import type { Target } from "@/lib/api/workspace";
 import { Badge } from "@/components/ui/table";
+import type { AIReviewApi } from "@/lib/api/ai-review";
+import { AIReview } from "./ai-review";
 
-export function TargetDetails({ target }: { target: Target }) {
+export function TargetDetails({
+  target,
+  ai,
+}: {
+  target: Target;
+  ai?: AIReviewApi;
+}) {
   return (
     <article className="mt-5 space-y-6">
       <div>
@@ -22,6 +30,14 @@ export function TargetDetails({ target }: { target: Target }) {
           {target.description ?? "No description recorded."}
         </p>
       </section>
+      {ai && target.description && (
+        <AIReview
+          key={`${target.id}:${target.revision}`}
+          api={ai}
+          resource={`targets/${target.id}`}
+          label="Review job description"
+        />
+      )}
       {target.notes && (
         <section>
           <h3 className="text-sm font-semibold">Your notes</h3>

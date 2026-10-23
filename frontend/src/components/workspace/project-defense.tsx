@@ -1,7 +1,9 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ErrorDisplay } from "@/components/ui/states";
 import type { Defense, DefenseAction, ProjectApi } from "@/lib/api/projects";
+import { AIReview } from "./ai-review";
 
 export function ProjectDefense({
   initial,
@@ -13,6 +15,10 @@ export function ProjectDefense({
   onBack: () => void;
 }) {
   const [run, setRun] = useState(initial);
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    heading.current?.focus();
+  }, []);
   const current = run.responses.find(
     (r) => r.position === run.current_position,
   );
@@ -75,30 +81,36 @@ export function ProjectDefense({
   const dirty = answer !== (current?.answer_text ?? "");
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold">Project Defense interview</h2>
-      <p>
-        Deterministic practice · {run.status} · No AI evaluation or numerical
-        score. Explain decisions, evidence, trade-offs and your own
-        contributions, including AI assistance.
+      <h1 ref={heading} tabIndex={-1} className="page-title">
+        Project Defense interview
+      </h1>
+      <p className="text-sm leading-7 text-muted">
+        Deterministic practice · {run.status} ·{" "}
+        {api.ai
+          ? "Optional AI feedback is available below for submitted answers."
+          : "No AI evaluation or numerical score."}{" "}
+        Explain decisions, evidence, trade-offs and your own contributions,
+        including AI assistance.
       </p>
-      {error && <p role="alert">{error} Your local answer is retained.</p>}
+      {error && (
+        <ErrorDisplay
+          title="Practice request failed"
+          message={`${error} Your local answer is retained.`}
+        />
+      )}
       {saved && <p role="status">{saved}</p>}
       {recoveredDraft !== null && (
         <label className="block">
           Recovered local draft from the previous question (not submitted)
-          <textarea
-            className="mt-2 w-full rounded-lg border p-3"
-            readOnly
-            value={recoveredDraft}
-          />
+          <textarea className="input mt-2" readOnly value={recoveredDraft} />
         </label>
       )}
       {run.status !== "completed" && current && (
-        <section className="space-y-4 rounded-xl border p-5">
-          <h3 className="text-lg font-semibold">
+        <section className="space-y-4 border-y border-line bg-surface p-5">
+          <h2 className="section-title">
             Question {current.position} of {run.responses.length}:{" "}
             {current.question.focus}
-          </h3>
+          </h2>
           <p>{current.question.prompt}</p>
           <p className="text-sm">
             {current.question.inferred ? "Inferred clue" : "Observed clue"}:{" "}
@@ -110,7 +122,7 @@ export function ProjectDefense({
           <label className="block">
             Your answer
             <textarea
-              className="mt-2 min-h-48 w-full rounded-lg border p-3"
+              className="input mt-2 min-h-48"
               maxLength={10000}
               value={answer}
               disabled={busy || run.status !== "active"}
@@ -124,7 +136,11 @@ export function ProjectDefense({
           <div className="flex flex-wrap gap-2">
             {run.status === "active" ? (
               <>
-                <Button disabled={busy} onClick={() => void act("save")}>
+                <Button
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => void act("save")}
+                >
                   Save draft
                 </Button>
                 <Button
@@ -133,10 +149,18 @@ export function ProjectDefense({
                 >
                   Submit answer
                 </Button>
-                <Button disabled={busy} onClick={() => void act("skip")}>
+                <Button
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => void act("skip")}
+                >
                   Skip question
                 </Button>
-                <Button disabled={busy} onClick={() => void act("pause")}>
+                <Button
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => void act("pause")}
+                >
                   Save and pause
                 </Button>
               </>
@@ -146,19 +170,24 @@ export function ProjectDefense({
               </Button>
             )}
             <Button
+              variant="outline"
               disabled={busy || (run.status === "paused" && dirty)}
               onClick={() => void act("end")}
             >
               End practice
             </Button>
-            <Button disabled={busy} onClick={() => void act("reload")}>
+            <Button
+              variant="ghost"
+              disabled={busy}
+              onClick={() => void act("reload")}
+            >
               Reload saved session
             </Button>
           </div>
         </section>
       )}
       <details
-        className="rounded-xl border p-4"
+        className="border-t border-line pt-4"
         open={run.status === "completed"}
       >
         <summary className="cursor-pointer font-semibold">
@@ -179,6 +208,13 @@ export function ProjectDefense({
                   {new Date(r.submitted_at).toLocaleString()}
                 </p>
               )}
+              {api.ai && r.status === "submitted" && (
+                <AIReview
+                  api={api.ai}
+                  resource={`defense/${encodeURIComponent(run.id)}/${r.position}`}
+                  label={`Review defense answer ${r.position}`}
+                />
+              )}
             </li>
           ))}
         </ol>
@@ -188,7 +224,7 @@ export function ProjectDefense({
           next.
         </p>
       </details>
-      <Button disabled={busy || dirty} onClick={onBack}>
+      <Button variant="outline" disabled={busy || dirty} onClick={onBack}>
         Back to repository
       </Button>
       {dirty && <p>Save or pause before leaving to retain your answer.</p>}

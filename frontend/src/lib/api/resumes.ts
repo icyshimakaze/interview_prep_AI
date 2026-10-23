@@ -1,5 +1,6 @@
 import type { components } from "./generated";
 import { WorkspaceError } from "./workspace";
+import { createAIReviewApi, type AIReviewApi } from "./ai-review";
 
 export type Resume = components["schemas"]["ResumeDetail"];
 export type Evidence = components["schemas"]["EvidenceView"];
@@ -131,6 +132,7 @@ export function validateResumeFile(file: File): string | null {
 }
 
 export type ResumeApi = {
+  ai?: AIReviewApi;
   list: (signal?: AbortSignal) => Promise<Resume[]>;
   read: (id: string) => Promise<Resume>;
   upload: (file: File) => Promise<Resume>;
@@ -150,6 +152,7 @@ export function createResumeApi(
   const result = async (url: string, init?: RequestInit) =>
     parseResume(await (await request(url, init)).json());
   return {
+    ai: createAIReviewApi(request),
     list: async (signal) => {
       const row = object(await (await request(root, { signal })).json());
       if (!Array.isArray(row.items) || row.items.length > 5)

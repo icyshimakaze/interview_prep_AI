@@ -246,5 +246,5 @@ async def test_project_populated_downgrade_preserves_snapshot_and_answer(
     assert saved.responses[0].answer_text == "Keep history"
     async with database.connect() as connection:
         assert await connection.scalar(text("SELECT version_num FROM alembic_version")) == (
-            "0010_security_budgets"
+            "0012_ai_context_reviews"
         )

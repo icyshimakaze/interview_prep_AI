@@ -2,9 +2,9 @@ import type { Project } from "@/lib/api/projects";
 
 function Facts({ facts }: { facts: Project["facts"] }) {
   return facts.length ? (
-    <ul className="space-y-3">
+    <ul className="divide-y divide-line border-y border-line">
       {facts.map((f, i) => (
-        <li key={i} className="rounded-lg border p-3">
+        <li key={i} className="py-3">
           <strong>
             {f.inferred ? "Inferred" : "Observed"} · {f.kind}
           </strong>
@@ -24,8 +24,8 @@ function Facts({ facts }: { facts: Project["facts"] }) {
 }
 export function ProjectAnalysis({ project }: { project: Project }) {
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Repository analysis</h2>
+    <div className="space-y-6 text-sm leading-7">
+      <h2 className="section-title">Repository analysis</h2>
       <p>
         {project.example
           ? "Illustrative demo fixture"
@@ -65,7 +65,7 @@ export function ProjectAnalysis({ project }: { project: Project }) {
           )}
         />
       </section>
-      <details className="rounded-xl border p-4">
+      <details className="border-t border-line pt-4">
         <summary className="cursor-pointer font-semibold">
           Technology view
         </summary>
@@ -81,7 +81,7 @@ export function ProjectAnalysis({ project }: { project: Project }) {
           )}
         />
       </details>
-      <details className="rounded-xl border p-4">
+      <details className="border-t border-line pt-4">
         <summary className="cursor-pointer font-semibold">
           Tests, CI, Docker and documentation
         </summary>
@@ -91,7 +91,7 @@ export function ProjectAnalysis({ project }: { project: Project }) {
           )}
         />
       </details>
-      <details className="rounded-xl border p-4">
+      <details className="border-t border-line pt-4">
         <summary className="cursor-pointer font-semibold">
           Directory structure and inspected files
         </summary>

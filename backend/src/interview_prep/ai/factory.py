@@ -3,6 +3,7 @@ import httpx
 from interview_prep.ai.mock import MockAIProvider
 from interview_prep.ai.provider import AIProvider
 from interview_prep.ai.remote import OllamaProvider, OpenAIProvider
+from interview_prep.ai.xkiro import XkiroProvider
 from interview_prep.core.config import Settings
 
 
@@ -11,6 +12,8 @@ def create_provider(
 ) -> AIProvider:
     if demo or settings.ai_provider == "mock":
         return MockAIProvider()
+    if settings.ai_provider == "xkiro":
+        return XkiroProvider(client, settings)
     if settings.ai_provider == "ollama":
         return OllamaProvider(
             client,

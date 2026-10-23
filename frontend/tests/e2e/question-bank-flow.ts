@@ -100,6 +100,7 @@ export async function checkQuestionBank(page: Page) {
   await page.reload();
   await page.getByLabel("Search questions").fill("Two Sum");
   await page.getByRole("button", { name: "Search", exact: true }).click();
+  await page.getByRole("button", { name: /^Filters/ }).click();
   await page
     .getByRole("combobox", { name: "Attempted state", exact: true })
     .selectOption("yes");

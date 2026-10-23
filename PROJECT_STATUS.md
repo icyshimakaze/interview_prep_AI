@@ -1,8 +1,487 @@
 # Project Status
 
-Updated: 2026-10-22 (Asia/Calcutta).
+Updated: 2026-10-23 (Asia/Calcutta).
 
-## Engineering portfolio presentation (current phase)
+Deployment-guide follow-up: checked current provider documentation and moved the
+Blueprint's `DATABASE_URL` and `ALLOWED_ORIGINS` prompts from the environment group
+to the service. Render ignores group-level `sync: false`; generated keys and other
+defaults stay in the group. Updated the runbook accordingly. No deployment or
+secret-file change. Formatting and whitespace checks passed for this correction;
+hosted Blueprint validation remains part of the user's import review.
+
+## Phase 23B — free-tier production deployment preparation
+
+Completed 23 October 2026. See the [A–S deployment runbook](docs/DEPLOYMENT.md),
+[full preparation report](docs/PHASE_23B_REPORT.md) and
+[phase plan](.agent/plans/phase-23b.md). No push, hosted deployment, paid resource,
+existing application-data migration or actual dotenv-file change occurred.
+
+- Replaced the paid Starter + cron Blueprint with **one Render Free web service**,
+  retaining Vercel and Neon. No cron/worker/disk/Render DB is provisioned. Initial
+  profile stays zero-key mock; complete backend/frontend account examples enable
+  Clerk + xKiro on the **same app** while recruiter demo remains isolated/mock.
+- Production now validates selected AI/auth/security settings, rejects placeholder
+  gateway/database secrets, and checks database/schema read-only before serving.
+  Startup never migrates or seeds; head remains **0012**, with no schema change.
+  Render probes `/health`; explicit `/api/v1/health/ready` still checks DB/revision.
+  Production docs/OpenAPI routes remain disabled.
+- In-process cleanup runs at startup/hourly while awake. **Sleeping/suspended
+  services cannot perform scheduled physical deletion**; expiry authorization
+  still denies access. Updated runbook/privacy copy rather than promising an
+  hourly deletion SLA on Free. Existing standalone cleanup remains available.
+- Free profile uses 600-second idle interview polling, owned-read/mutation wakeups
+  and a lost-wakeup fix; durable jobs retain existing fences/failure behavior.
+  PDF/project processing shares bounded capacity, set to one slot on Free.
+- Added content-free production request metadata logging (method, route template,
+  status, duration and random request ID), with raw access logs off. No raw paths,
+  queries, headers, bodies, IPs or identities. Added production HSTS and required
+  matching Clerk live keys for the Vercel account profile. Backend credentials
+  remain outside client bundles; no new public API-base variable is needed.
+- Documented exact monorepo Docker/Next commands, all real environment names,
+  manual Neon migrations/grants, safe per-visitor demo initialization, Clerk
+  DNS/JWT/redirect settings, secret entry, redeploy/recovery and spending controls.
+  Account example conservatively uses zero retries and 10 / 30 / 100 owner-hourly /
+  owner-daily / global-daily AI budgets, with exact requested free Qwen IDs.
+
+Final verification:
+
+- Full backend gate passed: **628 tests in 435.83 seconds**, Ruff lint/format
+  (**209 files**), strict mypy (**196 source files**), fresh migration, complete
+  downgrade/upgrade round-trip, zero schema drift, OpenAPI/contracts and legacy
+  hashes/seeds. Corrected one new test's expected demo bootstrap status to its
+  existing **200** contract; the focused and complete reruns passed. No check
+  was disabled or weakened.
+- Frontend zero-warning lint, strict TypeScript and **166 tests across 18 files**
+  passed. Vercel-production gateway build, browser production build and final
+  ordinary native production build passed. TypeScript regeneration equality,
+  repository Prettier, Actionlint, Compose config and Git whitespace passed.
+- Full local production harness passed at 0012 with verified PostgreSQL and
+  frontend/backend TLS, restricted runtime grants, non-root **512 MiB API**,
+  mock/no AI credentials, 29 catalogue versions/zero repeat writes, secure cookies,
+  CSRF, exact origins, gateway spoof rejection, quotas and cleanup. This is not
+  a hosted 0.1-CPU load/reliability benchmark.
+- **25 Playwright tests passed**, one Chrome worker: persisted recruiter journey,
+  visitor isolation/deletion, assessments/interviews, roadmap/progress, illustrative
+  Project Defense, error recovery, desktop/mobile/keyboard and automated axe checks.
+- Production-account regression verifies signed test JWT/JWKS, ownership and a
+  mocked real-provider failure while the demo stays mock/usable. No live Clerk
+  callback or hosted authentication claim. **No live inference in 23B**; earlier
+  23A smoke remains historical evidence only.
+- Four configured private values had zero matches in **436 checked source files**
+  and **23 browser JS files**. No actual env files tracked now or found by filename
+  in reachable history; production image contains no dotenv files. Existing env
+  ignore rules verified. Verification-owned DBs/containers/servers and generated
+  runtime credentials were removed; unrelated existing resources were preserved.
+
+Ready for a separately authorized, limited recruiter preview within provider
+free-tier limits. Personal steps remain: canonical domain/profile choice, free
+platform/repository account connections, private secret entry, Neon roles/backup/
+migration grants, Clerk production domain/DNS/JWT/OAuth and actual hosted flow
+verification. Render sleeps/restarts, Neon/Vercel/Clerk quotas apply, and xKiro free
+availability is not guaranteed. Do not provision paid services to bypass limits.
+
+Before broad personal-data account registration, resolve existing self-service
+export/erasure, Clerk deletion reconciliation and strict script-CSP release gaps.
+The running local stack was not refreshed; its previously observed revision 0010
+still requires the documented image/migration update. No public URL was claimed.
+Next task: review the runbook and complete account-dependent setup/release gaps;
+deploy only under separate explicit authorization.
+
+## Phase 23A — complete xKiro integration and verification
+
+Completed 23 October 2026 against the existing working tree. See the
+[detailed nine-part report](docs/PHASE_23A_REPORT.md) and
+[phase plan](.agent/plans/phase-23a.md). Existing uncommitted work and actual
+root/backend/frontend secret files were preserved. No push or deployment.
+
+- Verified the pre-existing provider, schema/domain grounding, technical/STAR
+  rubrics, adaptive interviews, resume-evidence reviews, saved Defense feedback,
+  quotas and mock demo; kept those boundaries and deterministic engines.
+- Native Settings now read absolute root `.env`, then `backend/.env`, regardless
+  of shell cwd; process environment wins. Added requested `XKIRO_MODEL_SMART` and
+  `XKIRO_MODEL_MULTIMODAL` with backward-compatible legacy aliases. Added a
+  placeholder-only backend example and updated backend-only Compose forwarding.
+  Compose users with a backend-local key must specify both dotenv files as
+  documented in [XKIRO.md](docs/XKIRO.md). Actual dotenv files were not edited.
+- Connected opt-in saved job-description review, roadmap activity suggestions
+  from evidence-based saved reasons, and six project practice questions from
+  bounded static facts. Provider disclosure, explicit sharing consent and owned
+  sources precede dispatch. Existing requirements, plans, evidence and defense
+  runs are not mutated by these suggestions. No repository code is executed.
+- Additive migration **`0012_ai_context_reviews`** extends existing receipts with
+  composite owned source references, cascades and one-source validation. It
+  preserves existing rows/cache identities and refuses downgrade when new-source
+  results would be erased. Existing 30-day cleanup, cache reuse, quota reservation
+  and bounded explicit retry/fencing logic apply to the new operations.
+- Added four concurrent remote-call slots per shared application HTTP client;
+  total timeout includes slot wait. Database owner/global budgets remain shared
+  across processes. Free IDs remain unchanged; no paid or silent mock fallback.
+- After **160 mocked provider/schema/config/rubric/concurrency tests passed**,
+  executed exactly **one** minimal synthetic Max-free request (128-token cap,
+  60-second deadline, zero retries). **HTTP 200 in 3.86 seconds**: authentication,
+  exact `qwen/qwen3.8-max:free` identity and JSON validation passed. No private
+  document/answer was sent; no key/header/raw response was printed or saved.
+
+Final verification:
+
+- Complete backend gate passed: **610 tests in 401.94 seconds**, Ruff lint/format
+  (**205 files**), strict mypy (**192 source files**), fresh upgrade, schema drift,
+  full downgrade/upgrade round trip, OpenAPI equality and legacy hashes/seeds.
+  The disposable databases created by these runs were removed. A new fixture
+  typo exposed by the first full run was corrected; no check was weakened.
+- Frontend zero-warning lint, strict typecheck and **162 tests across 18 files**
+  passed; the final Next.js production build passed. Repository Prettier and
+  regenerated TypeScript contract equality checks passed. Offline backend wheel
+  and source-distribution builds also passed. Browser/container production
+  harnesses and live Clerk flows were not repeated in this phase.
+- No actual dotenv files tracked now or found by filename in reachable Git
+  history. Configured keys were absent from checked source, **23 browser JS
+  bundles**, and both Python package artifacts; neither archive contains actual
+  env files. Root/backend/frontend secret-file ignore rules were verified.
+- Tests use fictional credentials and in-memory HTTP; live HTTP is blocked in
+  pytest and CI needs no xKiro key. New regressions cover environment precedence,
+  requested/legacy variables, unsupported request statuses, concurrent/queued
+  deadlines, new source ownership/consent/cache/cascade/failures, guarded downgrade,
+  one-call synthetic smoke behavior and UI rerender/provenance parsing.
+
+Limits: the single live request establishes connectivity/parsing, not feature
+quality or Omni availability. Resume review still uses retained evidence;
+roadmap suggestions cover six short topics and at most 600 minutes; project
+questions use up to 30 static facts. Results require human review and cannot
+validate competence. Existing large synchronous assessment latency, account
+erasure/export and provider-retention limitations remain documented.
+
+The current local frontend/liveness/readiness return 200, but the running API
+still reports **`0010_security_budgets`**. It was not refreshed or migrated.
+Next: review/apply **0012**, refresh runtime grants and backend images, configure
+and test Clerk for real account flows, then complete the documented hosted release
+checks under separate deployment authorization. Public recruiter demo stays mock.
+No existing application data or running service was changed by verification.
+
+## Live xKiro resume verification (preceding phase)
+
+Used the user-authorized root environment key and supplied resume for actual free
+xKiro inference. The key was never printed, copied to an artifact or sent to the
+browser; the root `.env` and original PDF were not modified.
+
+- Real PDF upload returned **201**: one page, **35 retained evidence entries**.
+  Anonymous analysis access returned 401 and denied sharing consent returned 422
+  before dispatch. Protected endpoints used a locally signed test account and
+  test JWKS in a disposable database, not a real Clerk/browser login.
+- The initial 30-second request timed out. A 60-second diagnostic attempt returned
+  HTTP 200 in 32.69 seconds but had incorrect model-generated evidence offsets
+  (21 of 30 mismatched lengths); domain validation correctly rejected it.
+- Fixed the xKiro document wire contract: the model supplies exact quotes, and
+  the backend computes Unicode source positions locally. Unsupported/paraphrased
+  quotes, unexpected fields and duplicate names remain rejected. Public Pydantic
+  schemas and domain validation are unchanged. Versioned provider identity to
+  `xkiro-chat-v2`; Ollama/OpenAI/mock behavior is preserved.
+- The corrected live review returned **200** in **25.14 seconds**, using
+  **`qwen/qwen3.8-max:free`** with real `model_assisted` provenance: **29 grounded
+  skill mentions and six suggestions**. This is review feedback, not verified
+  competence. The private result is in ignored `.cache/live-xkiro-resume-result.json`;
+  the redacted verification report is `.cache/live-xkiro-check.json`.
+- Repeating the review reused the saved result with **no second upstream call or
+  quota reservation**. The recruiter demo remained `MockAIProvider` with no AI
+  call. All live-check disposable databases were removed. There were three
+  explicit resume inference attempts total (timeout, rejected output, success),
+  all using the requested free model; no paid model or silent mock fallback.
+- Focused mocked provider/schema tests: **113 passed**. The complete backend gate
+  passed: **594 tests** in 380.72 seconds, Ruff lint/format (**199 files**), strict
+  mypy (**187 sources**), fresh migration/downgrade/upgrade and drift checks,
+  OpenAPI equality and legacy hashes/seeds. Its disposable container/database and
+  generated credentials were removed. New regressions cover quote-only wire
+  schemas, Unicode/duplicate-source positions, invented/inexact quotes, unexpected
+  offset fields and duplicate skill rejection. Repository formatting/whitespace
+  checks passed. Frontend/public contracts were unchanged; frontend/browser gates
+  were not repeated in this backend-only correction (preceding results below).
+
+The running local website is reachable (HTTP 200), but its existing Compose API
+still reports **`0010_security_budgets`**, **`AI_PROVIDER=mock`** and
+**`AUTH_ENABLED=false`**; that image has no xKiro support. The root environment
+selects xKiro and loads the key, but the running container has not been refreshed.
+Adding the key alone does not rebuild containers, migrate the database or configure Clerk.
+The current-source backend resume flow is live-verified; the running browser's
+authenticated upload/review flow is not. Follow [the local update/key guide](docs/XKIRO.md)
+and [authentication setup](docs/AUTHENTICATION.md) to enable it. A diagnostic
+60-second deadline was used; the root's 30-second default was preserved. The
+guide documents the optional 60-second setting for variable free-model latency.
+No existing application data migration, auth change, deployment or push occurred.
+
+## xKiro integration (preceding phase)
+
+Implemented xKiro as the recommended real account provider using its fixed
+OpenAI-compatible Chat Completions endpoint. Mock remains the default and the
+zero-key recruiter demo is unchanged. Existing Ollama/OpenAI adapters remain.
+See [the plan](.agent/plans/xkiro-provider.md) and [secure setup](docs/XKIRO.md).
+
+- Backend-only `XKIRO_API_KEY` is masked/excluded from Settings serialization.
+  Existing secret files/values were not printed or modified; no live inference was requested.
+  Default models are `qwen/qwen3.8-max:free` for text/reasoning and
+  `qwen/qwen3.8-omni-flash:free` for the bounded inline-image adapter. Typed
+  per-operation routes are server configuration. Non-free IDs require an explicit
+  configured model and `XKIRO_ALLOW_PAID_MODELS=true`; no automatic paid fallback.
+- Pydantic envelope/domain validation rejects malformed JSON, partial completions,
+  tool calls, refusals, incorrect model identity and invalid evidence/rubrics.
+  Existing total deadlines, body/token limits and retry rules are reused. xKiro
+  rate-limit errors receive a safe distinct code; other adapters retain behavior.
+- Assessments/interviews use existing per-owner/global database budgets and saved
+  feedback. Routing changes alter frozen provider identity; per-call provenance
+  records the routed model, including contextual follow-ups. Objective grading,
+  selection, extraction, static scanning and practice transitions remain local.
+- Added opt-in account resume-evidence review and saved Project Defense answer
+  feedback. UI disclosure and sharing consent precede dispatch to xKiro/downstream
+  providers. Raw PDFs/source archives are not sent. A retained-evidence review is
+  not full-document analysis and cannot confirm claims or validated performance.
+- Additive migration **`0011_ai_analyses`** adds bounded owned analysis receipts,
+  composite source/owner constraints, 30-day expiry and cleanup. Completed results
+  are reused before a new budget/call; concurrent/ambiguous dispatch is fenced.
+  Resume revisions participate in cache identity; unique dispatch tokens prevent
+  late success/failure responses from overwriting replacement receipts.
+  One further explicit retry is allowed for failed work. Evidence mutations
+  invalidate old reviews and source/owner deletion cascades them. No existing
+  application data was migrated; update/grant instructions are documented.
+- Updated root/production env examples, backend-only Compose variables, CI/test
+  isolation, README, provider/privacy/deployment docs and generated API contracts.
+  The native env loader reads the ignored root `.env`, not `backend/.env`.
+
+Verification:
+
+- Complete backend gate: **589 tests passed** in 430.61 seconds, including 29
+  mocked xKiro cases and nine saved-analysis cases. These cover all six text
+  operations, image routing, free/paid guards, deadlines/errors, consent/ownership,
+  budgets, cache reuse/invalidation, expiry and stale-dispatch replacement fencing.
+  Ruff lint/format passed (**198 files**) and strict mypy passed (**186 source files**).
+- Fresh upgrade through **`0011_ai_analyses`**, downgrade/upgrade round trip and
+  schema drift checks passed on an isolated disposable PostgreSQL instance.
+  OpenAPI contracts and legacy hashes/seeds matched. The temporary database,
+  container and generated credentials were removed after verification.
+- Frontend zero-warning lint, strict typecheck and **158 tests across 18 files**
+  passed. The 11 new review tests cover explicit sharing, simulation provenance,
+  keyboard focus, safe retries/disclosures and actionable AI errors without
+  exposing upstream text. Review text wraps within narrow containers. Repository
+  Prettier and regenerated TypeScript-contract equality checks passed.
+- Complete **Next.js 16.4.1 production builds passed**, including the production
+  gateway configuration and final ordinary local target (`http://127.0.0.1:8000`).
+  The Linux backend production image also built successfully.
+- `scripts/check_production.py` passed locally at migration 0011: **mock AI with
+  no AI credentials**, TLS database/frontend/backend, non-root API, restricted
+  runtime grants, 29 seeded catalogue versions with zero repeat writes, secure
+  cookies/CSRF, exact CORS, gateway spoofing rejection, quotas and cleanup.
+  Browser bundles contained none of its generated server credentials. Owned
+  containers and ephemeral credentials/private key were removed afterward.
+- **25 Playwright tests passed** against a production frontend, temporary API
+  and separate database with mock AI. Desktop/375px/320px layouts, account-form
+  component fixtures, keyboard/skip links, dialog focus/Escape/recovery, reduced
+  motion, axe A/AA checks and the persisted candidate journey passed. The runner
+  removed its servers, database, container and generated credentials.
+
+Earlier resource-blocked attempts are superseded by these successful final checks.
+Verification used serial gates, one browser/build worker and bounded Node heaps.
+Three older disposable test databases remain on the pre-existing application
+PostgreSQL server; their originating runs could not be confirmed, so they were
+preserved. This verification's owned resources were removed.
+
+Next: configure a key privately using [docs/XKIRO.md](docs/XKIRO.md), apply the
+documented migration/grants and restart the backend when ready to enable account
+AI. Existing application data and running Compose images were not replaced.
+Live provider quality/availability, Clerk callbacks, hosted deployment and manual
+screen-reader/device checks remain unverified; none is claimed by mocked tests.
+No real xKiro/OpenAI call, application-data migration, deployment or push occurred.
+
+## Production deployment preparation (preceding phase)
+
+Prepared **Vercel + Render + Neon** without creating hosted resources, deploying,
+or requiring a paid AI API. Follow the
+[deployment runbook](docs/DEPLOYMENT.md) and
+[production plan](.agent/plans/production-deployment.md).
+[ADR 0001](docs/adr/0001-managed-deployment.md) selects Render: the earlier design
+chose a VM and contained no Render/Railway decision, so the hosting target is
+explicitly superseded rather than presented as an existing decision.
+
+- Added [Vercel configuration](frontend/vercel.json), a manual-deploy
+  [Render Blueprint](render.yaml), a production
+  [backend image](deploy/backend.Dockerfile) with reviewed catalogue content,
+  backend/frontend environment examples and
+  [restricted runtime grants](deploy/runtime-grants.sql). Render assigns `PORT`;
+  the new typed entry point binds it as a non-root process without trusting
+  arbitrary proxy headers. The root frontend-oriented Docker ignore rules remain
+  intact; a production-Dockerfile-specific allowlist keeps environments, tests,
+  caches and unrelated files out of this backend context.
+- Public release profile enforces **`PUBLIC_DEMO_ONLY=true`**, **`AI_PROVIDER=mock`**
+  and **`AUTH_ENABLED=false`**. No OpenAI, Ollama or Clerk key is needed. A separate
+  later account-enabled profile can select optional providers. Real feedback and
+  simulated history retain their existing provenance/validation distinctions.
+- Added an authenticated frontend gateway: Vercel's sanitized client-IP metadata
+  is forwarded with a server-only credential, supplied gateway fields are
+  replaced, and the API rejects direct/forged calls before body processing.
+  Existing ownership, CSRF and bearer checks remain. Native development ignores
+  browser-supplied forwarding addresses. CORS permits exact HTTPS origins only;
+  frontend Clerk authorized parties use only the configured canonical origin in
+  Vercel production, preserving local development aliases.
+- Production database access requires verified certificate/hostname TLS. Neon
+  examples use direct asyncpg URLs with explicit SSL context configuration,
+  avoiding incompatible libpq URL parameters and PgBouncer assumptions. Production
+  pools are bounded to three plus two connections per process; development/test
+  pool sizes and command timeouts are preserved. No schema or API DTO changes.
+- Migrations and idempotent question publication remain explicit owner-role
+  commands; only the restricted DB credential belongs on Render. API health is
+  the existing schema-aware readiness endpoint. Hourly cleanup uses that runtime
+  role. No automatic startup migrations, shared demo login or destructive seed.
+- The runbook covers Neon creation/roles, exact migration/publication/grant
+  commands, backend/frontend deployment, frozen pnpm/Corepack setup, complete
+  environment tables, canonical CORS/cookies, secrets, preview isolation,
+  callbacks, demo setup, optional local Ollama and optional OpenAI later. It
+  distinguishes free service accounts from hosting charges and AI API keys.
+  The prepared Render API/cron use paid compute; this is a no-paid-AI deployment,
+  not a promise of free hosting. Existing local `.env` and application data were
+  preserved, along with all preceding UI and cleanup work.
+
+### Verification
+
+- Local production-mode check passed with **no AI credentials**, using an owned
+  TLS PostgreSQL container, the non-root production API image, a restricted login,
+  and HTTPS frontend/backend gateways. It applied head `0010_security_budgets`,
+  checked schema drift, published **29 versions**, reran publication with **zero
+  new versions**, and verified DB TLS, no runtime DDL/schema-version writes,
+  actual same-origin secure cookies/CSRF, exact CORS, header spoof rejection,
+  two isolated visitors, creation quotas, mock-provider metadata and expiry cleanup.
+  Cleanup physically removed the expired principal while retaining the other demo.
+  Generated test credentials were absent from browser JS and response headers.
+- Frontend zero-warning lint, strict typecheck and **147 tests across 17 files**
+  passed, including **13 new gateway/production-configuration cases**. Production
+  Next.js builds passed under both production-profile and ordinary browser-test
+  configuration. **25 Playwright tests** passed with the full persisted candidate
+  journey and desktop/mobile accessibility checks. No checks were weakened.
+  The final native production build restores the ordinary localhost API target;
+  the existing running Compose application was not changed.
+- Render and Vercel manifests passed their publicly documented JSON schemas.
+  Repository formatting, local runbook links and `git diff --check` passed.
+- Full backend gate passed: **551 tests in 496.11 seconds**, including **29 new
+  deployment cases**; Ruff lint/format (**191 files**), strict mypy (**180 source
+  files**), disposable migration downgrade/re-upgrade, schema drift, OpenAPI and
+  legacy preservation all passed. No application database was downgraded or reset.
+
+### Limits and next task
+
+No Vercel/Render/Neon/Clerk account, project, DNS entry, callback or hosted database
+was created or changed. No push, deployment, paid inference, external repository
+import or application-data migration occurred. Local TLS ingress models Vercel's
+documented metadata contract; it is not hosted-platform verification. Real network
+quotas/cookies, cold starts, provider certificates, plan limits, backups/restore
+and optional Clerk/OAuth still need the runbook's release smoke after explicit
+authorization. Account data remains disabled in the public profile until the
+documented privacy/lifecycle release requirements are met. Next: review the
+prepared configuration and authorize a separate deployment only when ready.
+
+## Product quality and accessibility review (preceding phase)
+
+Reviewed all fourteen requested product areas using the
+[product quality plan](.agent/plans/product-quality-review.md). Demo/Dashboard
+and Profile/Settings share routes, producing twelve distinct public/demo screens.
+The [page-by-page review](docs/PRODUCT_QUALITY_REVIEW.md) records findings,
+changes, accessibility evidence and limitations. Existing cleanup, test and
+changelog work from the preceding startup phase was preserved.
+
+- Inspected the running app in Chrome at **1280 × 900, 375 × 812 and 320 × 812**.
+  Retained before/after captures and machine-readable results in ignored
+  `.cache/product-review-before/` and `.cache/product-review-after/`. The after
+  pass covered **36 page scans**, with **no document overflow or axe violations**;
+  six additional repository-analysis/defense scans also passed. Wide semantic
+  tables intentionally retain contained horizontal scrolling.
+- Replaced generic landing/dashboard slogans and stale feature-availability
+  claims with concrete capabilities and next actions. Removed repeated advice,
+  decorative icons and oversized empty-state spacing. Flattened excess task,
+  evidence, history and review cards while keeping the established visual system.
+- Fixed unstyled interview controls/answer input, the squeezed mobile search and
+  repository URL fields, **15px of ZIP-picker overflow at 320px**, table row-header
+  styling and the stray final-row border. Mobile filters now expose their state
+  and applied count, preserve selections and work with Enter/Space. Pagination
+  wraps, checkbox labels provide larger targets, and control typography is
+  consistent. Source/evidence policy detail remains available in disclosures.
+- Input-boundary contrast against white improved from **1.83:1 to 3.58:1**.
+  Project Defense practice has an H1 and receives focus when opened; its primary
+  action is distinct from secondary controls. Loading includes visible status
+  text. Consistent project alerts retain actionable messages and local drafts.
+  Corrected a written-answer hint that always claimed mock feedback, and an
+  undefined interview feedback-background class. No fabricated metrics, outcomes
+  or testimonials were added; simulation/provenance/privacy notices remain.
+- The production build exposed a security stop for Next.js **16.4.0**. Verified
+  the official 14 October advisory and registry audit, then patched Next.js and
+  its matching ESLint configuration to **16.4.1**. Only their resolved packages
+  changed; no new library was added. Production audit then reported **zero known
+  advisories**, compared with one critical and one high advisory before the fix.
+
+### Verification
+
+- Frontend zero-warning **lint**, strict **typecheck**, all **134 component tests
+  across 15 files**, and the **production build** passed. Repository Prettier and
+  `git diff --check` passed. The initial sandbox build worker failure was rerun
+  with process access; the subsequent security stop was resolved by the patch.
+- **25 Playwright tests across four specs passed**, including two new keyboard/
+  mobile-filter/reduced-motion regressions, all workspace screens at desktop,
+  375px and 320px, and actual account-form component fixtures at the same sizes.
+  The real candidate journey still covers filters, saved assessments, mock
+  interviews, repository analysis/defense, roadmap changes, persisted progress,
+  ownership isolation and demo erasure. No assertions or gates were weakened.
+- Checked keyboard navigation/skip links, route and invalid-field focus, dialog
+  focus containment/Escape/return, labels and accessible names, heading/table
+  semantics, text/control contrast, alerts/retry and reduced motion. Final axe
+  A/AA scans reported zero violations; this is not a full conformance claim.
+- Built the Linux frontend image and refreshed only the local frontend service.
+  The app remains at **http://localhost:3000**. Readiness and same-origin HTTP/API/
+  PostgreSQL smoke passed. Browser runners removed their temporary servers and
+  disposable databases; the application database and other services were retained.
+
+### Limits and next task
+
+Live Clerk sign-in is unconfigured. Account forms were inspected as labelled
+static fixtures and tested with authenticated-client component mocks, not a real
+account session. No manual screen-reader audio session, physical mobile device,
+real AI provider or external repository import was tested. Backend logic, APIs,
+migrations and ownership rules were unchanged; the full backend suite was not
+rerun. All edits remain uncommitted; no push or public deployment occurred.
+Next: verify the configured account journey with a real Clerk development
+instance and conduct a manual screen-reader/device pass before public release.
+
+## Local application startup (preceding phase)
+
+The user authorized running the documented local setup. Docker Desktop was already
+running with older containers; the existing ignored `.env` was preserved. Built
+and started the current Compose services, applied migrations through
+`0010_security_budgets` to the configured application database and explicitly
+published **29 new reviewed catalogue versions**. The existing PostgreSQL volume
+was retained. The website is running at `http://localhost:3000`; the demo was
+opened in the default browser. Services are intentionally left running for use.
+
+- Startup exposed an existing cleanup crash: the standalone maintenance process
+  imported only part of the ORM graph, so mapper configuration could not resolve
+  referenced interview/project tables. API/test initialization had already loaded
+  these models, masking the separate entry-point failure.
+- Fixed [cleanup startup](backend/src/interview_prep/cleanup.py) to import and
+  configure the complete explicit model registry before database work. Added a
+  [fresh-interpreter regression](backend/tests/test_cleanup.py) independent of
+  pytest's preloaded models; it failed before the fix and passed afterward.
+- Rebuilt the cleanup image, completed a real one-shot maintenance invocation
+  successfully and restarted the hourly loop. Expiry cleanup remains its intended
+  behavior; no volume reset, downgrade or manual deletion of candidate data.
+- **8 focused tests passed** (new cleanup regression plus isolation tests). Backend
+  lint, format (**186 files**) and strict mypy (**175 source files**) passed.
+  No frontend, dependency, schema or API contract change was required.
+- Compose startup/readiness, migration-head inspection and the HTTP smoke passed:
+  frontend, API liveness, PostgreSQL/schema and same-origin forwarding. Landing,
+  demo and service-status pages returned HTTP 200. A real headless browser clicked
+  **Verify connection**, confirmed API/PostgreSQL connectivity and revision 0010,
+  and verified the demo entry. An initial shell-pipe encoding mismatch in the
+  temporary assertion was corrected with a Unicode escape; the unchanged UI's
+  full connection text then passed. No paid provider call was made.
+
+The full automated suite was not rerun for this small startup fix. Code/test/status
+changes remain uncommitted; this request authorized local execution, not a new
+commit/push or public deployment. Next: use the local demo, then review the startup
+fix for a later commit. Earlier deployment/privacy limitations remain in effect.
+
+## Engineering portfolio presentation (preceding phase)
 
 Implemented the [portfolio presentation plan](.agent/plans/portfolio-presentation.md)
 after checking the actual routes, policy engines, models, provider wiring, workers,

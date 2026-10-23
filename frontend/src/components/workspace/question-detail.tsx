@@ -78,7 +78,7 @@ function PracticeForm({
             {question.options.map((option) => (
               <label
                 key={option.id}
-                className="flex items-start gap-3 text-sm leading-6"
+                className="flex min-h-11 items-start gap-3 py-2 text-sm leading-6"
               >
                 <input
                   className="mt-1"
@@ -101,7 +101,7 @@ function PracticeForm({
             onChange={(event) => setAnswer(event.target.value)}
             maxLength={10000}
             rows={6}
-            className="mt-2 w-full rounded border border-line bg-surface p-3 font-normal"
+            className="input mt-2"
             required
           />
         </label>

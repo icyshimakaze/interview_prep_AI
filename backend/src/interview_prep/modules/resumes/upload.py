@@ -134,8 +134,8 @@ def run_worker(data: bytes) -> ParsedPdf:
 
 
 class PdfParser:
-    def __init__(self) -> None:
-        self.slots = asyncio.Semaphore(2)
+    def __init__(self, slots: asyncio.Semaphore | None = None) -> None:
+        self.slots = slots if slots is not None else asyncio.Semaphore(2)
 
     async def parse(self, data: bytes) -> ParsedPdf:
         if self.slots.locked():

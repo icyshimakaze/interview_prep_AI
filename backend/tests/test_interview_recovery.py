@@ -346,5 +346,5 @@ async def test_populated_interview_downgrade_refuses_data_loss(
     async with database.connect() as connection:
         assert (
             await connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "0010_security_budgets"
+            == "0012_ai_context_reviews"
         )

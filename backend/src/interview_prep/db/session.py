@@ -1,3 +1,4 @@
+import ssl
 from collections.abc import AsyncIterator
 
 from fastapi import Request
@@ -15,7 +16,15 @@ def create_engine(settings: Settings) -> AsyncEngine:
     return create_async_engine(
         settings.database_url.get_secret_value(),
         pool_pre_ping=True,
-        connect_args={"timeout": 3, "command_timeout": 3},
+        pool_size=3 if settings.app_env == "production" else 5,
+        max_overflow=2 if settings.app_env == "production" else 10,
+        connect_args={
+            "timeout": settings.database_connect_timeout_seconds,
+            "command_timeout": 30 if settings.app_env == "production" else 3,
+            "ssl": ssl.create_default_context(cafile=settings.database_ssl_ca_file)
+            if settings.database_ssl_mode == "verify-full"
+            else False,
+        },
         hide_parameters=True,
     )
 

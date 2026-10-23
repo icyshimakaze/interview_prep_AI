@@ -63,7 +63,7 @@
     @apply inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent;
   }
   .public-section {
-    @apply border-t border-line py-16 sm:py-24;
+    @apply border-t border-line py-12 sm:py-16;
   }
   .page-header {
     @apply mb-9 flex flex-wrap items-end justify-between gap-5;
@@ -84,7 +84,7 @@
     @apply block font-medium;
   }
   .input {
-    @apply block min-h-11 w-full rounded-md border border-[#b8c2b8] bg-surface px-3 py-2.5 text-ink placeholder:text-muted disabled:cursor-not-allowed disabled:bg-paper;
+    @apply block min-h-11 w-full min-w-0 rounded-md border border-[#7c8b81] bg-surface px-3 py-2.5 text-base font-normal text-ink placeholder:text-muted disabled:cursor-not-allowed disabled:bg-paper sm:text-sm;
   }
   .input[aria-invalid="true"] {
     @apply border-danger;
@@ -99,10 +99,10 @@
     @apply grid gap-7 border-t border-line py-8 lg:grid-cols-[1fr_2fr] lg:gap-12;
   }
   .empty-state {
-    @apply border-y border-line bg-surface px-6 py-14 text-center sm:py-20;
+    @apply border-y border-line bg-surface px-6 py-8 text-center sm:py-12;
   }
   .empty-icon {
-    @apply mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-line text-accent;
+    @apply mx-auto mb-4 flex h-8 w-8 items-center justify-center text-accent;
   }
   .error-display {
     @apply my-6 border-l-2 border-danger bg-[#fcf1ee] p-5 text-danger;
@@ -116,17 +116,22 @@
   .data-table {
     @apply w-full border-collapse text-left text-sm;
   }
-  .data-table th {
+  .data-table thead th {
     @apply border-b border-line bg-paper px-5 py-3 text-xs font-medium whitespace-nowrap text-muted;
   }
-  .data-table td {
+  .data-table td,
+  .data-table tbody th {
     @apply border-b border-line px-5 py-5 align-top leading-6;
   }
-  .data-table tr:last-child td {
+  .data-table tbody th {
+    @apply min-w-44 font-medium whitespace-normal;
+  }
+  .data-table tbody tr:last-child th,
+  .data-table tbody tr:last-child td {
     @apply border-0;
   }
   .badge {
-    @apply inline-flex items-center rounded-sm px-2 py-1 text-xs leading-4 font-medium whitespace-nowrap;
+    @apply inline-flex max-w-full items-center rounded-sm px-2 py-1 text-xs leading-4 font-medium;
   }
   .badge-neutral {
     @apply bg-paper text-muted;

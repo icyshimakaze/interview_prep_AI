@@ -105,6 +105,8 @@ async def create_workspace(
 
 
 async def delete_expired(session: AsyncSession, now: datetime | None = None) -> None:
+    from interview_prep.ai.analysis_models import AIAnalysis
+
     cutoff = now or datetime.now(UTC)
     await session.execute(
         delete(User).where(
@@ -116,4 +118,5 @@ async def delete_expired(session: AsyncSession, now: datetime | None = None) -> 
     await session.execute(delete(DemoCreationLimit).where(DemoCreationLimit.expires_at <= cutoff))
     await session.execute(delete(OperationQuota).where(OperationQuota.expires_at <= cutoff))
     await session.execute(delete(EvaluationReceipt).where(EvaluationReceipt.expires_at <= cutoff))
+    await session.execute(delete(AIAnalysis).where(AIAnalysis.expires_at <= cutoff))
     await session.commit()

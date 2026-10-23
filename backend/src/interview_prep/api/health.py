@@ -2,14 +2,14 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_prep.core.errors import ErrorResponse
+from interview_prep.db.readiness import SCHEMA_REVISION as SCHEMA_REVISION
+from interview_prep.db.readiness import verify_schema
 from interview_prep.db.session import get_session
 
 router = APIRouter(tags=["health"])
-SCHEMA_REVISION = "0010_security_budgets"
 
 
 class HealthResponse(BaseModel):
@@ -38,10 +38,7 @@ async def ready(
     request: Request, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> ReadinessResponse:
     try:
-        await session.execute(text("SELECT 1"))
-        revision = await session.scalar(text("SELECT version_num FROM alembic_version"))
-        if revision != SCHEMA_REVISION:
-            raise ValueError("Schema mismatch")
+        await verify_schema(session)
     except Exception:
         # Never expose connection strings, driver errors, or credentials.
         from fastapi import HTTPException

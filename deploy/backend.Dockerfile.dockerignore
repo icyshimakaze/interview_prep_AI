@@ -1,0 +1,19 @@
+# Override the frontend-oriented root ignore file with an explicit backend allowlist.
+**
+!backend/
+!backend/pyproject.toml
+!backend/uv.lock
+!backend/src/
+!backend/src/**
+!backend/alembic.ini
+!backend/alembic/
+!backend/alembic/**
+!content/
+!content/*.json
+!deploy/
+!deploy/backend.Dockerfile
+!deploy/backend.Dockerfile.dockerignore
+**/__pycache__/
+**/*.pyc
+**/.env
+**/.env.*

@@ -10,6 +10,8 @@ import type {
 } from "@/lib/api/projects";
 import { ProjectAnalysis } from "./project-analysis";
 import { ProjectDefense } from "./project-defense";
+import { SectionHeader } from "./section-header";
+import { AIReview } from "./ai-review";
 
 export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
   const [items, setItems] = useState<ProjectSummary[]>([]);
@@ -91,22 +93,21 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
     );
   return (
     <div className="space-y-6">
-      <h1 className="page-title">Project Repository</h1>
-      <p>
-        Prepare to defend a project you built. Import public GitHub source or a
-        ZIP, inspect static evidence, then practice explaining decisions and
-        AI-assisted work.
-      </p>
-      <p className="text-sm">
+      <SectionHeader
+        title="Project Defense"
+        eyebrow="Explain your work"
+        description="Analyze a public GitHub repository or source ZIP, then practice explaining its architecture, decisions and your contributions."
+      />
+      <p className="text-sm leading-6 text-muted">
         No repository code, package scripts, tests or containers are run.
         Archives and source contents are discarded after analysis. Paths, facts
         and your answers are saved. Up to five snapshots and twenty practice
         sessions per snapshot.
       </p>
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorDisplay title="Project request failed" message={error} />}
       {busy && <p role="status">Working on your project…</p>}
-      <section className="space-y-4 rounded-xl border p-5">
-        <h2 className="text-xl font-semibold">Add a project</h2>
+      <section className="space-y-5 border-y border-line bg-surface p-5 sm:p-6">
+        <h2 className="section-title">Add a project</h2>
         <form
           className="flex flex-wrap items-end gap-3"
           onSubmit={(e) => {
@@ -114,10 +115,10 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
             void perform(async () => select(await api.github(url.trim())));
           }}
         >
-          <label className="flex-1">
+          <label className="min-w-0 flex-1 basis-full text-sm font-medium sm:basis-0">
             Public GitHub repository URL
             <input
-              className="mt-1 w-full rounded-lg border p-2"
+              className="input mt-2"
               type="url"
               required
               maxLength={250}
@@ -142,10 +143,10 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
               });
           }}
         >
-          <label>
+          <label className="min-w-0 flex-1 basis-full text-sm font-medium sm:basis-0">
             Source ZIP (10 MiB maximum)
             <input
-              className="mt-1 block"
+              className="input mt-2 file:mr-3 file:font-medium"
               type="file"
               accept=".zip,application/zip"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
@@ -161,14 +162,14 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
         >
           Load illustrative demo project
         </Button>
-        <p className="text-sm">
+        <p className="text-sm leading-6 text-muted">
           The demo is an authored teaching fixture analyzed locally, with no
           GitHub or AI service required. Remove secrets before uploading; file
           exclusions are not a comprehensive secret scanner.
         </p>
       </section>
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Saved repositories</h2>
+        <h2 className="section-title">Saved repositories</h2>
         {loading && <p role="status">Loading saved repositories…</p>}
         {listError && (
           <ErrorDisplay
@@ -184,7 +185,7 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
         {items.map((p) => (
           <div
             key={p.id}
-            className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
+            className="flex flex-wrap items-center gap-3 border-b border-line py-4"
           >
             <Button
               disabled={busy}
@@ -199,6 +200,7 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
               {new Date(p.created_at).toLocaleString()}
             </span>
             <Button
+              variant="outline"
               disabled={busy}
               onClick={() => {
                 if (
@@ -224,7 +226,15 @@ export function ProjectsWorkspace({ api }: { api: ProjectApi }) {
       {project && (
         <>
           <ProjectAnalysis project={project} />
-          <section className="space-y-3 rounded-xl border p-5">
+          {api.ai && (
+            <AIReview
+              key={project.id}
+              api={api.ai}
+              resource={`projects/${project.id}`}
+              label="Generate project practice questions"
+            />
+          )}
+          <section className="space-y-3 border-t border-line pt-6">
             <h2 className="text-xl font-semibold">
               Project Defense interview mode
             </h2>

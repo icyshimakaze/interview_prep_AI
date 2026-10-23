@@ -1,6 +1,7 @@
 import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from time import perf_counter
 from uuid import uuid4
 
 import httpx
@@ -11,11 +12,16 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
 from interview_prep.ai.factory import create_provider
+from interview_prep.ai.router import router as ai_router
 from interview_prep.api.health import router as health_router
+from interview_prep.cleanup import periodic_cleanup
 from interview_prep.core.config import Settings, get_settings
 from interview_prep.core.errors import register_error_handlers
+from interview_prep.core.gateway import GatewayMiddleware
+from interview_prep.core.request_logging import record_request
 from interview_prep.core.request_security import RequestSecurityMiddleware
 from interview_prep.db.models import Base
+from interview_prep.db.readiness import require_production_database
 from interview_prep.db.session import create_engine
 from interview_prep.modules.assessments.evaluation import MockAIProvider, ProviderEvaluationAdapter
 from interview_prep.modules.assessments.router import account_router as assessment_account_router
@@ -47,38 +53,48 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         engine = create_engine(configuration)
-        app.state.session_factory = async_sessionmaker(engine, expire_on_commit=False)
-        app.state.pdf_parser = PdfParser()
-        app.state.assessment_slots = asyncio.Semaphore(2)
-        async with httpx.AsyncClient(timeout=3, follow_redirects=False, trust_env=False) as http:
-            app.state.project_importer = ProjectImporter(http)
-            app.state.token_verifier = TokenVerifier(configuration, http)
-            app.state.ai_provider = create_provider(configuration, http)
-            runner = InterviewRunner(app.state.session_factory, configuration, http)
-            app.state.interview_runner = runner
-            workers = (
-                [asyncio.create_task(runner.loop()) for _ in range(2)]
-                if configuration.interview_worker_enabled
-                else []
-            )
-            app.state.evaluation_provider = (
-                MockAIProvider()
-                if configuration.ai_provider == "mock"
-                else ProviderEvaluationAdapter(app.state.ai_provider)
-            )
-            try:
-                yield
-            finally:
-                for worker in workers:
-                    worker.cancel()
-                await asyncio.gather(*workers, return_exceptions=True)
-                await engine.dispose()
+        try:
+            app.state.session_factory = async_sessionmaker(engine, expire_on_commit=False)
+            if configuration.app_env == "production":
+                await require_production_database(app.state.session_factory)
+            file_slots = asyncio.Semaphore(configuration.file_worker_slots)
+            app.state.pdf_parser = PdfParser(file_slots)
+            app.state.assessment_slots = asyncio.Semaphore(2)
+            async with httpx.AsyncClient(
+                timeout=3, follow_redirects=False, trust_env=False
+            ) as http:
+                app.state.project_importer = ProjectImporter(http, file_slots)
+                app.state.token_verifier = TokenVerifier(configuration, http)
+                app.state.ai_provider = create_provider(configuration, http)
+                runner = InterviewRunner(app.state.session_factory, configuration, http)
+                app.state.interview_runner = runner
+                workers = (
+                    [asyncio.create_task(runner.loop()) for _ in range(2)]
+                    if configuration.interview_worker_enabled
+                    else []
+                )
+                if configuration.cleanup_enabled:
+                    workers.append(asyncio.create_task(periodic_cleanup(app.state.session_factory)))
+                app.state.evaluation_provider = (
+                    MockAIProvider()
+                    if configuration.ai_provider == "mock"
+                    else ProviderEvaluationAdapter(app.state.ai_provider)
+                )
+                try:
+                    yield
+                finally:
+                    for worker in workers:
+                        worker.cancel()
+                    await asyncio.gather(*workers, return_exceptions=True)
+        finally:
+            await engine.dispose()
 
     app = FastAPI(
         title="Interview Prep API",
         version="0.1.0",
         lifespan=lifespan,
         docs_url="/docs" if configuration.app_env != "production" else None,
+        openapi_url="/openapi.json" if configuration.app_env != "production" else None,
         redoc_url=None,
     )
     app.state.settings = configuration
@@ -93,19 +109,23 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.middleware("http")
     async def response_metadata(request: Request, call_next: RequestResponseEndpoint) -> Response:
         request.state.request_id = str(uuid4())
+        started = perf_counter()
         response = await call_next(request)
         response.headers["X-Request-ID"] = request.state.request_id
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Cache-Control"] = "no-store"
+        record_request(request, response.status_code, perf_counter() - started)
         return response
 
     register_error_handlers(app)
     app.add_middleware(RequestSecurityMiddleware)
+    app.add_middleware(GatewayMiddleware, settings=configuration)
     app.include_router(health_router)
     app.include_router(demo_router)
     app.include_router(account_router)
     app.include_router(target_router)
     app.include_router(resume_router)
+    app.include_router(ai_router)
     app.include_router(skill_router)
     app.include_router(question_account_router)
     app.include_router(question_demo_router)

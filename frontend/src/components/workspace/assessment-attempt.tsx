@@ -191,7 +191,7 @@ export function AssessmentAttemptView({
                         className="flex cursor-pointer items-start gap-3 rounded border border-line p-4 text-sm leading-6"
                       >
                         <input
-                          className="accent-primary mt-1 size-4 shrink-0"
+                          className="mt-1 size-4 shrink-0 accent-accent"
                           type={
                             q.question_type === "multiple_select"
                               ? "checkbox"
@@ -234,7 +234,7 @@ export function AssessmentAttemptView({
                     hint={
                       q.question_type === "short_answer"
                         ? "Enter a concise exact answer. Surrounding whitespace is ignored."
-                        : "Explain your reasoning in a few sentences. Conceptual feedback is a labelled MockAIProvider simulation."
+                        : "Explain your reasoning in a few sentences. The feedback provider and its limitations are disclosed before you start."
                     }
                   />
                 )}

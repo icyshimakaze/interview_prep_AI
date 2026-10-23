@@ -137,7 +137,7 @@ export function InterviewsWorkspace({ api }: { api: InterviewApi }) {
                 {state.history.items.map((s) => (
                   <div
                     key={s.id}
-                    className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line p-5"
+                    className="flex flex-wrap items-center justify-between gap-4 border-b border-line py-5"
                   >
                     <div>
                       <h3 className="font-medium">
@@ -170,11 +170,11 @@ export function InterviewsWorkspace({ api }: { api: InterviewApi }) {
                   No interviews yet. Start a session above.
                 </p>
               )}
-              <div className="mt-5 flex items-center justify-between">
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
                 <p className="text-sm text-muted">
                   {state.history.total} saved interviews
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Button
                     variant="outline"
                     disabled={busy || offset === 0}

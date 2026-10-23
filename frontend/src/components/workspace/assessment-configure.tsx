@@ -37,15 +37,15 @@ export function AssessmentConfigure({
     )
     .reduce((sum, i) => sum + i.count, 0);
   return (
-    <section className="mb-10 rounded-xl border border-line bg-surface p-5 sm:p-7">
+    <section className="mb-8 border-y border-line bg-surface p-5 sm:p-7">
       <h2 className="section-title">Configure an assessment</h2>
       <p className="mt-2 text-sm leading-6 text-muted">
         Choose published questions by topic, difficulty and format. Drafts stay
-        editable for {options.duration_hours} hours. Objective answers are
-        graded on the server; conceptual feedback uses{" "}
-        {options.conceptual_provider}{" "}
-        {options.conceptual_kind === "simulation" ? "simulation" : "evaluation"}
-        .
+        editable for {options.duration_hours} hours. Objective answers use
+        deterministic grading; written answers receive{" "}
+        {options.conceptual_kind === "simulation"
+          ? "simulated feedback, not AI evaluation."
+          : "AI-assisted feedback."}
       </p>
       {options.conceptual_provider === "OpenAIProvider" && (
         <p className="mt-2 text-sm leading-6 text-muted">
@@ -53,6 +53,15 @@ export function AssessmentConfigure({
           criteria to OpenAI for AI-assisted feedback. Feedback may be
           inaccurate and does not establish verified competence. Choose only
           objective formats to avoid AI evaluation.
+        </p>
+      )}
+      {options.conceptual_provider === "XkiroProvider" && (
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Submitting written answers sends their text, question and review
+          criteria to xKiro and its downstream model provider. Third-party
+          retention policies apply. Feedback may be inaccurate and does not
+          verify competence. Choose only objective formats to avoid AI
+          evaluation.
         </p>
       )}
       {options.conceptual_provider === "OllamaProvider" && (
@@ -118,10 +127,13 @@ export function AssessmentConfigure({
             onChange={(e) => setCount(e.target.value)}
           />
         </fieldset>
-        <fieldset disabled={busy} className="space-y-3">
+        <fieldset disabled={busy} className="grid gap-x-6 sm:grid-cols-2">
           <legend className="mb-3 text-sm font-medium">Question formats</legend>
           {assessmentTypes.map((type) => (
-            <label key={type} className="flex items-start gap-3 text-sm">
+            <label
+              key={type}
+              className="flex min-h-11 items-center gap-3 text-sm"
+            >
               <input
                 type="checkbox"
                 checked={types.includes(type)}
@@ -132,7 +144,7 @@ export function AssessmentConfigure({
                       : types.filter((t) => t !== type),
                   )
                 }
-                className="accent-primary mt-0.5 size-4 shrink-0"
+                className="size-4 shrink-0 accent-accent"
               />
               {assessmentTypeLabel[type]}
             </label>

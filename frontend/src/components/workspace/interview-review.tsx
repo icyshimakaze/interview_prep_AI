@@ -4,7 +4,7 @@ import type { InterviewReview } from "@/lib/api/interviews";
 export function InterviewReviewView({ review }: { review: InterviewReview }) {
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-line bg-surface p-5">
+      <section className="border-y border-line bg-surface p-5">
         <h2 className="section-title">
           {review.review_status === "provisional"
             ? "Preparing final review"
@@ -35,7 +35,7 @@ export function InterviewReviewView({ review }: { review: InterviewReview }) {
       {review.turns.map(
         ({ turn, evaluation, expected_concepts, rubric, rationale }) => (
           <article
-            className="rounded-xl border border-line bg-surface p-5"
+            className="border-y border-line bg-surface p-5"
             key={turn.id}
           >
             <h3 className="font-semibold">
@@ -62,7 +62,7 @@ export function InterviewReviewView({ review }: { review: InterviewReview }) {
               {turn.answer_text || "No response."}
             </p>
             {evaluation && (
-              <div className="bg-subtle mt-4 rounded-lg p-4 text-sm leading-6">
+              <div className="mt-4 bg-paper p-4 text-sm leading-6">
                 <p>
                   {evaluation.evaluation
                     ? "Structured feedback"

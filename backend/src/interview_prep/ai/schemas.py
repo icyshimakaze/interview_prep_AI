@@ -62,6 +62,7 @@ class FollowupInput(AnswerInput):
 class RoadmapInput(Contract):
     topics: list[Label] = Field(min_length=1, max_length=6)
     weekly_minutes: int = Field(ge=15, le=600)
+    context: Document | None = None
 
     @model_validator(mode="after")
     def unique_topics(self) -> "RoadmapInput":

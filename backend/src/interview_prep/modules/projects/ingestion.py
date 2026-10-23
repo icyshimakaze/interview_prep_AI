@@ -177,9 +177,9 @@ def run_worker(data: bytes) -> StaticAnalysis:
 
 
 class ProjectImporter:
-    def __init__(self, http: httpx.AsyncClient) -> None:
+    def __init__(self, http: httpx.AsyncClient, slots: asyncio.Semaphore | None = None) -> None:
         self.http = http
-        self.slots = asyncio.Semaphore(2)
+        self.slots = slots if slots is not None else asyncio.Semaphore(2)
 
     @asynccontextmanager
     async def slot(self) -> AsyncIterator[None]:

@@ -1,10 +1,19 @@
 # AI-provider architecture
 
+Phase 23B production profile: account xKiro credentials are mandatory when selected,
+while the recruiter demo remains mock on the same app. The conservative example
+uses zero transport retries, 10 owner-hourly / 30 owner-daily / 100 global-daily
+attempts and a 60-second deadline. This does not guarantee provider free allowance
+or uptime. Receipts expire from reuse at their documented age; physical cleanup
+runs at startup/hourly while the Render process is awake, with delays during sleep.
+See [free-tier deployment and privacy limits](DEPLOYMENT.md).
+
 The backend defaults to **`AI_PROVIDER=mock`**. Local development, automated tests,
 CI and the recruiter demo require neither an AI credential nor a model server.
 The mock is an explicitly labelled deterministic simulation, not machine learning
-or a prediction of competence. Optional account integrations are available for a
-configured Ollama server and OpenAI's Responses API. Recruiter demo evaluation is
+or a prediction of competence. **xKiro Chat Completions is the primary real
+provider**, with optional Ollama and OpenAI Responses integrations. See
+[xKiro setup, routing and consent](XKIRO.md). Recruiter demo evaluation is
 always pinned to mock independently of the account provider.
 
 For a portfolio walkthrough, start with [current architecture](ARCHITECTURE.md),
@@ -43,6 +52,10 @@ Responsibilities are separate:
 - `provider.py` and `validation.py`: shared validation and provenance boundary.
 - `mock.py`: deterministic simulations and a finite skill vocabulary.
 - `remote.py`: OpenAI/Ollama request and response formats.
+- `xkiro.py`: free-by-default Chat Completions, operation routing and bounded image capability.
+- `xkiro_documents.py`: strict quote-only document wire contracts; exact source
+  grounding and Unicode offsets calculated locally before public/domain validation.
+- `analyses.py` / `analysis_models.py`: owned opt-in reviews and durable saved results.
 - `transport.py`: HTTP size limits, deadline, retry and safe failure handling.
 - `factory.py`: server-side configuration and unconditional demo override.
 
@@ -51,7 +64,8 @@ owner-ID capability. Callers must resolve authenticated ownership before supplyi
 private context. The existing assessment workflow does so before evaluating saved
 answers. The later [interview workflow](MOCK_INTERVIEWS.md) also connects answer
 evaluation and contextual follow-up generation through durable owned work. The
-other four operations remain internal services for future workflows. Resume
+resume analysis operation also serves explicit account evidence reviews. JD,
+roadmap and project-question generation have opt-in account reviews. Resume
 upload still uses the existing local PDF/evidence pipeline; it does not automatically call AI. No raw
 resume, JD or project is sent by the assessment workflow.
 
@@ -113,14 +127,14 @@ and pin mock; CI also explicitly selects mock with empty remote configuration.
 Transport tests use `httpx.MockTransport` and fictional test credentials, never a
 real model or paid API. Existing HTTPX/Pydantic dependencies are reused.
 
-Only operators opting into a remote account provider set `AI_PROVIDER=ollama` or
-`openai`. An invalid provider name fails settings validation instead of silently
+Operators opting into real AI normally set `AI_PROVIDER=xkiro`; `ollama` and
+`openai` remain optional choices. An invalid provider name fails validation instead of silently
 selecting a different provider. Missing model/key values for an explicitly chosen
 optional provider do not prevent application startup or demo use: evaluation
 returns a safe unavailable error without attempting a request. Switching the
 server configuration back to mock restores account simulation after restart.
 
-Settings mask the OpenAI key and exclude it from serialization. Compose passes
+Settings mask xKiro/OpenAI keys and exclude them from serialization. Compose passes
 these variables only through the backend service environment, never frontend
 environment/build arguments. No provider credential has a `NEXT_PUBLIC_` variant
 or appears in API responses/generated frontend types. The browser selects neither
@@ -205,6 +219,13 @@ identity encoding required; encoded responses are rejected before reading. Domai
 JSON text is limited to 128 KiB. Redirect following and environment
 proxy inheritance are disabled on the application HTTP client.
 
+All remote operations sharing an application HTTP client also share four
+concurrent-call slots. The total deadline includes slot wait and retry backoff;
+queued requests cannot wait indefinitely. This is a per-process bound, while the
+database quotas remain shared across processes. JSON-object mode is requested,
+but [xKiro documents](https://docs.xkiro.com/guides/structured-output/) that Qwen
+applies it as a prompt instruction, so schema validation remains essential.
+
 Retry only connection establishment failures and HTTP 408, 429, 500, 502, 503, 504. A 429 `insufficient_quota` result is not retried. Respect numeric/date
 `Retry-After`; otherwise use bounded exponential delays starting at 250 ms. A
 backoff exceeding the deadline returns unavailable without retrying too early.
@@ -238,10 +259,30 @@ contract. Objective MCQ/multiple-select/literal short-answer grading stays entir
 deterministic, local and independent of optional AI availability.
 
 The interview runner also dispatches `evaluate_answer()` and `generate_followup()`
-after saving owned answers/work. The other four operations are implemented/tested
-provider capabilities, not user-facing integrations: current PDF evidence, job
-mentions, personalized roadmaps and Project Defense use their local deterministic
-services. Enabling a provider does not reroute those workflows to AI.
+after saving owned answers/work. Resume evidence review and submitted Project
+Defense answer feedback use separate opt-in account endpoints with sharing consent,
+server-resolved source ownership and 30-day saved receipts. Resume evidence edits
+invalidate old reviews; source/owner deletion cascades feedback. PDF extraction,
+job mentions, personalized roadmap ordering, project scanning and practice
+transitions remain local. Enabling a provider does not automatically share documents.
+
+Account users can explicitly request a job review, roadmap activity suggestions
+or six project practice questions through `ai/context_reviews.py`. Ownership and
+provider-bound sharing consent precede dispatch. Job reviews read the latest
+immutable description version; their summary covers responsibilities and notes
+cover technical concepts/interview topics. Roadmap reviews use up to six unfinished
+saved topics and their reasons (already derived from actual eligible results,
+resume evidence and target requirements), capped at 600 minutes. Longer topic
+names outside the provider's 100-character bound are omitted. Project questions
+use up to 30 static facts with file/line references, never repository execution or
+raw archives. These are separate suggestions, not replacements for deterministic
+planning, confirmed requirements or persisted defense runs.
+
+Migration `0012_ai_context_reviews` adds composite owned source references to the
+existing receipt table. No existing rows change. Job-version changes and plan
+revisions change input identity; unchanged results reuse existing receipts.
+Source/owner deletion cascades receipts; cleanup removes expired results after
+30 days. A downgrade refuses to erase receipts for the newly added sources.
 
 ## Cost control and durable failures
 
@@ -269,7 +310,7 @@ remain operator requirements. [Security budgets and privacy](SECURITY.md).
 ## Data disclosure and retention
 
 The assessment configuration screen identifies the active provider and discloses
-OpenAI/Ollama sharing before starting. Only written responses invoke AI on submit;
+xKiro/downstream, OpenAI or Ollama sharing before starting. Only written responses invoke AI on submit;
 choosing objective formats avoids it. Questions, answer text, expected concepts and
 rubric descriptions are sent to the selected server. IDs, resume/JD/project text
 and credentials are not included in the model prompt. `store: false` does not
@@ -278,10 +319,13 @@ has been updated accordingly.
 
 Validated conceptual results retain existing simulation/model-assisted kinds and
 add optional configured-model and prompt-version fields to the existing metadata
-JSON. Old records without these fields remain valid. There is no schema migration,
-new analytics store or logging of full input/output bodies. Account assessment
+JSON. Old records without these fields remain valid. Evaluation metadata needs no
+additional migration or analytics store; full input/output bodies are not logged. Account assessment
 history retains its existing lifetime; demo expiry/exit erases demo history. The
-new analysis/generation methods do not persist outputs themselves.
+opt-in resume/Defense review service persists validated results separately, with
+bounded JSON, input/provider/prompt digests, concurrency fencing and owner budgets.
+Its API requires explicit consent; provider methods alone do not grant
+authorization or persistence. [Detailed sharing and retention](XKIRO.md).
 
 ## Verification and next steps
 

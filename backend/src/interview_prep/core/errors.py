@@ -10,6 +10,26 @@ from starlette.exceptions import HTTPException
 from interview_prep.modules.projects.ingestion import ERRORS as PROJECT_ERRORS
 
 PLANNING_ERRORS: dict[str, tuple[int, str]] = {
+    "ai_analysis_pending": (
+        409,
+        "This review is running, was interrupted, or reached its retry limit. "
+        "Saved work is retained; no duplicate AI call was sent.",
+    ),
+    "ai_provider_changed": (409, "The AI provider changed. Reload before agreeing to share data."),
+    "ai_no_evidence": (422, "Add retained resume evidence before requesting a review."),
+    "ai_no_review_context": (
+        422,
+        "No suitable saved context to review. "
+        "Add unfinished roadmap tasks or static project facts.",
+    ),
+    "ai_unavailable": (503, "The AI provider is unavailable. Saved work is retained."),
+    "ai_timeout": (503, "The AI request timed out. Saved work is retained."),
+    "ai_invalid_output": (503, "The AI response failed validation. Saved work is retained."),
+    "ai_refusal": (503, "The AI provider declined this request. Saved work is retained."),
+    "ai_rate_limited": (
+        503,
+        "The AI provider's rate limit was reached. Try again later; saved work is retained.",
+    ),
     "roadmap_conflict": (
         409,
         "This roadmap changed. Reload its saved history before trying again.",

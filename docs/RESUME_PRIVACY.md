@@ -1,5 +1,15 @@
 # Resume upload, evidence and privacy
 
+23 October addition: upload/parsing remains local. A separate optional account
+**Review resume evidence** action discloses the configured provider and requires
+sharing consent before sending retained non-rejected claims/corrections and
+excerpts. The raw PDF is never sent. xKiro routes through a third party/downstream
+model; their retention policies apply. Saved feedback lasts up to 30 days plus
+cleanup; evidence edits invalidate it and resume deletion cascades it. On Render
+Free, cleanup runs at startup/hourly while awake; physical deletion is delayed
+while sleeping or suspended. Review results expire from reuse after 30 days.
+This feedback does not auto-confirm evidence. [Full provider/privacy details](XKIRO.md).
+
 The account Resume screen supports PDF upload, server-side text extraction,
 editable evidence review, additions and deletion. The fictional recruiter demo
 continues to accept no real files. No AI, OCR, external document service or remote

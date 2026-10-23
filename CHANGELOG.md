@@ -36,6 +36,12 @@ describe implemented source changes, not a published production release.
   retries while preserving draft/turn conflict checks. Repository lists expose
   loading and retryable errors before declaring an empty result.
 
+### Fixed
+
+- Standalone cleanup now loads the complete ORM registry before maintenance,
+  preventing unresolved model references from restarting the service. A fresh
+  interpreter regression covers this separate entry point.
+
 ### Security
 
 - Request limits before JSON decoding; durable shared import/provider budgets;

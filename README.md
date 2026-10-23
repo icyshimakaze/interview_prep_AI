@@ -106,7 +106,8 @@ No account, AI key or model download is needed. Use fictional answers and data.
    **Progress**. A short demo history can correctly show tables or an explanation
    instead of a trend chart.
 8. Choose **Exit and delete demo** when finished. Access expires within 24 hours;
-   hourly cleanup removes expired records. Creation is limited to two new
+   cleanup removes expired records while the service is running. On Render Free,
+   physical deletion waits for a wakeup when asleep. Creation is limited to two new
    workspaces per direct network identifier per hour; reuse the current session.
 
 Account-only PDF upload and editable profile/targets require
@@ -131,7 +132,7 @@ flowchart TD
     API --> GitHub[Fixed GitHub API and archive hosts]
     API --> Work[Durable interview work: two loops per API process]
     Work --> DB
-    API --> Providers[AIProvider: mock / optional Ollama / OpenAI]
+    API --> Providers[AIProvider: mock / xKiro / optional Ollama / OpenAI]
     Work --> Providers
     Cleanup[Hourly cleanup process] --> DB
 ```
@@ -167,28 +168,55 @@ bounded ZIP upload. It never runs `git clone`, extracts members to disk, install
 dependencies or executes submitted code. Static inspection emits cited facts and
 clearly marked inferences; deterministic templates generate explanation questions.
 
-Practice records preserve drafts, submitted/skipped answers and revisions. There
-is no authorship detector, code-quality score or AI grading in this workflow.
+Practice records preserve drafts, submitted/skipped answers and revisions. Account
+users can explicitly request separate AI feedback on a saved Defense answer;
+practice transitions and static scanning remain local. No authorship detector or
+code-quality score is implemented.
 Path/symlink/expansion checks and worker limits reduce risk; subprocess isolation
 is not a complete OS security sandbox. [Design and limits](docs/PROJECT_DEFENSE.md).
 
 ## AI providers and the zero-key demo
 
+Backend variables: `XKIRO_API_KEY`, fixed `XKIRO_BASE_URL`,
+`XKIRO_MODEL_SMART`, `XKIRO_MODEL_MULTIMODAL`, `XKIRO_MODEL_ROUTES` and
+`XKIRO_ALLOW_PAID_MODELS`. The complete safe defaults are in `.env.example`;
+configure your real key only in ignored backend environment configuration.
+
 The default `MockAIProvider` makes no network/model calls. Its lexical concept
 overlap is labelled simulation and cannot establish competence. Account operators
-may enable Ollama or OpenAI for written-answer evaluation and interview follow-ups.
+can select **xKiro as the primary real provider** using its OpenAI-compatible Chat
+Completions API. Optional Ollama and OpenAI remain available. The default reasoning
+model is `qwen/qwen3.8-max:free`; the bounded image adapter uses
+`qwen/qwen3.8-omni-flash:free`. Non-free xKiro IDs require explicit model
+configuration and `XKIRO_ALLOW_PAID_MODELS=true`; no paid fallback exists.
 Objective grading, PDF evidence extraction, job mention matching, skill ordering,
-selection, Project Defense and roadmap/progress rules remain local.
+selection, Project Defense practice and roadmap/progress rules remain local.
 
-The shared protocol has six typed operations; only evaluation and follow-up
-generation are wired into the current provider-backed product workflows. The
-other operations are tested interfaces, not implemented AI upload/roadmap features.
+The shared protocol has six typed operations. Evaluation and contextual follow-ups
+serve assessments/interviews. Account users can opt into a retained resume-evidence
+review and saved Project Defense answer feedback, with provider disclosure and
+sharing consent first. Raw PDFs are discarded; upload alone sends nothing to AI.
+Completed reviews are saved for reuse, invalidated on evidence edits and removed
+with their source or after 30 days plus cleanup. Additional opt-in reviews analyze
+saved job descriptions, suggest activities from evidence-based roadmap reasons,
+and generate project practice questions from static facts. These suggestions do
+not alter confirmed requirements, scheduled plans or saved defense sessions.
+Inline image review remains an internal typed capability.
 Output passes schema and domain validation before persistence, with server-assigned
 provider/model/prompt/rubric provenance. Errors preserve saved answers; there is
 no silent remote-to-mock fallback. The recruiter demo always selects mock.
 
 [Provider architecture, data sharing and deadlines](docs/AI_ARCHITECTURE.md) ·
 [Evaluation rubric and score meanings](docs/EVALUATION_RUBRIC.md)
+
+For secure setup, add `XKIRO_API_KEY` privately to the **backend process environment**
+or existing ignored **`backend/.env`**, set `AI_PROVIDER=xkiro` and
+`PUBLIC_DEMO_ONLY=false`, migrate to head and restart the backend. The native loader
+reads absolute root `.env`, then `backend/.env`; process variables override both.
+Legacy model variable names remain accepted. Never paste your key into Codex chat,
+commit it or put it in a frontend variable. See [the xKiro guide](docs/XKIRO.md)
+for exact model routing, per-user budgets, third-party data sharing and mocked tests.
+Keep the public production recruiter demo on `AI_PROVIDER=mock` with no key.
 
 ## Tech stack and repository structure
 
@@ -320,7 +348,8 @@ See [development and troubleshooting](docs/DEVELOPMENT.md).
 
 ## Environment variables
 
-Templates: [root `.env.example`](.env.example) and
+Templates: [root `.env.example`](.env.example),
+[optional backend overrides](backend/.env.example) and
 [frontend `.env.example`](frontend/.env.example). Never commit real `.env` files.
 
 | Variables                                                                | Purpose / local default                                                                                                                                    |
@@ -335,20 +364,20 @@ Templates: [root `.env.example`](.env.example) and
 | `FRONTEND_ORIGIN`                                                        | Frontend origin used by authentication configuration; match the browser origin.                                                                            |
 | `AUTH_ENABLED`, `AUTH_ISSUER`, `AUTH_AUDIENCE`                           | Account JWT verification; disabled by default, demo still available.                                                                                       |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`                  | Optional account integration. Only the publishable key is public; real keys require the documented Clerk configuration.                                    |
-| `AI_PROVIDER`                                                            | `mock` by default; optional account `ollama` or `openai`. Demo remains mock.                                                                               |
+| `AI_PROVIDER`                                                            | `mock` by default; optional account `xkiro` (primary real), `ollama` or `openai`. Demo remains mock.                                                       |
 | `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `OPENAI_API_KEY`, `OPENAI_MODEL`      | Backend-only optional provider settings; blank in zero-key mode.                                                                                           |
 | `AI_TIMEOUT_SECONDS`, `AI_MAX_RETRIES`                                   | Total per-call deadline 30 seconds; one additional transport retry by default, subject to safe retry rules.                                                |
 | `AI_OWNER_HOURLY_CALLS`, `AI_OWNER_DAILY_CALLS`, `AI_GLOBAL_DAILY_CALLS` | Shared attempted-call ceilings: 60 / 200 / 2000. They are not currency limits.                                                                             |
 | `INTERVIEW_WORKER_ENABLED`                                               | `true`; starts two database-backed work loops per API process.                                                                                             |
 
-The native backend reads root `.env`. Next.js reads `frontend/.env.local`; copy the
+The native backend reads root `.env`, then `backend/.env`; process variables win. Next.js reads `frontend/.env.local`; copy the
 frontend example when overriding its configuration. Optional settings and retry
 semantics are in [AI architecture](docs/AI_ARCHITECTURE.md). No private key belongs
 in `NEXT_PUBLIC_*`, a URL example, screenshot or build argument.
 
 ## Migrations
 
-The required head is **`0010_security_budgets`**. Compose applies it through the
+The required head is **`0012_ai_context_reviews`**. Compose applies it through the
 one-shot migration service; native development uses:
 
 ```sh
@@ -402,7 +431,9 @@ Credentials stay server-side, with safe errors and body-free application logging
 
 Raw PDFs/ZIPs and full extracted/source text are transient. Resume excerpts and
 repository paths, hashes and cited facts are persisted and can contain private
-data. Optional remote evaluation sends question/answer/rubric context; OpenAI
+data. Optional remote evaluation sends question/answer/rubric context.
+Resume review sends explicitly consented retained evidence to the selected provider.
+Third-party and downstream-provider retention policies apply. OpenAI's
 `store: false` is not a zero-retention guarantee. Demo expiry/exit erases active
 owned records; account history has incomplete self-service erasure/export and
 backups/identity-provider records require separate handling.
@@ -416,19 +447,27 @@ public upload service.
 
 There is no verified public deployment URL or production rollout in this repo.
 Compose is a local topology, not a turnkey production ingress configuration.
+The prepared [Vercel/Render/Neon runbook](docs/DEPLOYMENT.md) and
+[hosting decision](docs/adr/0001-managed-deployment.md) define one Render Free
+backend, Vercel and Neon, with an initial mock-only recruiter profile and an
+optional Clerk + xKiro account profile on the same app. The initial demo needs no
+AI API key; account inference uses a backend-only key. Cleanup runs while awake,
+with physical deletion delayed during free-hosting sleep. No deployment occurred.
 Before publishing a recruiter URL:
 
-1. Build the pinned frontend/backend images; set the backend destination and
-   public Clerk key at frontend build time. Keep private credentials at runtime.
+1. Build the pinned frontend/backend images and set the backend destination at
+   frontend build time. The public demo leaves Clerk keys unset; add its public
+   key only for a separately reviewed account release. Keep secrets server-side.
 2. Use a private PostgreSQL instance, back up/restore-test it, apply the reviewed
    migrations with a separate migration role, and explicitly publish content.
 3. Set HTTPS frontend origins consistently in `APP_ENV=production`,
-   `ALLOWED_ORIGINS`, `FRONTEND_ORIGIN` and Clerk configuration. Establish trusted
+   `ALLOWED_ORIGINS`, `FRONTEND_ORIGIN` and optional Clerk configuration. Establish trusted
    proxy/client-IP handling before exposing the demo creation quota.
 4. Provide TLS ingress/body/rate limits, restricted parser execution, cleanup and
    durable-worker operation, monitoring and provider spend caps.
-5. Resolve account erasure/export, identity lifecycle and backup/log retention;
-   verify real sign-in, deletion and provider behavior in the intended environment.
+5. Keep account access disabled until account erasure/export, identity lifecycle,
+   backup/log retention and real sign-in/deletion have been verified. The public
+   demo requires neither Clerk credentials nor an AI provider key.
 
 Then replace the hosted-demo placeholder above with the verified URL. Configuration
 details and unresolved release requirements are in

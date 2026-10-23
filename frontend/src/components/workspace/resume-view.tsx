@@ -17,6 +17,7 @@ import type {
 import { ResumeUpload } from "./resume-upload";
 import { ResumeEvidence } from "./resume-evidence";
 import { EvidenceForm } from "./evidence-form";
+import { AIReview } from "./ai-review";
 
 type Editor = { resume: Resume; evidence?: Evidence };
 
@@ -255,6 +256,20 @@ export function ResumeView({ api }: { api: ResumeApi }) {
                       setDeleteError(null);
                     }}
                   />
+                  {api.ai && (
+                    <>
+                      <p className="mt-5 text-sm text-muted">
+                        Optional review covers retained claims and excerpts
+                        only. The raw PDF has been discarded.
+                      </p>
+                      <AIReview
+                        key={`${resume.id}-${resume.revision}`}
+                        api={api.ai}
+                        resource={`resumes/${encodeURIComponent(resume.id)}`}
+                        label="Review resume evidence"
+                      />
+                    </>
+                  )}
                   <Button
                     className="mt-6"
                     variant="outline"

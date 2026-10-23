@@ -53,7 +53,7 @@ async def test_assessment_migration_preserves_old_rows_and_refuses_new_data_loss
             async with engine.connect() as connection:
                 assert (
                     await connection.scalar(text("SELECT version_num FROM alembic_version"))
-                    == "0010_security_budgets"
+                    == "0012_ai_context_reviews"
                 )
                 assert (
                     await connection.scalar(text("SELECT title FROM assessments"))

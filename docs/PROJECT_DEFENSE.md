@@ -1,5 +1,24 @@
 # Project Defense Mode
 
+23 October addition: account users may explicitly request separate feedback on a
+submitted saved Defense answer. Provider disclosure and a sharing checkbox precede
+dispatch to xKiro/downstream, OpenAI or the configured Ollama server. Only that
+question, answer and rubric are sent, not the source archive. Results are validated,
+privately saved for reuse for 30 days plus cleanup and removed with the source.
+On Render Free, physical cleanup waits until the service runs; no hourly deletion
+guarantee applies while it sleeps. Saved results still expire from reuse at 30 days.
+Practice state, repository scanning and objective performance remain unchanged;
+the public recruiter demo still has no external AI calls. [Setup and limits](XKIRO.md).
+
+Phase 23A also adds **Generate project practice questions** for accounts. With
+explicit consent, up to 30 saved static facts and file/line references are sent
+to the configured provider. Six schema-validated questions cover design,
+implementation, security, databases, testing and scalability where supported.
+Unobserved capabilities must be phrased as hypothetical design questions. These
+optional suggestions retain their evidence and do not replace questions or
+answers in existing defense sessions. Raw archives/source code are not executed
+or sent by this action. Results use the same owned 30-day receipts and budgets.
+
 Project Defense helps candidates explain projects they built, including work
 created with AI assistance. It is deterministic source inspection and interview
 practice, not a code audit, authorship detector, competence score or ML prediction.
@@ -96,7 +115,8 @@ comments or dead code. Missing evidence never establishes absence.
 - `project_defense_runs` and `project_defense_answers` store owned practice
   state, revision, answer text and timestamps separately from scored interviews.
   No model is called and no evaluation or numerical ability score is fabricated.
-  Optional AIProvider enrichment is **not enabled** in this version.
+  Automatic AI enrichment of snapshot analysis is not enabled. Separate account
+  answer feedback requires explicit sharing consent.
 - Every read and mutation resolves the authenticated account or demo principal
   server-side. Request-supplied owner IDs are not accepted. Composite foreign
   keys enforce ownership among analyses, questions, runs and answers.

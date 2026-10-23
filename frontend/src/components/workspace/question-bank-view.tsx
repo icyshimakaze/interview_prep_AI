@@ -126,14 +126,14 @@ export function QuestionBankView({
               update({ search: search.trim() });
             }}
           >
-            <label className="min-w-0 flex-1 text-sm font-medium">
+            <label className="min-w-0 flex-1 basis-full text-sm font-medium sm:basis-0">
               Search questions
               <input
                 type="search"
                 value={search}
                 maxLength={100}
                 onChange={(event) => setSearch(event.target.value)}
-                className="mt-2 w-full rounded border border-line bg-surface p-3"
+                className="input mt-2"
               />
             </label>
             <Button type="submit">Search</Button>

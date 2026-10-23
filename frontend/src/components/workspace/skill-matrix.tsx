@@ -14,11 +14,26 @@ import { SectionHeader } from "./section-header";
 export function SkillMatrixTable({ matrix }: { matrix: SkillMatrix }) {
   return (
     <>
-      <div className="mb-6 space-y-2 text-sm leading-6 text-muted">
+      <p className="mb-3 text-sm leading-6 text-muted">
+        Resume mentions are context. Eligible practice results can validate
+        skills only in their tested scope.
+      </p>
+      <details className="mb-6 text-sm leading-6 text-muted">
+        <summary className="min-h-11 py-2 text-accent">
+          Evidence rules and preparation order
+        </summary>
+        <p className="mt-2">
+          Preparation order: Required, Preferred, Mentioned, then Low relevance.
+          Within each group, practice comes before validation, then maintenance.
+          Ties use skill name. Strong evidence covers at least two tested
+          concepts; it does not imply mastery.
+        </p>
         {matrix.notices?.map((note) => (
-          <p key={note}>{note}</p>
+          <p key={note} className="mt-2">
+            {note}
+          </p>
         ))}
-      </div>
+      </details>
       {!matrix.rows.length ? (
         <EmptyState
           icon="questions"
@@ -37,15 +52,12 @@ export function SkillMatrixTable({ matrix }: { matrix: SkillMatrix }) {
         >
           {matrix.rows.map((row) => (
             <tr key={row.key}>
-              <th scope="row">
+              <th scope="row" className="min-w-36">
                 <span className="block font-semibold">{row.name}</span>
                 <Badge>{row.importance}</Badge>
               </th>
               <td>
                 <p>{row.resume_state}</p>
-                <p className="mt-2 text-xs text-muted">
-                  Mentions only; not verified competence.
-                </p>
               </td>
               <td>
                 <Badge
@@ -65,7 +77,7 @@ export function SkillMatrixTable({ matrix }: { matrix: SkillMatrix }) {
               </td>
               <td>
                 <p className="font-semibold">{row.action}</p>
-                <details className="mt-3 max-w-lg break-words whitespace-normal">
+                <details className="mt-3 max-w-lg min-w-48 break-words whitespace-normal">
                   <summary className="cursor-pointer text-accent">
                     Why this priority? Sources for {row.name}
                   </summary>
@@ -166,7 +178,7 @@ export function SkillMatrixView({ api }: { api: SkillApi }) {
         <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
           Target job
           <select
-            className="max-w-full rounded border border-line bg-surface p-3"
+            className="input"
             value={target ?? ""}
             onChange={(event) => setTarget(event.target.value || null)}
           >
@@ -186,12 +198,6 @@ export function SkillMatrixView({ api }: { api: SkillApi }) {
           Refresh evidence
         </Button>
       </div>
-      <p className="mb-6 max-w-3xl text-sm leading-7 text-muted">
-        Preparation order: Required, Preferred, Mentioned, then Low relevance.
-        Within each group, practice comes before validation, then maintenance.
-        Ties use skill name. Strong evidence covers at least two tested
-        concepts; it does not imply mastery.
-      </p>
       {!current && <WorkspaceSkeleton label="Loading skill evidence…" />}
       {current?.error && (
         <ErrorDisplay

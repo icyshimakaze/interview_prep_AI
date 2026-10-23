@@ -384,7 +384,7 @@ export function InterviewSession({
               </label>
               <textarea
                 id="interview-answer"
-                className="field mt-2 min-h-52 w-full"
+                className="input mt-2 min-h-52"
                 maxLength={10000}
                 value={text}
                 readOnly={!actions.includes("save")}

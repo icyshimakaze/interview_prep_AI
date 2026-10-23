@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from interview_prep.ai.errors import ProviderError, ProviderUnavailable
 from interview_prep.ai.factory import create_provider
-from interview_prep.ai.provider import AIProvider
+from interview_prep.ai.provider import AIProvider, BaseProvider
 from interview_prep.ai.rubric import profile_for
 from interview_prep.ai.schemas import AnswerEvaluation as AnswerResult
 from interview_prep.ai.schemas import AnswerInput, Followup, FollowupInput, Provenance
@@ -73,6 +73,9 @@ class InterviewRunner:
 
     async def loop(self) -> None:
         while True:
+            # Clear before querying so a committed command cannot lose its wakeup
+            # between an idle tick and entering the wait below.
+            self.wake.clear()
             try:
                 worked = await self.tick()
             except Exception:
@@ -80,9 +83,10 @@ class InterviewRunner:
                 logger.warning("Interview worker temporarily unavailable")
                 worked = False
             if not worked:
-                self.wake.clear()
                 try:
-                    await asyncio.wait_for(self.wake.wait(), timeout=1)
+                    await asyncio.wait_for(
+                        self.wake.wait(), timeout=self.settings.interview_poll_seconds
+                    )
                 except TimeoutError:
                     pass
 
@@ -121,7 +125,16 @@ class InterviewRunner:
                     provenance.provider != dispatch.provider.name
                     or provenance.provider_version != dispatch.provider.version
                     or provenance.kind != dispatch.provider.kind
-                    or provenance.model != dispatch.provider.model
+                    or provenance.model
+                    != (
+                        dispatch.provider.model_for(
+                            "evaluate_answer"
+                            if dispatch.operation == "evaluate"
+                            else "generate_followup"
+                        )
+                        if isinstance(dispatch.provider, BaseProvider)
+                        else dispatch.provider.model
+                    )
                 ):
                     raise ValueError("Provenance mismatch")
         except ProviderError as exc:

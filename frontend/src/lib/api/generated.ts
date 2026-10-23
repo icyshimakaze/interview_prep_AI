@@ -4,6 +4,108 @@
  */
 
 export interface paths {
+    "/api/v1/account/ai/defense/{identifier}/{position}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Defense Review */
+        post: operations["defense_review_api_v1_account_ai_defense__identifier___position__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/ai/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Options */
+        get: operations["options_api_v1_account_ai_options_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/ai/projects/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Project Questions */
+        post: operations["project_questions_api_v1_account_ai_projects__identifier__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/ai/resumes/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume Review */
+        post: operations["resume_review_api_v1_account_ai_resumes__identifier__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/ai/roadmaps/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Roadmap Review */
+        post: operations["roadmap_review_api_v1_account_ai_roadmaps__identifier__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/ai/targets/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Target Review */
+        post: operations["target_review_api_v1_account_ai_targets__identifier__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/account/assessments": {
         parameters: {
             query?: never;
@@ -1758,6 +1860,30 @@ export interface components {
             /** Revision */
             revision: number;
         };
+        /** AnalysisConsent */
+        AnalysisConsent: {
+            /**
+             * Consent
+             * @constant
+             */
+            consent: true;
+            /** Provider Version */
+            provider_version: string;
+        };
+        /** AnalysisOptions */
+        AnalysisOptions: {
+            /** Disclosure */
+            disclosure: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "simulation" | "model_assisted";
+            /** Name */
+            name: string;
+            /** Version */
+            version: string;
+        };
         /** AnalysisSummary */
         AnalysisSummary: {
             /** Languages */
@@ -2857,6 +2983,31 @@ export interface components {
             difficulty: components["schemas"]["Difficulty"];
             question_type: components["schemas"]["QuestionType"];
         };
+        /** JobAnalysis */
+        JobAnalysis: {
+            /** Requirements */
+            requirements: components["schemas"]["JobRequirement"][];
+            /** Review Notes */
+            review_notes: string[];
+            /** Summary */
+            summary: string;
+        };
+        /** JobRequirement */
+        JobRequirement: {
+            /** End */
+            end: number;
+            /** Evidence */
+            evidence: string;
+            /**
+             * Importance
+             * @enum {string}
+             */
+            importance: "required" | "preferred" | "mentioned";
+            /** Name */
+            name: string;
+            /** Start */
+            start: number;
+        };
         /** MissedConcept */
         MissedConcept: {
             /**
@@ -3218,6 +3369,20 @@ export interface components {
             /** Items */
             items: components["schemas"]["ProjectSummary"][];
         };
+        /** ProjectQuestion */
+        ProjectQuestion: {
+            /** Evidence */
+            evidence: string;
+            /** Focus */
+            focus: string;
+            /** Question */
+            question: string;
+        };
+        /** ProjectQuestions */
+        ProjectQuestions: {
+            /** Questions */
+            questions: components["schemas"]["ProjectQuestion"][];
+        };
         /** ProjectSummary */
         ProjectSummary: {
             /**
@@ -3247,6 +3412,53 @@ export interface components {
             name: string;
             /** Origin */
             origin: string;
+        };
+        /** Provenance */
+        Provenance: {
+            /** Disclosure */
+            disclosure: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "simulation" | "model_assisted";
+            /** Model */
+            model: string | null;
+            /**
+             * Prompt Version
+             * @default ai-prompts-v1
+             * @enum {string}
+             */
+            prompt_version: "ai-prompts-v1" | "answer-evaluation-v2";
+            /** Provider */
+            provider: string;
+            /** Provider Version */
+            provider_version: string;
+        };
+        /** ProviderResult[AnswerEvaluation] */
+        ProviderResult_AnswerEvaluation_: {
+            data: components["schemas"]["AnswerEvaluation"];
+            provenance: components["schemas"]["Provenance"];
+        };
+        /** ProviderResult[JobAnalysis] */
+        ProviderResult_JobAnalysis_: {
+            data: components["schemas"]["JobAnalysis"];
+            provenance: components["schemas"]["Provenance"];
+        };
+        /** ProviderResult[ProjectQuestions] */
+        ProviderResult_ProjectQuestions_: {
+            data: components["schemas"]["ProjectQuestions"];
+            provenance: components["schemas"]["Provenance"];
+        };
+        /** ProviderResult[ResumeAnalysis] */
+        ProviderResult_ResumeAnalysis_: {
+            data: components["schemas"]["ResumeAnalysis"];
+            provenance: components["schemas"]["Provenance"];
+        };
+        /** ProviderResult[Roadmap] */
+        ProviderResult_Roadmap_: {
+            data: components["schemas"]["Roadmap"];
+            provenance: components["schemas"]["Provenance"];
         };
         /**
          * QuestionType
@@ -3302,7 +3514,7 @@ export interface components {
             database: "connected";
             /**
              * Schema Revision
-             * @default 0010_security_budgets
+             * @default 0012_ai_context_reviews
              */
             schema_revision: string;
             /**
@@ -3326,6 +3538,15 @@ export interface components {
             revision: number;
             /** Selected Option Ids */
             selected_option_ids?: string[];
+        };
+        /** ResumeAnalysis */
+        ResumeAnalysis: {
+            /** Skills */
+            skills: components["schemas"]["SkillMention"][];
+            /** Suggestions */
+            suggestions: string[];
+            /** Summary */
+            summary: string;
         };
         /** ResumeDetail */
         ResumeDetail: {
@@ -3407,6 +3628,13 @@ export interface components {
             /** Revision */
             revision: number;
         };
+        /** Roadmap */
+        Roadmap: {
+            /** Steps */
+            steps: components["schemas"]["RoadmapStep"][];
+            /** Summary */
+            summary: string;
+        };
         /** RoadmapItemView */
         RoadmapItemView: {
             /** Estimated Minutes */
@@ -3420,6 +3648,17 @@ export interface components {
             status: string;
             /** Title */
             title: string;
+        };
+        /** RoadmapStep */
+        RoadmapStep: {
+            /** Activity */
+            activity: string;
+            /** Minutes */
+            minutes: number;
+            /** Success Check */
+            success_check: string;
+            /** Topic */
+            topic: string;
         };
         /** RoadmapWorkspace */
         RoadmapWorkspace: {
@@ -3503,6 +3742,17 @@ export interface components {
             target_id: string | null;
             /** Targets */
             targets: components["schemas"]["SkillTarget"][];
+        };
+        /** SkillMention */
+        SkillMention: {
+            /** End */
+            end: number;
+            /** Evidence */
+            evidence: string;
+            /** Name */
+            name: string;
+            /** Start */
+            start: number;
         };
         /** SkillRow */
         SkillRow: {
@@ -3728,6 +3978,535 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    defense_review_api_v1_account_ai_defense__identifier___position__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalysisConsent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResult_AnswerEvaluation_"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    options_api_v1_account_ai_options_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisOptions"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    project_questions_api_v1_account_ai_projects__identifier__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalysisConsent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResult_ProjectQuestions_"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    resume_review_api_v1_account_ai_resumes__identifier__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalysisConsent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResult_ResumeAnalysis_"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    roadmap_review_api_v1_account_ai_roadmaps__identifier__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalysisConsent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResult_Roadmap_"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    target_review_api_v1_account_ai_targets__identifier__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalysisConsent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResult_JobAnalysis_"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     history_api_v1_account_assessments_get: {
         parameters: {
             query?: {

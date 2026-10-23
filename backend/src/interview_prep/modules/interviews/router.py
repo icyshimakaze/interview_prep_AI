@@ -83,15 +83,25 @@ def interview_router(mode: str) -> APIRouter:
 
     @router.get("/{identifier}", response_model=InterviewSessionView)
     async def read(
-        identifier: UUID, user: Annotated[User, Depends(identity)], session: Session
+        identifier: UUID,
+        request: Request,
+        user: Annotated[User, Depends(identity)],
+        session: Session,
     ) -> InterviewSessionView:
-        return await queries.read(session, user.id, identifier)
+        result = await queries.read(session, user.id, identifier)
+        request.app.state.interview_runner.wake.set()
+        return result
 
     @router.get("/{identifier}/review", response_model=InterviewReview)
     async def review(
-        identifier: UUID, user: Annotated[User, Depends(identity)], session: Session
+        identifier: UUID,
+        request: Request,
+        user: Annotated[User, Depends(identity)],
+        session: Session,
     ) -> InterviewReview:
-        return await queries.review(session, user.id, identifier)
+        result = await queries.review(session, user.id, identifier)
+        request.app.state.interview_runner.wake.set()
+        return result
 
     async def execute(
         identifier: UUID,

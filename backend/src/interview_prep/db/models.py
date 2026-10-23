@@ -1,5 +1,6 @@
 """Explicit metadata registry used by Alembic, tests, and data tooling."""
 
+from interview_prep.ai import analysis_models as ai_analyses
 from interview_prep.core import security_models as security
 from interview_prep.db.base import Base
 from interview_prep.modules.assessments import models as assessments
@@ -15,6 +16,7 @@ from interview_prep.modules.roadmaps import models as roadmaps
 
 __all__ = [
     "Base",
+    "ai_analyses",
     "security",
     "assessments",
     "context",

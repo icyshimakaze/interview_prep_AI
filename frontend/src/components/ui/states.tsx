@@ -72,7 +72,7 @@ export function WorkspaceSkeleton({
 }) {
   return (
     <div role="status" aria-busy="true" className="space-y-8">
-      <span className="sr-only">{label}</span>
+      <p className="text-sm text-muted">{label}</p>
       <div aria-hidden="true" className="space-y-4">
         <div className="skeleton h-4 w-24" />
         <div className="skeleton h-10 w-2/3 max-w-sm" />

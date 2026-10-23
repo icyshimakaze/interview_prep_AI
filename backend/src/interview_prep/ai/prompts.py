@@ -52,11 +52,15 @@ TASKS: dict[Operation, str] = {
     "Do not repeat the input question or any recent_questions. Include a concise rationale.",
     "recommend_roadmap": "Return one practice step per supplied topic, preserving each exact "
     "topic name once. Total minutes must not exceed weekly_minutes. Give verifiable practice "
-    "checks, not promised hiring outcomes or readiness predictions.",
+    "checks, not promised hiring outcomes or readiness predictions. When context is supplied, "
+    "use its saved evidence-based task reasons. Missing evidence means unknown, not incompetence. "
+    "Do not change the deterministic plan or claim these suggestions validate skills.",
     "generate_project_questions": "Return exactly question_count distinct project-defense "
     "questions grounded in the supplied project text. Each evidence field must be a nonempty "
     "exact substring of that text. Ask about decisions, testing and tradeoffs without asserting "
-    "that unverified repository claims are true.",
+    "that unverified repository claims are true. Cover architecture, implementation choices, "
+    "security, databases, testing and scalability when six questions are requested. "
+    "If facts do not establish a capability, ask how it would be designed rather than invent it.",
 }
 
 

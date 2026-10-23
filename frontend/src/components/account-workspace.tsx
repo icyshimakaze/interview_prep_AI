@@ -27,6 +27,7 @@ import { createAssessmentApi, type AssessmentApi } from "@/lib/api/assessments";
 import { createPlanningApi } from "@/lib/api/planning";
 import { createProjectApi } from "@/lib/api/projects";
 import { createInterviewApi } from "@/lib/api/interviews";
+import { createAIReviewApi } from "@/lib/api/ai-review";
 import {
   createResumeApi,
   type ResumeApi,
@@ -83,6 +84,12 @@ function AccountSession({ children }: { children: ReactNode }) {
   );
   const planningApi = useMemo(
     () => ({
+      ai: {
+        options: () => createAIReviewApi(authenticatedRequest).options(),
+        review: (
+          ...args: Parameters<ReturnType<typeof createAIReviewApi>["review"]>
+        ) => createAIReviewApi(authenticatedRequest).review(...args),
+      },
       read: (
         ...args: Parameters<ReturnType<typeof createPlanningApi>["read"]>
       ) => createPlanningApi(authenticatedRequest, "account").read(...args),
@@ -100,6 +107,12 @@ function AccountSession({ children }: { children: ReactNode }) {
   );
   const projectApi = useMemo(
     () => ({
+      ai: {
+        options: () => createAIReviewApi(authenticatedRequest).options(),
+        review: (
+          ...args: Parameters<ReturnType<typeof createAIReviewApi>["review"]>
+        ) => createAIReviewApi(authenticatedRequest).review(...args),
+      },
       list: (
         ...args: Parameters<ReturnType<typeof createProjectApi>["list"]>
       ) => createProjectApi(authenticatedRequest, "account").list(...args),
@@ -228,6 +241,12 @@ function AccountSession({ children }: { children: ReactNode }) {
   );
   const targetApi = useMemo<TargetApi>(() => {
     return {
+      ai: {
+        options: () => createAIReviewApi(authenticatedRequest).options(),
+        review: (
+          ...args: Parameters<ReturnType<typeof createAIReviewApi>["review"]>
+        ) => createAIReviewApi(authenticatedRequest).review(...args),
+      },
       list: (offset, status, signal) =>
         createTargetApi(authenticatedRequest).list(offset, status, signal),
       read: (id) => createTargetApi(authenticatedRequest).read(id),
@@ -292,6 +311,12 @@ function AccountSession({ children }: { children: ReactNode }) {
       return result;
     };
     return {
+      ai: {
+        options: () => createAIReviewApi(authenticatedRequest).options(),
+        review: (
+          ...args: Parameters<ReturnType<typeof createAIReviewApi>["review"]>
+        ) => createAIReviewApi(authenticatedRequest).review(...args),
+      },
       list: (signal) => createResumeApi(authenticatedRequest).list(signal),
       read: (id) => createResumeApi(authenticatedRequest).read(id),
       upload: (file) =>

@@ -45,8 +45,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
           <div>
             <Brand />
             <p className="mt-3 max-w-sm text-sm leading-6 text-muted">
-              A little more direction.
-              <br />A more considered way to prepare.
+              Job targets, interview practice, and a record of your preparation.
             </p>
           </div>
           <nav

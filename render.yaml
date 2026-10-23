@@ -1,0 +1,48 @@
+# Prepared only. Importing a Blueprint creates hosted resources; do so only after approval.
+services:
+  - type: web
+    name: interview-prep-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./deploy/backend.Dockerfile
+    dockerContext: .
+    autoDeployTrigger: "off"
+    # Startup checks the schema once; liveness probes do not wake Neon repeatedly.
+    healthCheckPath: /health
+    envVars:
+      - fromGroup: interview-prep-production
+      # Render only prompts for sync:false values on services, not groups.
+      - key: DATABASE_URL
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+envVarGroups:
+  - name: interview-prep-production
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PUBLIC_DEMO_ONLY
+        value: "true"
+      - key: AI_PROVIDER
+        value: mock
+      - key: AUTH_ENABLED
+        value: "false"
+      - key: DATABASE_SSL_MODE
+        value: verify-full
+      - key: DATABASE_CONNECT_TIMEOUT_SECONDS
+        value: "10"
+      - key: DEMO_RATE_LIMIT_KEY
+        generateValue: true
+      - key: BACKEND_PROXY_SECRET
+        generateValue: true
+      - key: DEMO_TTL_SECONDS
+        value: "86400"
+      - key: INTERVIEW_WORKER_ENABLED
+        value: "true"
+      - key: INTERVIEW_POLL_SECONDS
+        value: "600"
+      - key: CLEANUP_ENABLED
+        value: "true"
+      - key: FILE_WORKER_SLOTS
+        value: "1"

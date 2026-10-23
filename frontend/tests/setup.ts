@@ -4,12 +4,14 @@ import { cleanup } from "@testing-library/react";
 
 // jsdom lacks native dialog lifecycle methods. Browser tests exercise actual
 // modal focus, Escape, overflow and focus restoration in Chrome.
-HTMLDialogElement.prototype.showModal = function () {
-  this.setAttribute("open", "");
-};
-HTMLDialogElement.prototype.close = function () {
-  this.removeAttribute("open");
-};
+if (typeof HTMLDialogElement !== "undefined") {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
+}
 
 beforeEach(() => {
   vi.stubGlobal(

@@ -1,5 +1,6 @@
 import type { components } from "./generated";
 import { csrfToken } from "./workspace";
+import { createAIReviewApi, type AIReviewApi } from "./ai-review";
 
 export type Project = components["schemas"]["ProjectDetail"];
 export type ProjectSummary = components["schemas"]["ProjectSummary"];
@@ -169,7 +170,10 @@ export function createProjectApi(
     return response.status === 204 ? null : response.json();
   }
   const path = (id: string) => `/${encodeURIComponent(id)}`;
+  const ai: { ai?: AIReviewApi } =
+    mode === "account" ? { ai: createAIReviewApi(request) } : {};
   return {
+    ...ai,
     list: async () => list(object(await call()).items).map(summary),
     read: async (id: string) => parseProject(await call(path(id))),
     github: async (url: string) =>

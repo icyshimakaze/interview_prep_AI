@@ -6,8 +6,10 @@ import {
   type TargetList,
   type TargetStatus,
 } from "./workspace";
+import { createAIReviewApi, type AIReviewApi } from "./ai-review";
 
 export type TargetApi = {
+  ai?: AIReviewApi;
   list: (
     offset: number,
     status: TargetStatus | "all",
@@ -22,6 +24,7 @@ export function createTargetApi(
   request: (path: string, init?: RequestInit) => Promise<Response>,
 ): TargetApi {
   return {
+    ai: createAIReviewApi(request),
     list: async (offset, status, signal) =>
       parseTargetList(
         await (

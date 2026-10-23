@@ -132,7 +132,7 @@ export function AssessmentsWorkspace({ api }: { api: AssessmentApi }) {
                 versions.
               </p>
               {!current.history.total ? (
-                <p className="rounded-xl border border-line p-6 text-sm">
+                <p className="border-y border-line py-5 text-sm text-muted">
                   No attempts yet. Configure your first assessment above.
                 </p>
               ) : (
@@ -185,7 +185,7 @@ export function AssessmentsWorkspace({ api }: { api: AssessmentApi }) {
                 <p className="text-sm text-muted">
                   {current.history.total} saved attempts
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Button
                     variant="outline"
                     disabled={busy || offset === 0}

@@ -45,22 +45,24 @@ export function InterviewConfigure({
   return (
     <form
       onSubmit={submit}
-      className="mb-8 space-y-5 rounded-xl border border-line bg-surface p-5 sm:p-6"
+      className="mb-8 space-y-5 border-y border-line bg-surface p-5 sm:p-6"
     >
       <h2 className="section-title">Configure an interview</h2>
       <p className="text-sm leading-6 text-muted">
         {options.provider.disclosure}{" "}
         {options.provider.name === "OpenAIProvider"
           ? "Written answers are sent to OpenAI."
-          : options.provider.name === "OllamaProvider"
-            ? "Written answers are sent to your configured Ollama server."
-            : "No external AI credentials or API calls are needed."}
+          : options.provider.name === "XkiroProvider"
+            ? "Written answers and follow-up context are sent to xKiro and its downstream model provider. Third-party retention policies apply."
+            : options.provider.name === "OllamaProvider"
+              ? "Written answers are sent to your configured Ollama server."
+              : "No external AI credentials or API calls are needed."}
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="text-sm font-medium">
+        <label className="min-w-0 text-sm font-medium">
           Target job
           <select
-            className="field mt-2 w-full"
+            className="input mt-2"
             value={target}
             onChange={(e) => setTarget(e.target.value)}
             disabled={busy}
@@ -73,10 +75,10 @@ export function InterviewConfigure({
             ))}
           </select>
         </label>
-        <label className="text-sm font-medium">
+        <label className="min-w-0 text-sm font-medium">
           Interview type
           <select
-            className="field mt-2 w-full"
+            className="input mt-2"
             value={type}
             disabled={busy}
             onChange={(e) => {
@@ -104,10 +106,10 @@ export function InterviewConfigure({
             ))}
           </select>
         </label>
-        <label className="text-sm font-medium">
+        <label className="min-w-0 text-sm font-medium">
           Interview difficulty
           <select
-            className="field mt-2 w-full"
+            className="input mt-2"
             value={difficulty}
             disabled={busy}
             onChange={(e) => {
@@ -127,10 +129,10 @@ export function InterviewConfigure({
             <option value="hard">Hard only</option>
           </select>
         </label>
-        <label className="text-sm font-medium">
+        <label className="min-w-0 text-sm font-medium">
           Main questions
           <input
-            className="field mt-2 w-full"
+            className="input mt-2"
             type="number"
             min={available?.min_questions ?? 1}
             max={available?.max_questions || 10}

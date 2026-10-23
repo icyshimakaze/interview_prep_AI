@@ -5,13 +5,28 @@ import json
 import math
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
+from weakref import WeakKeyDictionary
 
 import httpx
 
-from interview_prep.ai.errors import InvalidProviderOutput, ProviderTimeout, ProviderUnavailable
+from interview_prep.ai.errors import (
+    InvalidProviderOutput,
+    ProviderRateLimited,
+    ProviderTimeout,
+    ProviderUnavailable,
+)
 
 MAX_RESPONSE_BYTES = 262144
 TRANSIENT_STATUS = {408, 429, 500, 502, 503, 504}
+MAX_CONCURRENT_CALLS = 4
+_CLIENT_SLOTS: WeakKeyDictionary[httpx.AsyncClient, asyncio.Semaphore] = WeakKeyDictionary()
+
+
+def provider_slots(client: httpx.AsyncClient) -> asyncio.Semaphore:
+    """Share a bounded pool across provider instances using the application client."""
+    if client not in _CLIENT_SLOTS:
+        _CLIENT_SLOTS[client] = asyncio.Semaphore(MAX_CONCURRENT_CALLS)
+    return _CLIENT_SLOTS[client]
 
 
 def retry_delay(header: str | None, attempt: int) -> float:
@@ -46,9 +61,11 @@ async def request_json(
     headers: dict[str, str],
     deadline_seconds: float,
     retries: int,
+    *,
+    distinguish_rate_limits: bool = False,
 ) -> bytes:
     try:
-        async with asyncio.timeout(deadline_seconds):
+        async with asyncio.timeout(deadline_seconds), provider_slots(client):
             for attempt in range(retries + 1):
                 try:
                     async with client.stream(
@@ -76,10 +93,14 @@ async def request_json(
                             or attempt == retries
                             or quota_exhausted(bytes(body))
                         ):
+                            if response.status_code == 429 and distinguish_rate_limits:
+                                raise ProviderRateLimited()
                             raise ProviderUnavailable()
                         delay = retry_delay(response.headers.get("Retry-After"), attempt)
                         # Never retry earlier than a server's long backoff request.
                         if delay >= deadline_seconds:
+                            if response.status_code == 429 and distinguish_rate_limits:
+                                raise ProviderRateLimited()
                             raise ProviderUnavailable()
                 except (httpx.ConnectError, httpx.ConnectTimeout):
                     if attempt == retries:

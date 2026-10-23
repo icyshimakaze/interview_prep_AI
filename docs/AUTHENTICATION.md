@@ -1,5 +1,19 @@
 # Accounts and recruiter demo
 
+For the prepared Vercel/Render/Neon public release, follow
+[DEPLOYMENT.md](DEPLOYMENT.md). Its `PUBLIC_DEMO_ONLY=true` profile enforces mock AI
+and disabled accounts; no Clerk or AI key is required. Enable accounts only in a
+reviewed account profile on the same app, with exact HTTPS callbacks/origins and the documented
+privacy/release requirements. No hosted authentication was configured here.
+
+Phase 23B provides [production account examples](../deploy/backend.account.env.example)
+and [Vercel account settings](../deploy/frontend.account.env.example). Production
+Vercel requires matching `pk_live_`/`sk_live_` keys, and the backend requires enabled
+auth, issuer and selected provider credentials. The mock-only release stays usable
+without Clerk; enabling accounts does not change the recruiter demo's provider.
+Production Clerk requires an owned domain/DNS configuration and remains a manual
+account action. Follow [DEPLOYMENT.md sections H/K](DEPLOYMENT.md#h-configure-clerk-production-authentication-manually).
+
 The account routes use Clerk's maintained Next.js integration. FastAPI verifies
 every account bearer token independently and resolves a local principal from its
 trusted issuer/subject. No password table or client-submitted owner ID is used.

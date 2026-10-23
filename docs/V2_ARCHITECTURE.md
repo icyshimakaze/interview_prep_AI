@@ -461,6 +461,10 @@ Bootstrap must define these commands or equivalent explicit scripts: `pnpm lint`
 
 ## 18. Deployment architecture
 
+The VM choice below is historical. [ADR 0001](adr/0001-managed-deployment.md)
+supersedes its hosting target with Vercel, Render and Neon for the mock-only
+public demo. See [DEPLOYMENT.md](DEPLOYMENT.md) for the prepared, undeployed setup.
+
 Development uses Docker Compose for web, API, worker, PostgreSQL, and private artifact volume. Add Ollama as an optional profile; do not make GPU support a default requirement. Bind database and model ports only to the internal network or localhost when explicitly needed. Health checks gate startup; migration execution is a separate one-shot command, not something every API replica races to run.
 
 First public deployment: a single modest VM running the same containers behind an HTTPS gateway, with persistent private volumes and encrypted off-host backups. This suits a portfolio demo without a complex platform. Public recruiter mode uses mock inference only. Account mode can use Clerk and later managed PostgreSQL/object storage when operational needs justify the move. Do not run a remote user's local Ollama through public ingress; public model-backed accounts need an operator-managed private inference host or opted-in cloud provider.

@@ -17,6 +17,7 @@ for (const name of ["profile", "target", "resume", "skills"] as const) {
     for (const viewport of [
       { width: 1280, height: 900 },
       { width: 375, height: 812 },
+      { width: 320, height: 812 },
     ]) {
       await page.setViewportSize(viewport);
       expect(

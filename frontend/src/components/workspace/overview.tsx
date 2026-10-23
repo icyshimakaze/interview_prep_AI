@@ -15,20 +15,20 @@ export function Overview({ data }: { data: Dashboard }) {
     <>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Your preparation, in focus</p>
+          <p className="eyebrow">Preparation overview</p>
           <h1 className="page-title">
             {demo
-              ? `${data.profile?.display_name ?? "Fictional candidate"}’s workspace`
+              ? (data.profile?.display_name ?? "Demo dashboard")
               : hasProfile
-                ? "Make your next step count."
-                : "A good place to begin."}
+                ? "Dashboard"
+                : "Set up your preparation"}
           </h1>
           <p className="page-description">
             {demo
               ? "Explore a sample journey, review the history, and try completing a roadmap task."
               : hasProfile
-                ? `Preparing for ${data.profile?.target_role}. Keep your context close and your next step clear.`
-                : "Set your direction first. Your workspace will grow with the work you put in."}
+                ? `Preparing for ${data.profile?.target_role}. Review your context or plan your next practice session.`
+                : "Add your target role, experience level, and weekly study budget to begin."}
           </p>
         </div>
         <Badge tone="green">
@@ -47,32 +47,26 @@ export function Overview({ data }: { data: Dashboard }) {
             </p>
             <h2 className="mt-4 font-serif text-2xl sm:text-3xl">
               {demo
-                ? "Put a little practice on the record."
+                ? "Try a roadmap task"
                 : hasProfile
-                  ? "Your direction is set."
+                  ? "Plan your next practice session"
                   : "Start with your preparation profile."}
             </h2>
             <p className="mt-3 text-sm leading-7 text-muted">
               {demo
                 ? "Open the sample roadmap and mark a task complete. Your changes stay in this isolated demo until it expires or you delete it."
                 : hasProfile
-                  ? "Review your target role and study budget as your plans change. Explore the demo to see how the upcoming practice workflow will fit together."
+                  ? "Generate a roadmap from your job priorities, resume evidence, and weekly study budget."
                   : "Tell us the role you’re working toward, your experience level, and the time you want to set aside. You can change these later."}
             </p>
           </div>
-          <span
-            aria-hidden="true"
-            className="hidden h-14 w-14 items-center justify-center rounded-full bg-tint text-accent sm:flex"
-          >
-            <Icon name={demo ? "roadmap" : "settings"} width={26} height={26} />
-          </span>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <ButtonLink href={href(demo ? "roadmap" : "settings")}>
+          <ButtonLink href={href(demo || hasProfile ? "roadmap" : "settings")}>
             {demo
               ? "Open sample roadmap"
               : hasProfile
-                ? "Review profile"
+                ? "Open roadmap"
                 : "Set up your profile"}
             <Icon name="arrow" width={17} height={17} />
           </ButtonLink>
@@ -92,7 +86,7 @@ export function Overview({ data }: { data: Dashboard }) {
           <ol className="border-t border-line">
             {[
               {
-                title: "Define your direction",
+                title: "Preparation profile",
                 description: hasProfile
                   ? data.profile?.target_role
                   : "Add your role, experience, and study budget.",
@@ -112,7 +106,7 @@ export function Overview({ data }: { data: Dashboard }) {
                 status: data.targets.length ? "Available" : "Next step",
               },
               {
-                title: "Bring your experience into focus",
+                title: "Resume evidence",
                 description: "Review the evidence behind your resume.",
                 href: href("resume"),
                 ready: data.resumes.length > 0,
@@ -153,11 +147,10 @@ export function Overview({ data }: { data: Dashboard }) {
         </section>
         <section>
           <h2 className="section-title">
-            {demo ? "About this example" : "Room for real progress"}
+            {demo ? "Sample activity" : "Practice activity"}
           </h2>
           <div className="mt-5 border-t border-line pt-6">
-            <Icon name="progress" className="text-accent" />
-            <p className="mt-4 text-sm leading-7 text-muted">
+            <p className="text-sm leading-7 text-muted">
               {data.progress.length
                 ? "Your activity history keeps the context behind each recorded step. Demo events are always labeled as simulations."
                 : "When you start completing practice, your activity will appear here. There’s no readiness score to guess at before you begin."}

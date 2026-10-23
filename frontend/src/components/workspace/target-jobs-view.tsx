@@ -292,7 +292,7 @@ export function TargetJobsView({ api }: { api: TargetApi }) {
         onClose={() => setDetails(null)}
         title="Target job details"
       >
-        {details && <TargetDetails target={details} />}
+        {details && <TargetDetails target={details} ai={api.ai} />}
       </Dialog>
       <Dialog
         open={deleting !== null}

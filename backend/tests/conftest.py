@@ -21,6 +21,14 @@ from interview_prep.main import create_app
 def isolated_ai_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     """Local credentials/configuration must never opt the test suite into network AI."""
     monkeypatch.setenv("AI_PROVIDER", "mock")
+    monkeypatch.delenv("XKIRO_MODEL_SMART", raising=False)
+    monkeypatch.delenv("XKIRO_MODEL_MULTIMODAL", raising=False)
+    monkeypatch.setenv("XKIRO_API_KEY", "")
+    monkeypatch.setenv("XKIRO_BASE_URL", "https://api.xkiro.com/v1")
+    monkeypatch.setenv("XKIRO_REASONING_MODEL", "qwen/qwen3.8-max:free")
+    monkeypatch.setenv("XKIRO_MULTIMODAL_MODEL", "qwen/qwen3.8-omni-flash:free")
+    monkeypatch.setenv("XKIRO_MODEL_ROUTES", "{}")
+    monkeypatch.setenv("XKIRO_ALLOW_PAID_MODELS", "false")
     for key in ("OPENAI_API_KEY", "OPENAI_MODEL", "OLLAMA_BASE_URL", "OLLAMA_MODEL"):
         monkeypatch.setenv(key, "")
 
@@ -29,6 +37,14 @@ def pytest_configure(config: pytest.Config) -> None:
     """Block real HTTP before collection, including accidental module-level calls."""
     monkeypatch = pytest.MonkeyPatch()
     config.add_cleanup(monkeypatch.undo)
+    monkeypatch.delenv("XKIRO_MODEL_SMART", raising=False)
+    monkeypatch.delenv("XKIRO_MODEL_MULTIMODAL", raising=False)
+    monkeypatch.setenv("XKIRO_API_KEY", "")
+    monkeypatch.setenv("XKIRO_BASE_URL", "https://api.xkiro.com/v1")
+    monkeypatch.setenv("XKIRO_REASONING_MODEL", "qwen/qwen3.8-max:free")
+    monkeypatch.setenv("XKIRO_MULTIMODAL_MODEL", "qwen/qwen3.8-omni-flash:free")
+    monkeypatch.setenv("XKIRO_MODEL_ROUTES", "{}")
+    monkeypatch.setenv("XKIRO_ALLOW_PAID_MODELS", "false")
     monkeypatch.setenv("AI_PROVIDER", "mock")
     for key in ("OPENAI_API_KEY", "OPENAI_MODEL", "OLLAMA_BASE_URL", "OLLAMA_MODEL"):
         monkeypatch.setenv(key, "")

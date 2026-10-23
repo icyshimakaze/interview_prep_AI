@@ -1,6 +1,6 @@
 # Implemented architecture
 
-Verified against the V2 source on 22 October 2026. This guide describes the current
+Verified against the V2 source on 23 October 2026. This guide describes the current
 application; [V2_ARCHITECTURE.md](V2_ARCHITECTURE.md) records the original design
 proposal. [PROJECT_STATUS.md](../PROJECT_STATUS.md) records executed verification
 and release limitations. There is no verified production deployment here.
@@ -23,17 +23,25 @@ flowchart LR
     S --> R[Trusted PDF / ZIP worker code]
     S --> G[Fixed GitHub API + codeload hosts]
     S --> A[AIProvider boundary]
-    W[Two interview loops per API process] --> P
+    W[Two interview loops per API process, configurable idle polling] --> P
     W --> A
     A --> M[Mock: no external I/O]
-    A -. account opt-in .-> O[Ollama / OpenAI]
-    C[Separate hourly cleanup] --> P
+    A -. account opt-in .-> O[xKiro / Ollama / OpenAI]
+    C[Compose cleanup service or in-process Render cleanup while awake] --> P
 ```
 
 The browser sends account bearer credentials or demo cookies to the same frontend
 origin. Next forwards API requests; it does not authorize database access. The API
 resolves a principal before loading owned context. The database reinforces these
 checks with composite references, uniqueness, lifecycle constraints and triggers.
+
+Production startup performs a bounded read-only database/schema check before
+serving; migrations and catalogue publication remain operator commands. Render
+uses `/health` for liveness rather than continuously waking Neon with readiness
+queries. The free profile uses 600-second idle interview reconciliation with
+owned-read/mutation wakeups, startup/hourly-while-awake expiry cleanup and one
+shared PDF/project worker slot. Sleeping services cannot guarantee worker progress
+or scheduled physical deletion. [Deployment profiles and limits](DEPLOYMENT.md).
 
 ## Modules and responsibilities
 
@@ -163,7 +171,11 @@ Compose runs PostgreSQL, a one-shot migration, API, frontend and hourly cleanup;
 catalogue publication is an explicit tools command. API liveness does not query
 PostgreSQL; readiness requires connectivity and the exact application revision.
 Next.js API destinations are fixed at build time. Both runtime images use non-root
-users; local published ports bind to loopback. There is no deployment automation.
+users; local published ports bind to loopback. The prepared
+[managed deployment ADR](adr/0001-managed-deployment.md) and
+[deployment runbook](DEPLOYMENT.md) target Vercel, Render and Neon with mock AI,
+verified database TLS and an authenticated frontend gateway. They have not been
+deployed; the Render manifest disables automatic deploys.
 
 Shared database quotas cover expensive imports/provider attempts across replicas;
 parser/assessment semaphores are per process. AI attempt budgets reserve possible
