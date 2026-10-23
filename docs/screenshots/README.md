@@ -1,5 +1,20 @@
 # Product screenshot provenance
 
+## Hosted captures — 24 October 2026
+
+[hosted-landing.png](hosted-landing.png) (1440 pixels) and
+[hosted-landing-mobile.png](hosted-landing-mobile.png) (375 pixels) are unedited
+Chrome screenshots of <https://interview-prep-ai-icyshimakaze.vercel.app>, serving
+`c5ca23ea5a8b1d502f6e53d22b32b3bdde73debb`. They were visually inspected and copied
+from the ignored `phase24-public-artifacts` Playwright output. That real hosted
+test passed all four requested widths, overflow/accessibility/keyboard checks,
+privacy navigation and the unavailable-account pages. No API response was mocked
+and no visitor workspace, credential or real AI result appears in these captures.
+The landing page's workspace illustration is explicitly labelled interface preview.
+See the [Phase 24 report](../PHASE_24_REPORT.md) for the verification boundary.
+
+## Earlier local captures
+
 These are unedited PNGs copied from retained Playwright artifacts of the successful
 22 October 2026 full local quality run, on the implementation subsequently committed
 as `59e3507`. The original `frontend/test-results/.last-run.json` reports passed;

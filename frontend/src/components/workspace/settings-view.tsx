@@ -91,7 +91,7 @@ export function SettingsView({
             </h3>
             <p className="mt-2 text-sm leading-7 text-muted">
               {data.mode === "demo"
-                ? "Use “Exit and delete demo” above to erase this workspace. Otherwise it expires within 24 hours and is removed by hourly cleanup."
+                ? "Use “Exit and delete demo” above to erase this workspace. Otherwise access expires within 24 hours. Expired data is deleted when cleanup next runs; this can be delayed while free hosting is asleep."
                 : "Sign-in is managed by Clerk. Use Sign out above to leave your account. Your saved preparation profile remains in the application database."}
             </p>
             <h3 className="mt-6 text-sm font-semibold">Data controls</h3>

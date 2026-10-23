@@ -15,6 +15,12 @@ no login or AI key is needed. Free hosting may take time to wake after inactivit
 You can also [run locally](#run-locally) at <http://localhost:3000>.
 See the [deployment record and verification limits](docs/DEPLOYMENT.md).
 
+The hosted profile currently enables the recruiter demo. Production Clerk sign-in
+and xKiro account workflows remain disabled pending an owned domain/DNS setup and
+the account privacy/security release work. See the
+[Phase 24 verification report](docs/PHASE_24_REPORT.md) for fresh checks and exact
+remaining actions.
+
 [Recruiter walkthrough](#recruiter-walkthrough) ·
 [Architecture](docs/ARCHITECTURE.md) ·
 [Interview notes](docs/INTERVIEW_NOTES.md) ·
@@ -37,6 +43,15 @@ practice defending real source code without executing it.
 
 Screenshots are captured from the running application with fictional demo data;
 they are product views, not evidence of real users or hiring outcomes.
+
+<details>
+<summary>Hosted landing page — desktop and mobile, 24 October 2026</summary>
+
+![Verified hosted landing page at 1440 pixels](docs/screenshots/hosted-landing.png)
+
+![Verified hosted landing page at 375 pixels](docs/screenshots/hosted-landing-mobile.png)
+
+</details>
 
 <details>
 <summary>Landing page</summary>
@@ -66,9 +81,10 @@ they are product views, not evidence of real users or hiring outcomes.
 
 </details>
 
-[Capture provenance and reproduction](docs/screenshots/README.md). These retained
-images come from the successful 22 October 2026 local browser run; they are not
-screenshots of a hosted deployment.
+[Capture provenance and reproduction](docs/screenshots/README.md). The two hosted
+landing captures are from the 24 October 2026 public Chrome check. The four
+workspace/product captures below them are retained from the successful 22 October
+2026 local browser run.
 
 ## What is implemented
 

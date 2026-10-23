@@ -6,6 +6,13 @@ The public mock-only demo is live at
 Choose **Try Interactive Demo**; no login or AI key is needed. Account sign-in
 and live xKiro are disabled in this initial profile.
 
+Phase 24 rechecked the live resources, release CI, security boundaries and current
+local quality gates. The user confirmed that no owned domain/production Clerk
+setup exists and no Render payment method is saved. Account mode stays disabled;
+see the [Phase 24 report](PHASE_24_REPORT.md) for fresh results, environment names,
+the pending hosted journey and the blocked full-data backup/restore drill. The
+local retention-copy correction has not yet been pushed or deployed.
+
 | Resource        | Existing deployment                                                                                                                                                     |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Frontend        | Vercel Hobby, personal `icyshimakaze` account; project `interview-prep-ai-icyshimakaze`                                                                                 |
