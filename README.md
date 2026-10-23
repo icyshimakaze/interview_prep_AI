@@ -9,10 +9,11 @@ graded answer, simulated feedback and a model judgment have different meanings.
 The application preserves those distinctions through its database, algorithms,
 API and UI. It does not predict hiring outcomes or calculate a readiness score.
 
-**Demo:** [run locally](#run-locally) at <http://localhost:3000>, then choose
-**Try Interactive Demo**. **Hosted demo: not configured.** When a deployment has
-been verified, replace this sentence with its actual HTTPS URL and set the
-[deployment origins](#deployment); there is no separate live-demo URL setting.
+**[Open the hosted demo](https://interview-prep-ai-icyshimakaze.vercel.app)**, then
+choose **Try Interactive Demo**. It uses fictional data and labelled mock AI;
+no login or AI key is needed. Free hosting may take time to wake after inactivity.
+You can also [run locally](#run-locally) at <http://localhost:3000>.
+See the [deployment record and verification limits](docs/DEPLOYMENT.md).
 
 [Recruiter walkthrough](#recruiter-walkthrough) ·
 [Architecture](docs/ARCHITECTURE.md) ·

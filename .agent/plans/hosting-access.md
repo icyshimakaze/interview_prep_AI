@@ -44,6 +44,23 @@ credentials remain in memory, and generated deployment secrets remain ignored.
 Matched the Render default to the existing Singapore database. Release 12daed1's
 complete hosted CI is green. Existing unrelated hosting resources were preserved.
 Render's connector reports no selected workspace and explicitly requires a user
-choice before creation. Awaiting confirmation of My Workspace and the personal
-Vercel Hobby account; then provision/verify the two free-profile hosts. No hosted
-backend or frontend for this app has been created yet.
+choice before creation. The user confirmed My Workspace and the personal Vercel
+Hobby account. Created the Free Docker backend in Singapore and the production
+Next frontend, pinned to CI-approved c5ca23e. Render reports live; Vercel reports
+READY. Canonical frontend/readiness and gateway/CORS/security checks passed.
+No paid resources or automatic deploys were added; unrelated resources remain.
+
+The original hosted browser run had one pass and one navigation-timeout failure.
+A bounded follow-up passed interviews, Project Defense and roadmap but failed a
+progress assertion whose objective-assessment prerequisite was absent from its
+fresh session. Inspected progress showed correct empty objective history and
+persisted simulated activity. Hosted two-visitor isolation and UI exit remain
+uncompleted. Both synthetic sessions were erased through their own authenticated
+cleanup; database counts confirmed zero demo workspaces/sessions. Keep failures
+visible and respect the two-per-hour network creation quota. Optional Vercel
+team-detail/build-log access needs additional scope consent; no bypass was used.
+
+README, deployment runbook and status now record the actual public URL, resource
+IDs, successful CI and exact verification limits. Account mode/live xKiro remain
+disabled pending the documented release prerequisites. No further user setup is
+needed to use the public mock-only demo.

@@ -2,6 +2,63 @@
 
 Updated: 2026-10-24 (Asia/Calcutta).
 
+## Hosted public demo — 24 October 2026
+
+The user confirmed Render **My Workspace** and the personal Vercel Hobby account
+`icyshimakaze`. The authorized Free deployment is live at
+**https://interview-prep-ai-icyshimakaze.vercel.app**. README and the deployment
+runbook now link to the real site. No manual provisioning remains for this
+mock-only profile.
+
+- Render: `srv-dbdrrr9srm7s73cpdt6g`, Free Docker in Singapore, automatic deploys
+  off, status `live`. It uses the restricted Neon runtime role and private gateway
+  configuration. The creation connector cannot configure an HTTP health path;
+  current platform checks use TCP. Explicit `/health` and readiness probes passed.
+- Vercel: `prj_wsxEcvVC17paXs5pco4K9eHwWKgd`, production deployment
+  `dpl_AprjfXimTGg9oVJ9zP5ich1kYq9L`, status `READY`, canonical domain verified.
+  Pinned Git source was used without automatic Git linkage. Next.js uses Node
+  24.x, pnpm 12.8.1 and production-only configuration, with Singapore functions.
+- Both hosts run release `c5ca23ea5a8b1d502f6e53d22b32b3bdde73debb` from
+  `rebuild/professional-v2`. Its complete GitHub Actions run
+  [40012341296](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40012341296)
+  succeeded before deployment. No application code changed in this hosting step.
+- HTTPS, frontend/backend readiness at revision 0012, security headers, absence
+  of the gateway secret in checked responses, direct-backend rejection, exact
+  canonical CORS, foreign-origin rejection and closed account APIs passed.
+  All 12 JavaScript assets referenced by the public landing page were checked
+  against the generated deployment secrets with zero matches. A scan of all
+  467 tracked files also found zero deployment-secret matches; changed Markdown
+  passes Prettier and the diff has no whitespace errors.
+- Hosted Chrome: original demo suite returned **1 passed, 1 failed**. Candidate
+  edits, question practice and assessments passed before a 15-second navigation
+  timeout entering Interviews. Account-disabled UI passed. A separate bounded
+  follow-up passed mock interview pause/follow-up/completion, illustrative
+  Project Defense and roadmap persistence/completion/history. Its overall test
+  failed because the reused progress helper expected objective assessment grades
+  that the fresh follow-up visitor had not created. Inspection confirmed the
+  correct empty objective history and persisted simulated practice. Neither
+  failure was hidden or counted as a passing test. Hosted two-visitor isolation
+  and the UI exit sequence remain uncompleted; full disposable-browser CI had
+  previously passed 25 tests. Do not reset production creation quotas to rerun.
+- Both test visitors were removed with their own authenticated cleanup requests;
+  final verified counts are **0 demo workspaces and 0 demo sessions**. Final
+  frontend/readiness returned 200 and unauthenticated demo dashboard returned 401.
+  The operator network consumed its two-per-UTC-hour creation allowance.
+
+Existing unrelated services/projects were preserved. No paid service, custom
+domain, public account registration or live AI request was added. Actual dotenv
+files remain unchanged; deployment secrets/receipts are ignored local operator
+files. Owner credentials were never supplied to the runtime hosts. Vercel project
+creation/deployment/configuration/status work; optional team-detail and build-log
+reads returned a scope-authorization error and were not bypassed. They were not
+required to verify this successful public deployment.
+
+Next task: use the public demo; complete account export/erasure, Clerk deletion
+reconciliation, strict script CSP and production Clerk configuration before
+opening account mode with real xKiro. Additional hosted isolation/browser checks
+can run within a later normal quota window. Backups/restore and live account
+callbacks remain unverified. Earlier sections below are historical phase records.
+
 ## Hosted Neon initialization — 24 October 2026
 
 All three direct hosting connections are authenticated. Verified account access
@@ -30,10 +87,9 @@ The existing Neon region is Singapore (`ap-southeast-1`); aligned the Render
 Blueprint/runbook default to Singapore. No Render service or Vercel project has
 been created for this app. The unrelated existing student-management service and
 existing Vercel projects were preserved. Render's connector explicitly requires
-the user to identify a workspace before creation. Awaiting confirmation of
-"My Workspace" and the personal Vercel Hobby account; then create the Free Docker
-backend and production Next frontend, configure their shared gateway/origin,
-and verify the hosted demo. Account/Clerk release gaps remain as documented below.
+the user to identify a workspace before creation. The user subsequently confirmed
+"My Workspace" and the personal Vercel Hobby account; hosting was completed in the
+phase recorded above. Account/Clerk release gaps remain as documented below.
 
 ## GitHub release publication
 

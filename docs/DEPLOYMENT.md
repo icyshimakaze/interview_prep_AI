@@ -1,7 +1,47 @@
-# Deployment preparation: Vercel + Render Free + Neon
+# Deployment: Vercel + Render Free + Neon
 
-Prepared 23 October 2026. **Not deployed. Do not push, import a Blueprint, create
-hosted resources or connect automatic deployments until separately authorized.**
+Deployed with explicit user authorization on 24 October 2026 (Asia/Calcutta).
+The public mock-only demo is live at
+**[interview-prep-ai-icyshimakaze.vercel.app](https://interview-prep-ai-icyshimakaze.vercel.app)**.
+Choose **Try Interactive Demo**; no login or AI key is needed. Account sign-in
+and live xKiro are disabled in this initial profile.
+
+| Resource        | Existing deployment                                                                                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend        | Vercel Hobby, personal `icyshimakaze` account; project `interview-prep-ai-icyshimakaze`                                                                                 |
+| Backend         | [Render service](https://dashboard.render.com/web/srv-dbdrrr9srm7s73cpdt6g), Free Docker, Singapore, My Workspace                                                       |
+| Database        | [Existing Free Neon project](https://console.neon.tech/app/projects/autumn-sound-91017993/branches/br-twilight-resonance-b3ukxsc8?database=neondb), Singapore, `neondb` |
+| Deployed source | `rebuild/professional-v2` at `c5ca23ea5a8b1d502f6e53d22b32b3bdde73debb`                                                                                                 |
+| Release CI      | [Complete successful run](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40012341296)                                                                   |
+
+Neon migrations through `0012_ai_context_reviews`, 29 published questions,
+restricted runtime grants, verified TLS and frontend/backend readiness passed.
+Render reports `live`; Vercel reports `READY`. HTTPS, security headers, backend
+gateway enforcement, canonical/foreign CORS and closed account mode passed.
+Hosted Chrome checks exercised candidate edits, questions, assessments, mock
+interviews, Project Defense and roadmap. The full hosted suite did **not** pass:
+the first run stopped on a 15-second navigation timeout; a bounded follow-up
+passed interviews/projects/roadmap but reused a progress assertion that required
+objective assessment attempts absent from its fresh session. The page correctly
+showed empty objective history and persisted simulated practice. Hosted
+two-visitor isolation and the UI exit sequence were not completed. Both test
+sessions were deleted through their own authenticated cleanup requests; final
+aggregate database checks are recorded in `PROJECT_STATUS.md`.
+
+Render automatic deploys are off. Vercel was deployed from the pinned Git source
+without connecting automatic Git deploys. Future pushes require a separate
+explicit release. The Render creation connector cannot set `healthCheckPath`;
+the current service uses TCP health checks, and both HTTP health endpoints were
+verified manually. The Blueprint below specifies `/health` for future imports.
+Existing unrelated hosting resources were preserved. No paid services were added.
+
+**No provisioning steps remain for using this demo.** Sections A–S are the
+reproducible setup/redeployment reference. Do not import the Blueprint again for
+the existing service. Account mode still requires the release work in section H.
+Render Free sleeps when idle; the first visit may need time to wake. Demo
+creation is limited to two sessions per network per UTC hour; deployment checks
+used that allowance on the operator's network. Do not reset quotas to retry tests.
+
 This runbook supersedes the earlier paid Starter/cron proposal in
 [ADR 0001](adr/0001-managed-deployment.md). It prepares a small portfolio demo,
 not an availability SLA or an unrestricted production service for personal data.
@@ -26,8 +66,8 @@ Clerk verifies accounts; only Render sends opted-in content to xKiro/downstream.
   **pnpm 12.8.1**, Docker and a PostgreSQL client. Native backend uses Python 3.12
   and `uv`; the recommended hosted backend uses its Dockerfile.
 - Vercel, Render and Neon accounts with access to the repository. Authorizing
-  integrations/importing projects can trigger deployments; do not do that in
-  this preparation phase. Keep previews separate from production data/secrets.
+  integrations/importing projects can trigger deployments; do so only for an
+  authorized release. Keep previews separate from production data/secrets.
 - Optional account mode needs a Clerk production instance, matching keys and a
   domain you own/control for DNS. Domain registration is not included in a free
   hosting tier; use the mock-only `vercel.app` demo if that is unavailable.
@@ -251,7 +291,7 @@ Directory **`frontend`**, include source files outside the root (workspace lock)
 Use one canonical production origin. Preview URLs must not share production
 backend/database/auth credentials; never allowlist `*.vercel.app`.
 Disable automatic Git deployments if releases must remain manual. Importing or
-pushing a connected branch can deploy, so do neither during preparation.
+pushing a connected branch can deploy; keep release actions explicitly authorized.
 
 ## J. Exact Vercel install/build/routing
 
@@ -480,8 +520,9 @@ retrying so completed evaluation receipts can be reused.
    erase history as an improvised rollback. Restore a verified backup/branch for
    data recovery. Remove operator-only env files from active use when finished.
 
-No hosted backup, restore, DNS, Clerk callback or repository integration has been
-performed in this preparation phase. These remain personal-account release steps.
+The current demo uses provider subdomains and the existing repository source.
+Hosted backup/restore drills, custom DNS and Clerk callbacks have not been
+verified. Complete the relevant steps before enabling the account profile.
 
 ## S. Avoid accidental charges
 
