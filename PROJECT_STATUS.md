@@ -4,6 +4,18 @@ Updated: 2026-10-23 (Asia/Calcutta).
 
 ## GitHub release publication
 
+Deployment continuation: release `c39d70a` has a green hosted
+[quality run](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/39985334206).
+The provenance correction also passed the original exporter in a fresh clone
+with `core.autocrlf=false` and `core.eol=lf`; source hashes and tests were unchanged.
+The user identified an existing Free Neon project and branch. Render/Vercel
+plugins are installed but expose no callable account tools; Neon tools were
+removed. No direct hosting MCP entries previously existed. Configured official
+Render, Vercel and project-scoped Neon MCP entries through Codex CLI; browser
+OAuth flows await user completion, then the extension must reload to expose the
+tools. No hosted resources or production data have been changed. Details are in
+the [hosting-access plan](.agent/plans/hosting-access.md).
+
 The user authorized committing/pushing the prepared changes and completing
 available deployment work on 23 October 2026. Release `19999f7` was committed and
 pushed to `origin/rebuild/professional-v2`; remote SHA was verified. The index scan
