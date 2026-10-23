@@ -12,19 +12,22 @@ phase does not certify the complete account platform for public personal data.
 | Backend             | <https://interview-prep-api-icyshimakaze.onrender.com>                                                           |
 | Repository          | <https://github.com/icyshimakaze/interview_prep_AI>                                                              |
 | Branch              | `rebuild/professional-v2`                                                                                        |
-| Running source      | `c5ca23ea5a8b1d502f6e53d22b32b3bdde73debb` on both hosts                                                         |
-| Inspection baseline | `71d525c80216e4805c3a6ac68d592f01cbd50f15`; documentation-only changes after the deployed source                 |
+| Running source      | Frontend `7e6bcfd3029b29a62fcf121ffb4ca7496bce8cb6`; backend `c5ca23ea5a8b1d502f6e53d22b32b3bdde73debb`          |
+| Inspection baseline | `71d525c80216e4805c3a6ac68d592f01cbd50f15`; documentation-only changes after the initial deployment              |
 | Render              | `srv-dbdrrr9srm7s73cpdt6g`, My Workspace, Singapore, Docker, one Free instance, auto-deploy off                  |
 | Render deployment   | `dep-dbdrrs9srm7s73cpe00g`, `live`                                                                               |
 | Vercel              | `prj_wsxEcvVC17paXs5pco4K9eHwWKgd`, personal Hobby deployment, production, Singapore functions                   |
-| Vercel deployment   | `dpl_AprjfXimTGg9oVJ9zP5ich1kYq9L`, `READY`, canonical alias verified                                            |
+| Vercel deployment   | `dpl_4CnVhRSUVR3LCk8HwGRhp8s2Nwgq`, `READY`, canonical alias verified                                            |
 | Neon                | Existing selected `production` branch, Singapore, `neondb`, ready; no database created or migrated in this phase |
 
-Both the [baseline CI](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40017869418)
-and [deployed-release CI](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40012341296)
-were read through GitHub's public API and reported completed/success. The local
-changes described below are not yet pushed or deployed. The user requires
-separate authorization for any Git push; no default-branch merge is planned.
+The [release CI](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40021576996)
+for `7e6bcfd` completed successfully in all three jobs before deployment. The
+baseline and earlier deployed-release CI also passed. The user explicitly
+authorized the normal release-branch push, and its remote SHA was verified. No
+default-branch merge or force push occurred. Vercel reached READY and the canonical
+site/readiness/security checks passed afterward. The backend and deployment
+directories have identical Git tree hashes to c5ca23e, so the existing healthy
+Render deployment was preserved instead of rebuilding unchanged backend code.
 
 ## Security checkpoint and database
 
@@ -42,30 +45,30 @@ separate authorization for any Git push; no default-branch merge is planned.
   history UPDATE or `neon_superuser` membership. Runtime connections use verified
   TLS and the existing bounded direct-connection pool.
 - Startup performs read-only schema validation. No production migration, seed,
-  data reset or role change was needed. Disposable local migration and recovery
-  of the migration chain passed independently.
+  data reset or role change was needed. The migration round trip passed on a
+  disposable local database.
 - A full backup/local restore drill was prepared but did not execute: automatic
   approval review rejected exporting the complete production database because
   it could transfer personal data into a local archive. Explicit user approval
-  is required before that export. No backup file was created by that action;
-  data recovery remains unverified.
+  was requested before that export; the user chose to defer the drill. No backup
+  file was created by that action; data recovery remains unverified.
 
 ## Fresh checks
 
-| Check                                                  | Result                                                       |
-| ------------------------------------------------------ | ------------------------------------------------------------ |
-| Backend Ruff lint/format                               | Passed; 209 files already formatted                          |
-| Backend strict mypy                                    | Passed; 196 sources                                          |
-| Backend pytest                                         | 628 passed in 492.79 seconds                                 |
-| Fresh migrations, complete downgrade/upgrade and drift | Passed on a disposable local database                        |
-| OpenAPI and legacy hashes/seeds                        | Passed                                                       |
-| Frontend zero-warning lint and strict types            | Passed                                                       |
-| Frontend Vitest                                        | 166 passed across 18 files                                   |
-| Ordinary Next.js production build                      | Passed                                                       |
-| Production-mode gateway build and container harness    | Passed                                                       |
-| Full local browser suite                               | 25 passed in 1.2 minutes; temporary servers/database removed |
-| Hosted public pages                                    | 1 passed; Chrome, four requested widths                      |
-| Hosted full two-visitor journey                        | Pending the normal production quota window                   |
+| Check                                                  | Result                                                                                 |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Backend Ruff lint/format                               | Passed; 209 files already formatted                                                    |
+| Backend strict mypy                                    | Passed; 196 sources                                                                    |
+| Backend pytest                                         | 628 passed in 492.79 seconds                                                           |
+| Fresh migrations, complete downgrade/upgrade and drift | Passed on a disposable local database                                                  |
+| OpenAPI and legacy hashes/seeds                        | Passed                                                                                 |
+| Frontend zero-warning lint and strict types            | Passed                                                                                 |
+| Frontend Vitest                                        | 166 passed across 18 files                                                             |
+| Ordinary Next.js production build                      | Passed                                                                                 |
+| Production-mode gateway build and container harness    | Passed                                                                                 |
+| Full local browser suite                               | 25 passed in 1.2 minutes; temporary servers/database removed                           |
+| Hosted public pages                                    | 1 passed; Chrome, four requested widths                                                |
+| Hosted journey/account-disabled suite                  | 1 passed, 1 failed; interview creation timed out before the second visitor was created |
 
 The first Vitest invocation could not start a Windows subprocess (`spawn EPERM`)
 inside the sandbox. Running the unchanged test command with approved subprocess
@@ -81,12 +84,47 @@ backend rejection, exact canonical CORS and foreign-origin rejection. The 12
 JavaScript assets referenced by the landing page returned 200 with no configured
 private-value matches. Gateway rejection also prevents anonymous access to backend
 debug paths; production route disabling is separately verified in code/tests.
+An additional read-only scan fetched the 16 unique script URLs referenced by the
+landing and public demo-route HTML: zero matches for four applicable private
+values. The new retention text is present in the deployed bundle. Reading those
+scripts does not establish functional workspace verification.
 
 The hosted public Chrome check exercised 375, 768, 1440 and 1920 pixel widths,
 without horizontal overflow, with zero axe WCAG 2 A/AA and 2.1 AA violations on
 the landing page. Keyboard navigation, the privacy page and unavailable account
 routes passed with no console/page errors. These checks used real public pages,
 without intercepted API responses or live AI.
+
+## Hosted failure and remaining verification
+
+The full journey ran once in the normal 02:30 IST quota window. Fictional profile,
+target/resume, question filtering/bookmarks/self-review and persisted objective/
+conceptual assessments passed. At 375 pixels, starting the mock interview did not
+display an answer field. The UI reported **signal timed out**; Playwright then
+failed waiting 30 seconds for **Your answer**. The interview client has a 15-second
+request deadline. This remains an unresolved hosted client/gateway/network failure,
+not a proven backend defect or a passing end-to-end journey.
+
+Render's sanitized logs show interview history/options reads completing in 1816/
+908 ms, but no completed interview POST for that window. That absence does not
+prove whether the request reached the service. Vercel runtime-error and runtime-log
+reads both returned 403; there was no authenticated CLI/browser fallback. No
+timeout value or security control was changed speculatively.
+
+The failed test erased its visitor with its own authenticated cleanup. An attempted
+persistent diagnostic runner then closed its input immediately and erased the
+second permitted visitor before performing the interview action. This operator
+mistake consumed the remaining creation slot; it is not counted as verification.
+Final read-only Neon counts are **0 demo workspaces and 0 demo sessions**. The
+normal next creation window is **03:30 IST (22:00 UTC)**; no limit was reset.
+
+Hosted two-visitor read/write isolation, the UI exit sequence, completed interview
+feedback, full workspace responsive coverage, Project Defense, roadmap and progress
+are still incomplete in this phase. Their local tests pass, and earlier hosted
+results remain historical. Next work is authorized Vercel log access and a bounded
+reproduction with request timing and a retained disposable visitor in a normal
+quota window. Do not automatically retry ambiguous interview creation or describe
+the production failure as fixed.
 
 ## Authentication and real AI
 
@@ -171,14 +209,16 @@ limited to two visitors per network per UTC hour; no quota was reset. Current
 Render platform health checks are TCP; set `/health` in its service Settings if
 HTTP platform probes are desired. Manual liveness/readiness checks already pass.
 
-The local Settings copy now states that access expires within 24 hours and
-physical deletion can be delayed while hosting sleeps. Publishing that change
-requires the separately authorized branch push and a verified production release.
+The released Settings copy now states that access expires within 24 hours and
+physical deletion can be delayed while hosting sleeps. Its source was published
+with explicit authorization and passed complete CI before the frontend release.
 
 ## Recruiter readiness
 
-The public mock demo can be shared as a portfolio preview with its explicit
-simulation and free-hosting limitations. Complete hosted journey verification is
-pending as recorded above. Do not present account registration, hosted real AI,
-model accuracy or full data recovery as verified. No new deployment was triggered
-in this phase while prerequisites and Git publication remain pending.
+The public landing page and partial mock demo are live. **A dependable complete
+recruiter walkthrough is not yet verified**, because hosted interview creation
+failed and the remaining isolation/exit/workspace checks did not finish. Accounts
+and real hosted AI also remain blocked by the listed prerequisites. Do not present
+account registration, hosted real AI, model accuracy or full data recovery as
+verified. This phase released the tested retention correction and preserved the
+existing backend/database/profile; it did not complete the full platform release.

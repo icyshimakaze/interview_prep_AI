@@ -21,6 +21,10 @@ the account privacy/security release work. See the
 [Phase 24 verification report](docs/PHASE_24_REPORT.md) for fresh checks and exact
 remaining actions.
 
+The latest hosted journey passed questions and assessments, then interview
+creation timed out. The full hosted walkthrough and visitor-isolation/exit checks
+remain incomplete; this limitation is recorded in that report.
+
 [Recruiter walkthrough](#recruiter-walkthrough) ·
 [Architecture](docs/ARCHITECTURE.md) ·
 [Interview notes](docs/INTERVIEW_NOTES.md) ·

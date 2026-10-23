@@ -10,30 +10,35 @@ Phase 24 rechecked the live resources, release CI, security boundaries and curre
 local quality gates. The user confirmed that no owned domain/production Clerk
 setup exists and no Render payment method is saved. Account mode stays disabled;
 see the [Phase 24 report](PHASE_24_REPORT.md) for fresh results, environment names,
-the pending hosted journey and the blocked full-data backup/restore drill. The
-local retention-copy correction has not yet been pushed or deployed.
+the unresolved hosted interview timeout and user-deferred full-data recovery drill.
+The retention-copy correction is now deployed on Vercel at `7e6bcfd`, after the
+explicitly authorized release-branch push and a complete successful CI run.
 
 | Resource        | Existing deployment                                                                                                                                                     |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Frontend        | Vercel Hobby, personal `icyshimakaze` account; project `interview-prep-ai-icyshimakaze`                                                                                 |
 | Backend         | [Render service](https://dashboard.render.com/web/srv-dbdrrr9srm7s73cpdt6g), Free Docker, Singapore, My Workspace                                                       |
 | Database        | [Existing Free Neon project](https://console.neon.tech/app/projects/autumn-sound-91017993/branches/br-twilight-resonance-b3ukxsc8?database=neondb), Singapore, `neondb` |
-| Deployed source | `rebuild/professional-v2` at `c5ca23ea5a8b1d502f6e53d22b32b3bdde73debb`                                                                                                 |
-| Release CI      | [Complete successful run](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40012341296)                                                                   |
+| Frontend source | `rebuild/professional-v2` at `7e6bcfd3029b29a62fcf121ffb4ca7496bce8cb6`                                                                                                 |
+| Backend source  | `c5ca23ea5a8b1d502f6e53d22b32b3bdde73debb`; backend/deployment Git trees match the new release                                                                          |
+| Release CI      | [Complete successful run](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40021576996)                                                                   |
 
 Neon migrations through `0012_ai_context_reviews`, 29 published questions,
 restricted runtime grants, verified TLS and frontend/backend readiness passed.
 Render reports `live`; Vercel reports `READY`. HTTPS, security headers, backend
 gateway enforcement, canonical/foreign CORS and closed account mode passed.
-Hosted Chrome checks exercised candidate edits, questions, assessments, mock
-interviews, Project Defense and roadmap. The full hosted suite did **not** pass:
-the first run stopped on a 15-second navigation timeout; a bounded follow-up
-passed interviews/projects/roadmap but reused a progress assertion that required
-objective assessment attempts absent from its fresh session. The page correctly
-showed empty objective history and persisted simulated practice. Hosted
-two-visitor isolation and the UI exit sequence were not completed. Both test
-sessions were deleted through their own authenticated cleanup requests; final
-aggregate database checks are recorded in `PROJECT_STATUS.md`.
+The Phase 24 public Chrome check passed all four requested widths, accessibility,
+keyboard and unavailable-account checks. Its separate journey/account-disabled
+suite returned **1 passed, 1 failed**: profile/target/resume, questions and
+assessments passed, then interview creation showed **signal timed out** and never
+displayed the answer field. The root cause remains unresolved, and Vercel runtime
+log access returns 403. Hosted two-visitor isolation, UI exit and the remaining
+flows were not completed. The failed visitor and an unused diagnostic visitor were
+deleted with their own authenticated cleanup; final counts are **0 demo workspaces
+and 0 demo sessions**. The diagnostic runner closed stdin too early, consuming the
+remaining creation slot without testing the action. No quota was reset; the next
+normal window is **03:30 IST**. Earlier partial hosted runs remain historical in
+`PROJECT_STATUS.md`. A full recruiter walkthrough is not yet verified.
 
 Render automatic deploys are off. Vercel was deployed from the pinned Git source
 without connecting automatic Git deploys. Future pushes require a separate

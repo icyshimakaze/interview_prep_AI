@@ -58,12 +58,23 @@ account-dependent work remains pending.
 ## Current outcome
 
 Fresh backend/frontend quality gates, the production harness and 25 local browser
-tests pass. Hosted public pages pass at all four requested widths. Both live hosts
-still run c5ca23e; inspection-baseline CI is green. No owned domain/production
+tests pass. Hosted public pages pass at all four requested widths. The frontend
+now runs CI-approved 7e6bcfd; unchanged backend/deployment Git trees remain on the
+existing healthy c5ca23e service. No owned domain/production
 Clerk setup exists, so account/live-AI mode remains disabled. A full production
-export was rejected by automatic approval review before execution and requires
-explicit permission. Render has no saved payment method, as confirmed by the user.
+export was rejected by automatic approval review before execution, and the user
+chose to defer the drill. Render has no saved payment method, as confirmed by the user.
 
-The complete hosted journey is waiting for the normal 21:00 UTC quota window.
+The hosted suite ran in the normal 21:00 UTC window: one passed, one failed.
+Questions/assessments passed; interview creation showed signal timed out and its
+answer field never appeared. Render has successful GET logs but no completed
+interview POST; Vercel runtime log access is 403. Root cause remains unresolved.
+Two-visitor isolation/UI exit and remaining hosted workflows were not completed.
+An operator diagnostic-runner stdin error consumed and cleaned the second visitor
+without testing interview creation. Final counts are zero workspaces/sessions;
+next normal quota window is 22:00 UTC / 03:30 IST. No quota reset or speculative
+timeout/security change occurred. Full recruiter readiness remains unverified.
 Retention-copy correction, refreshed verification documentation and two inspected
-hosted landing screenshots are ready for review. No push or new deploy yet.
+hosted landing screenshots were committed/pushed with explicit authorization.
+Release CI 40021576996 passed every job. Vercel deployment
+dpl_4CnVhRSUVR3LCk8HwGRhp8s2Nwgq is READY and post-release HTTP checks passed.

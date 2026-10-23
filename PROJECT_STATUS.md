@@ -7,11 +7,15 @@ Updated: 2026-10-24 (Asia/Calcutta).
 See the [phase plan](.agent/plans/phase-24.md) and
 [deployment report](docs/PHASE_24_REPORT.md). The user authorized free-tier
 deployment work, while requiring separate authorization before any Git push.
-The working tree began clean at `71d525c`; both live hosts still run `c5ca23e`.
-Live provider reads confirm Render Free/live, Vercel READY/canonical alias and
-Neon revision 0012. Inspection-baseline GitHub Actions run
-[40017869418](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40017869418)
-and the deployed-release run both report completed/success.
+The working tree began clean at `71d525c`. With explicit push authorization,
+published `7e6bcfd` to `origin/rebuild/professional-v2` and verified its remote SHA.
+Complete GitHub Actions run
+[40021576996](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40021576996)
+passed before deploying that exact frontend revision. Vercel deployment
+`dpl_4CnVhRSUVR3LCk8HwGRhp8s2Nwgq` reached READY with the canonical alias; fresh
+post-release HTTPS/readiness/gateway/CORS/closed-account/12-asset checks passed.
+Render remains Free/live at `c5ca23e`: its backend/deployment Git trees are
+identical to the new release, so no backend rebuild was needed. Neon remains 0012.
 
 - Fresh backend gate passed: **628 tests in 492.79 seconds**, Ruff lint/format
   (209 files), strict mypy (196 sources), disposable migration round-trip/drift,
@@ -24,31 +28,44 @@ and the deployed-release run both report completed/success.
   removed only their owned resources; existing application services were preserved.
 - Fresh hosted HTTPS/readiness at 0012, direct gateway rejection, exact/foreign
   CORS and closed account APIs passed. Five configured private values had zero
-  matches in 471 tracked/new release files, 23 local browser bundles and 12 fetched public
-  landing assets. No actual dotenv file is tracked or found by filename in history.
+  matches in 471 tracked/new release files and 23 local browser bundles. The 12
+  landing scripts also passed, and a later 16-script public-route scan found no
+  matches for four applicable private values and confirmed the retention copy.
+  No actual dotenv file is tracked or found by filename in history.
 - The real public Chrome check passed at **375/768/1440/1920 pixels**, including
   overflow, landing axe, keyboard, privacy and unavailable-account checks with no
   console/page errors. Two inspected hosted landing screenshots are documented.
-  The full hosted two-visitor journey is pending the normal **02:30 IST** quota
-  window; production counters were inspected read-only and never reset.
+  The normal **02:30 IST** hosted journey/account-disabled suite returned **1 passed,
+  1 failed**: profile/target/resume, questions and assessments passed, then interview
+  creation showed **signal timed out** and never displayed the answer field.
+  Its 15-second client deadline expired; Playwright waited 30 seconds. Render
+  logged successful interview GETs but no completed POST. Root cause remains
+  unresolved; Vercel runtime errors/logs both return 403, with no CLI/browser
+  fallback. Two-visitor isolation, UI exit and remaining hosted flows did not run.
+  The failed visitor was erased with its own authenticated cleanup request.
+- An operator diagnostic-runner error closed stdin and erased the remaining
+  permitted visitor before the interview action. It consumed the second slot and
+  is not verification. Final Neon counts are **0 demo workspaces / 0 demo sessions**;
+  creation counters were not reset, with the next normal window at **03:30 IST**.
 - The user confirmed **no owned domain/production Clerk setup** and **no saved
   Render payment method**. Production accounts/xKiro stay disabled. No real AI
   request or key transfer to hosting occurred. Account export/erasure, Clerk
   deletion reconciliation and strict script CSP remain release gaps.
 - Automatic approval review rejected a prepared full Neon export/local restore
   drill because it could copy personal data into a local archive. It did not run;
-  explicit approval is required. Vercel team/billing read and its documented
+  the user chose to defer the drill. Vercel team/billing read and its documented
   authorization recovery both returned 403; no bypass was attempted. Project
   status/deployment/environment-name reads work. Neon account billing remains
   unavailable through its project-scoped connection.
 
-Corrected Settings retention copy locally to acknowledge delayed physical deletion
-while free hosting sleeps. README/runbook/report distinguish verified public demo
-behavior from disabled account/live-AI flows. No new resource, paid feature,
-production migration, push or deployment has occurred in this phase so far.
-Next: finish the bounded hosted journey within the normal quota, publish the
-reviewed branch changes only after explicit push authorization, then verify any
-authorized frontend release. Account mode remains gated by the listed prerequisites.
+Released the Settings retention correction to acknowledge delayed physical
+deletion while free hosting sleeps. README/runbook/report distinguish verified
+public demo behavior from disabled account/live-AI flows. No new resource, paid
+feature, production migration, default-branch merge or force push occurred.
+Next: obtain authorized Vercel runtime-log access and reproduce interview creation
+with timing in a retained disposable visitor in a normal quota window. Complete
+hosted isolation/exit and remaining flows afterward. Full recruiter-walkthrough
+readiness is not established. Account mode remains gated by the listed prerequisites.
 
 ## Hosted public demo — 24 October 2026
 
