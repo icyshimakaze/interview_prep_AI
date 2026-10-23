@@ -6,6 +6,9 @@ content/provenance/streamlit-v1.txt binary
 *.ts text eol=lf
 *.tsx text eol=lf
 *.json text eol=lf
+# Legacy provenance hashes include their original CRLF checkout bytes.
+/questions.json text eol=crlf
+/requirements.txt text eol=crlf
 *.yaml text eol=lf
 *.yml text eol=lf
 Dockerfile text eol=lf

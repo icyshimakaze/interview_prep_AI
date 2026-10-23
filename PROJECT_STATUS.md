@@ -31,6 +31,13 @@ but are not installed/connected; the user must connect them to enable hosted wor
 The remaining account-mode release gaps below are unchanged. See the
 [release plan](.agent/plans/github-release.md).
 
+Hosted CI follow-up: Linux passed 627 backend tests, with one provenance failure
+because Git's LF checkout of `questions.json` differed from its recorded original
+CRLF hash. The same mismatch affected legacy `requirements.txt`. Pin those two
+immutable legacy files to CRLF checkout in `.gitattributes`; preserve all recorded
+hashes, source contents, exporter validation and tests. Verify a fresh checkout
+with automatic newline conversion disabled before pushing the correction.
+
 Deployment-guide follow-up: checked current provider documentation and moved the
 Blueprint's `DATABASE_URL` and `ALLOWED_ORIGINS` prompts from the environment group
 to the service. Render ignores group-level `sync: false`; generated keys and other

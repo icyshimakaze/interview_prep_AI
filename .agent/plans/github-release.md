@@ -46,3 +46,9 @@ observe the complete hosted CI. Native and Linux-target strict checks passed,
 passed PDF/project worker smoke within 512 MiB. Hosting plugins were found and
 suggested but are not connected; no hosted resources have been created. GitHub
 publication is complete; hosted provisioning awaits those account connections.
+
+The full Linux database suite subsequently passed 627 tests and exposed a legacy
+provenance newline mismatch. Pin only the immutable root `questions.json` and
+`requirements.txt` files to their recorded CRLF checkout format. Do not update
+hashes or relax provenance checks. Reproduce a clean checkout with
+`core.autocrlf=false`, run the legacy exporter there, then observe hosted CI again.
