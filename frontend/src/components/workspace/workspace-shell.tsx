@@ -60,11 +60,13 @@ export function WorkspaceShell({
   children,
   onLeave,
   busy = false,
+  userControl,
 }: {
   mode: "account" | "demo";
   children: ReactNode;
   onLeave?: () => void;
   busy?: boolean;
+  userControl?: ReactNode;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -119,17 +121,20 @@ export function WorkspaceShell({
             </span>
             <span className="truncate text-sm font-medium">{current}</span>
           </div>
-          {onLeave && (
-            <Button
-              variant="ghost"
-              disabled={busy}
-              onClick={onLeave}
-              className="shrink-0 px-2 text-xs"
-            >
-              <Icon name="exit" width={17} height={17} />
-              {mode === "demo" ? "Exit and delete demo" : "Sign out"}
-            </Button>
-          )}
+          <div className="flex shrink-0 items-center gap-3">
+            {userControl}
+            {onLeave && (
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={onLeave}
+                className="shrink-0 px-2 text-xs"
+              >
+                <Icon name="exit" width={17} height={17} />
+                {mode === "demo" ? "Exit and delete demo" : "Sign out"}
+              </Button>
+            )}
+          </div>
         </header>
         {mode === "demo" && (
           <aside

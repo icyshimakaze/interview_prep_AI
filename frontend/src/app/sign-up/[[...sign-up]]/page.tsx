@@ -1,4 +1,5 @@
 import { SignUp } from "@clerk/nextjs";
+import { Suspense } from "react";
 import { AuthSetup } from "@/components/auth-setup";
 import { accountAuthConfigured } from "@/lib/auth-config";
 import { PublicShell } from "@/components/public/public-shell";
@@ -20,12 +21,14 @@ export default function SignUpPage() {
           </p>
         </div>
         <div className="flex justify-center">
-          <SignUp
-            routing="path"
-            path="/sign-up"
-            signInUrl="/sign-in"
-            forceRedirectUrl="/app/dashboard"
-          />
+          <Suspense fallback={<p role="status">Loading sign-up…</p>}>
+            <SignUp
+              routing="path"
+              path="/sign-up"
+              signInUrl="/sign-in"
+              forceRedirectUrl="/app/dashboard"
+            />
+          </Suspense>
         </div>
       </div>
     </PublicShell>

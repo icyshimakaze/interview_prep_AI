@@ -6,6 +6,12 @@ Released with explicit user authorization on 24 October 2026 (Asia/Calcutta).
 isolated temporary browser workspace. Feedback remains labelled simulation;
 production account sign-in and live xKiro are disabled.
 
+Publishing the Clerk integration code does not activate hosted accounts. Local
+`frontend/.env.local` development keys are ignored and are never uploaded with a
+Git push. Production sign-in requires the selected app's production instance,
+owned domain/DNS, matching live Vercel keys and Render token-verification settings
+in section H. Keep the hosted demo profile until those steps are complete.
+
 | Resource              | Current deployment                                                                                                                                                                |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Frontend              | Vercel Hobby, personal `icyshimakaze`; `dpl_HJMVCGL5ziQK86VkijTAbdnP9sMs`, READY; canonical alias verified                                                                        |

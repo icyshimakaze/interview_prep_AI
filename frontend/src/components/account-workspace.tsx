@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth, useClerk } from "@clerk/nextjs";
+import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import {
   useCallback,
   useEffect,
@@ -429,7 +429,12 @@ function AccountSession({ children }: { children: ReactNode }) {
     }
   }
   return (
-    <WorkspaceShell mode="account" onLeave={() => void leave()} busy={busy}>
+    <WorkspaceShell
+      mode="account"
+      onLeave={() => void leave()}
+      busy={busy}
+      userControl={<UserButton />}
+    >
       {error && (
         <ErrorDisplay
           title="Your workspace needs attention"

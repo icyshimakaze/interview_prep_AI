@@ -10,15 +10,17 @@ import type { Resume } from "@/lib/api/resumes";
 
 const auth = vi.hoisted(() => ({
   subject: "account-one",
+  signedIn: true,
   token: vi.fn(),
   signOut: vi.fn(),
   replace: vi.fn(),
   refresh: vi.fn(),
 }));
 vi.mock("@clerk/nextjs", () => ({
+  UserButton: () => <button type="button">Manage account</button>,
   useAuth: () => ({
     isLoaded: true,
-    isSignedIn: true,
+    isSignedIn: auth.signedIn,
     userId: auth.subject,
     getToken: auth.token,
   }),
@@ -31,6 +33,7 @@ vi.mock("next/navigation", () => ({
 
 beforeEach(() => {
   auth.subject = "account-one";
+  auth.signedIn = true;
   auth.token.mockResolvedValue("test-sdk-token");
   auth.signOut.mockResolvedValue(undefined);
 });
@@ -302,6 +305,48 @@ describe("account workspace integration", () => {
     expect(screen.queryByDisplayValue("First owner")).not.toBeInTheDocument();
     await waitFor(() =>
       expect(screen.getByLabelText("Display name (optional)")).toHaveValue(""),
+    );
+  });
+  it("clears private state when a Clerk profile control signs the user out", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        Response.json(
+          url.endsWith("/session")
+            ? {}
+            : {
+                ...emptyAccount,
+                profile: {
+                  ...workspaceFixture.profile,
+                  display_name: "Signed-in owner",
+                },
+              },
+        ),
+      ),
+    );
+    const { rerender } = render(
+      <AccountWorkspace>
+        <WorkspaceScreen section="settings" />
+      </AccountWorkspace>,
+    );
+    expect(await screen.findByLabelText("Display name (optional)")).toHaveValue(
+      "Signed-in owner",
+    );
+    expect(
+      screen.getByRole("button", { name: "Manage account" }),
+    ).toBeVisible();
+
+    auth.signedIn = false;
+    rerender(
+      <AccountWorkspace>
+        <WorkspaceScreen section="settings" />
+      </AccountWorkspace>,
+    );
+    expect(screen.queryByDisplayValue("Signed-in owner")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Manage account" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute(
+      "href",
+      "/sign-in",
     );
   });
   it("fails closed when an account endpoint returns demo data", async () => {

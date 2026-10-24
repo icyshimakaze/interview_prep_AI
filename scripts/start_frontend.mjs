@@ -1,7 +1,10 @@
 import { cp } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { loadEnvFile } from "node:process";
 
 const frontend = new URL("../frontend/", import.meta.url);
+const localEnvironment = new URL(".env.local", frontend);
+if (existsSync(localEnvironment)) loadEnvFile(localEnvironment);
 const standalone = new URL(".next/standalone/frontend/", frontend);
 const server = new URL("server.js", standalone);
 if (!existsSync(server)) {
@@ -23,6 +26,7 @@ if (existsSync(new URL("public/", frontend))) {
     recursive: true,
   });
 }
-process.env.HOSTNAME = process.env.FRONTEND_HOSTNAME ?? "127.0.0.1";
+// Match NextURL's loopback normalization so Clerk's internal rewrites stay local.
+process.env.HOSTNAME = process.env.FRONTEND_HOSTNAME ?? "localhost";
 process.env.PORT ??= "3000";
 await import(server.href);

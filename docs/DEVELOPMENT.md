@@ -122,8 +122,11 @@ with `--with-deps`. See [TESTING.md](TESTING.md) for the full coverage map, the
 live/intercepted/static browser boundaries, report paths and exact CI gates.
 Automated accessibility checks do not establish complete WCAG conformance.
 
-`pnpm start` runs the generated standalone server with static/public assets and
-binds to localhost. Set `FRONTEND_HOSTNAME` explicitly to change the listener.
+`pnpm start` runs the generated standalone server with static/public assets,
+loads ignored `frontend/.env.local` without replacing injected variables and
+binds to `localhost`. Use that hostname consistently for Clerk development;
+NextURL normalizes loopback IPs to `localhost`. Set `FRONTEND_HOSTNAME` explicitly
+to change the listener.
 The container runs that same generated server directly. With a normal stack
 running, `scripts/smoke_stack.py` verifies liveness, schema readiness and frontend
 API forwarding. `docker compose build` verifies image packaging without deployment.

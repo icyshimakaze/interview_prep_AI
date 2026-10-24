@@ -21,11 +21,104 @@ Recruiter demo routes use a separate expiring opaque cookie and fictional record
 
 ## Configure real accounts
 
-No Clerk credentials were provided for this implementation. Until configured,
-`/sign-in`, `/sign-up`, and `/app/dashboard` display an explicit unavailable state
-with a working **Try Interactive Demo** link. Backend account access stays closed.
+The project already uses Clerk Core 3 (`@clerk/nextjs` 7.9.14). Its provider lives
+inside `<body>`, managed auth pages use Suspense, and configured navigation offers
+sign-in/sign-up or the workspace link and managed profile control. The account
+header also retains its explicit sign-out action, which clears visible private
+state before ending the session. Missing frontend configuration remains an
+explicit unavailable state.
 
-1. Create/select a Clerk development application. Enable the desired sign-up and
+### Verified local setup (24 October 2026)
+
+The selected development application is connected and the user completed first
+sign-up, confirming the workspace and profile icon. Open
+**[the local workspace](http://localhost:3100/app/dashboard)**. Email/password,
+Google and Microsoft remain enabled; the user selected individual accounts.
+The separate Docker frontend still occupies port 3000.
+
+Public account controls use Clerk's client provider context, including on missing
+asset fallback pages that do not run the authentication proxy. Backend ownership
+checks and protected workspace redirects remain server-enforced.
+
+The frontend keys are in ignored `frontend/.env.local`. The local backend runs
+with ignored `.cache/clerk-setup/compose.auth.yaml`, which sets the trusted issuer,
+API audience and exact 3000/3100 origins. Its existing migrations are applied
+through `0012_ai_context_reviews`. No root environment or hosted configuration
+was modified. The required JWT template described below is already configured.
+
+After stopping the current native preview, restart it from the repository root:
+
+```powershell
+docker compose -f compose.yaml -f .cache/clerk-setup/compose.auth.yaml up -d --no-build --no-deps --wait backend
+$env:PORT = '3100'
+$env:FRONTEND_ORIGIN = 'http://localhost:3100'
+pnpm start
+```
+
+Keep `localhost` consistent in the URL and native listener. NextURL normalizes
+loopback IPs to that name; binding the native server to `127.0.0.1` caused Clerk's
+same-page rewrite to stall as an external self-proxy. Both native launchers now
+default to `localhost`; `FRONTEND_HOSTNAME` remains an explicit standalone override.
+The standalone launcher loads the ignored local file through Node without
+overwriting injected process variables. A public-key change still needs a rebuild.
+
+The backend override persists in the local container, but a later base-only
+`docker compose up` can replace it. Keep the override file when restarting this
+setup. If clearing `.cache/`, recreate its non-secret settings using the issuer,
+audience and origins documented in [project status](../PROJECT_STATUS.md).
+
+Real managed forms, signed-out redirects, live backend readiness and malformed
+token rejection passed in fresh Chrome contexts. The user's first-account
+confirmation supplements these checks. Profile-save/sign-out and two-account live
+isolation remain separate verification work; no agent-created users were used.
+
+### Connect the selected development application
+
+The dashboard-selected application is `app_3L935GM9Y4AtOVdSfyYKtxgbBm0`. Reuse it;
+do not run `clerk init`, create an accountless replacement or upgrade the existing
+SDK as part of configuration.
+
+First, run this in your own terminal and complete browser authorization:
+
+```powershell
+npx -y clerk@latest auth login
+```
+
+Dashboard sign-in does not authenticate the CLI. Then work from `frontend/`,
+where native Next.js expects its local configuration:
+
+```powershell
+cd frontend
+npx -y clerk@latest doctor --json
+```
+
+If no application is linked, link the selected existing application:
+
+```powershell
+npx -y clerk@latest link --app app_3L935GM9Y4AtOVdSfyYKtxgbBm0
+```
+
+If a different application is already linked, review the mismatch before
+switching. If development keys are missing, restore them with:
+
+```powershell
+npx -y clerk@latest env pull
+```
+
+Keep the CLI-reported environment file ignored. Preserve working keys and never
+paste secret keys, login tokens or full environment files into chat or logs.
+Do not pull production keys for local development. Linking and pulling frontend
+keys do not configure FastAPI: finish the issuer/origin and JWT-template steps
+below before verifying account workspace access.
+
+### Configure the backend and verify the complete flow
+
+Until both services are configured,
+`/sign-in`, `/sign-up`, and `/app/dashboard` display an explicit unavailable state
+when frontend keys are missing, with a working **Try Interactive Demo** link.
+Backend account access stays closed when backend authentication is disabled.
+
+1. Use the selected Clerk development application. Enable the desired sign-up and
    sign-in methods through Clerk. Keep email/password/recovery policy there.
 2. In its JWT templates settings, create **`interview-prep-api`**, using the
    instance's normal RS256 signing key, a **60-second lifetime** and **5-second

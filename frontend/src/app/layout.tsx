@@ -16,29 +16,33 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  const document = (
+  const content = (
+    <>
+      <a
+        href="#main-content"
+        className="sr-only rounded-md bg-accent p-3 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
+      >
+        Skip to main content
+      </a>
+      {children}
+    </>
+  );
+  return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <a
-          href="#main-content"
-          className="sr-only rounded-md bg-accent p-3 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
-        >
-          Skip to main content
-        </a>
-        {children}
+        {accountAuthConfigured() ? (
+          <ClerkProvider
+            signInUrl="/sign-in"
+            signUpUrl="/sign-up"
+            signInFallbackRedirectUrl="/app/dashboard"
+            signUpFallbackRedirectUrl="/app/dashboard"
+          >
+            {content}
+          </ClerkProvider>
+        ) : (
+          content
+        )}
       </body>
     </html>
-  );
-  return accountAuthConfigured() ? (
-    <ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-      signInFallbackRedirectUrl="/app/dashboard"
-      signUpFallbackRedirectUrl="/app/dashboard"
-    >
-      {document}
-    </ClerkProvider>
-  ) : (
-    document
   );
 }

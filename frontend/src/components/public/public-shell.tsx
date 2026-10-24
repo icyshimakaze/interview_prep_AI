@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Brand } from "@/components/brand";
-import { ButtonLink } from "@/components/ui/button";
+import { AuthNavigation } from "./auth-navigation";
 
 export function PublicShell({ children }: { children: ReactNode }) {
   return (
@@ -32,9 +32,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
               Privacy
             </Link>
           </nav>
-          <ButtonLink href="/sign-in" variant="outline">
-            Sign in
-          </ButtonLink>
+          <AuthNavigation />
         </div>
       </header>
       <main id="main-content" tabIndex={-1} className="focus:outline-none">

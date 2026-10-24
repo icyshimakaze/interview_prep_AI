@@ -1,6 +1,113 @@
 # Project Status
 
-Updated: 2026-10-24 (Asia/Calcutta).
+Updated: 2026-10-25 (Asia/Calcutta).
+
+## Clerk GitHub/Vercel release — authorized and verified for publication
+
+The user explicitly requested committing/pushing the existing Clerk changes and
+updating the Vercel website. See the
+[release plan](.agent/plans/clerk-github-vercel-release.md). The GitHub release
+branch is `rebuild/professional-v2`; its verified starting head is `d23d276`.
+
+- Isolated the Clerk/frontend/local-launcher/docs changes in a separate checkout,
+  preserving unrelated Phase 25 backend/parser/evaluation work. No local
+  environment file, account state or private key was copied into that checkout.
+- Fresh isolated lint, strict types, production build and **177 tests / 20 files**
+  passed (59.30s). Four Chrome tests passed in **8.3s**: public desktop/mobile
+  navigation/axe, keyboard/reduced motion, real backend readiness and missing-key
+  account screens. Launcher syntax and whitespace checks passed. Windows Git
+  checkout CRLF initially caused formatting failures; normalizing only the
+  isolated checkout restored the unchanged whole-repo Prettier gate. No unrelated
+  source change was added to the release.
+- Live Vercel inspection confirms project `prj_wsxEcvVC17paXs5pco4K9eHwWKgd`,
+  account `team_vyOtLBqMjk5sQ9DTmzCcbwiN`, existing READY production deployment
+  `dpl_HJMVCGL5ziQK86VkijTAbdnP9sMs` at `cf08aa4`, canonical alias
+  `interview-prep-ai-icyshimakaze.vercel.app`, and no Clerk environment keys.
+  Production account mode is not enabled by a Git push or frontend code release.
+  The user has been asked whether they now control a production domain. Preserve
+  the current hosted profile until its production Clerk prerequisites are met.
+
+Next: push the explicit Clerk commit, verify its GitHub Actions gates, deploy that
+exact revision to the existing Vercel project, and record canonical-site checks.
+Render/Neon settings and schema remain outside this frontend code release.
+
+## Clerk development setup — configured and user verified
+
+The user approved Clerk setup, completed host-terminal login, and selected existing
+application `app_3L935GM9Y4AtOVdSfyYKtxgbBm0` (`interview_prep_ai`). See the
+[setup plan](.agent/plans/clerk-development-setup.md) and updated
+[authentication guide](docs/AUTHENTICATION.md).
+
+- Linked that application and restored only its missing development keys to the
+  ignored `frontend/.env.local` through the CLI. Created missing JWT template
+  `jtmp_3L9EXNVIyVT1LZ6Fe1Ry8KF44NS` after a reviewed dry run: audience
+  `interview-prep-api`, 60-second lifetime, 5-second skew, instance-managed RS256.
+  Host-side Clerk CLI 4.0.0 diagnostics now return **exit 0**. The sole warning is
+  that the optional production instance is not configured.
+- Preserved pinned Clerk Core 3 (`@clerk/nextjs` 7.9.14), Next.js 16.4.1 and the
+  existing proxy, API-template tokens and server ownership checks. Skipped
+  `clerk init` to avoid creating or replacing an application. Moved the provider
+  inside `<body>` and wrapped managed sign-in/sign-up screens in Suspense.
+- Configured public navigation now offers sign-in/sign-up while signed out,
+  and a workspace link/profile control while signed in. Added the managed profile
+  control to the account header, preserving explicit sign-out and missing-key
+  fallbacks. Regression coverage verifies removal of private state when SDK
+  sign-out changes the session, including sign-out through the profile control.
+- Installed the 20 official Clerk skills globally. Applicable agent installs
+  succeeded; the installer additionally reported that PromptScript does not
+  support global installation. No project dependency/lockfile change.
+- Enabled only the local backend through ignored
+  `.cache/clerk-setup/compose.auth.yaml`: trusted issuer
+  `https://square-marlin-4895.clerk.accounts.dev`, matching audience and exact
+  local 3000/3100 origins. The cached backend image predated current configuration
+  and failed startup on the newer AI provider setting; rebuilding from current
+  locked source fixed that. The local database was still at 0010. Reviewed and
+  applied existing additive migrations 0011/0012; no new migration, existing-row
+  rewrite, deletion or database reset. Readiness now returns **200** at 0012, and
+  the actual verifier fetched one trusted public Clerk signing key.
+- Fixed native startup: NextURL normalizes loopback IPs to `localhost`, while
+  the old `127.0.0.1` listener made Clerk's internal rewrite appear external and
+  stall. Native dev/standalone defaults now use `localhost`; explicit hostname
+  overrides and Docker configuration remain supported. The standalone launcher
+  loads ignored `frontend/.env.local` through Node's built-in loader, preserving
+  injected variables. No dependency or lockfile change.
+- **Verification:** `pnpm lint`, `pnpm typecheck`, configured `pnpm build`, Node
+  launcher syntax and final `pnpm test` passed: **177 tests across 20 files**, in
+  **85.16 seconds**. One earlier focused sandbox run hit `spawn EPERM`; the
+  unchanged command passed with reviewed host subprocess access. The initial
+  configured build hit Windows `EBUSY` because its old preview was running;
+  stopping only that owned process allowed the unchanged build to pass.
+- Fresh isolated Chrome checks passed real signed-out navigation, managed
+  sign-in/sign-up forms, 375px sign-up overflow, signed-out workspace redirect,
+  proxied database readiness, missing/malformed-token 401 and no-store headers,
+  and zero JavaScript page errors. Repeated successfully on a disposable port
+  using the corrected default launcher; stopped only that verification server.
+  The final log check exposed server-session lookups in missing-asset fallback
+  pages. Moved the configured public session display into a small client
+  component under the existing server configuration guard, rebuilt and reran the
+  gates. Final missing-asset checks return 404 without Clerk middleware errors.
+  Inspected unedited desktop sign-in/mobile sign-up screenshots under
+  `.cache/clerk-setup/browser/`. No Clerk user was created by the agent.
+- Earlier missing-key verification also passed four existing local Chrome tests
+  for public/accessibility/keyboard/connectivity/fallback behavior. The configured
+  browser bundle scan found zero private Clerk key pattern matches in 23 files;
+  this is a targeted pattern check, not a complete secret/security audit.
+- The user completed first sign-up and confirmed **workspace and profile icon
+  appeared**. They explicitly chose to keep **email/password, Google, Microsoft**
+  and **individual accounts**. Existing methods were retained; Organizations were
+  not enabled. Separate live profile-save/sign-out and two-account isolation
+  journeys have not been exercised; component/ownership regression coverage is
+  preserved. Backend source was unchanged and its full test gate was not rerun.
+
+The configured local app remains at **http://localhost:3100**, PID **22988**;
+ignored logs and runtime override are in `.cache/clerk-setup/`. Existing Docker
+frontend/database/cleanup remain on 3000/5433; backend 8000 now runs current source
+with the local auth override. The root environment file was not inspected or
+modified; application processes loaded the ignored frontend configuration normally
+without printing it. No hosted settings, production account mode, commit, push or
+deployment changed. **Next:** continue using the local account and complete
+profile-save/sign-out plus a second-account live isolation check before claiming
+the full account journey verified. Production prerequisites remain in the runbook.
 
 ## Personal resume uploads and hosted reliability — released
 
