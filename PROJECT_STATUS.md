@@ -2,7 +2,7 @@
 
 Updated: 2026-10-24 (Asia/Calcutta).
 
-## Personal resume uploads and hosted reliability — local follow-up
+## Personal resume uploads and hosted reliability — released
 
 The user requested fixes for hosted failures and support for real resumes, then
 explicitly selected private temporary uploads without production sign-in. See the
@@ -35,7 +35,7 @@ explicitly selected private temporary uploads without production sign-in. See th
   512 MiB Linux backend with restricted DB grants. Owned disposable services and
   ephemeral credentials were removed.
 - Ruff (210 files), strict mypy (197 sources), whole-repo Prettier and whitespace
-  checks pass. Security scan found no configured-secret/pattern matches in 477
+  checks pass. Security scan found no configured-secret/pattern matches in 480
   tracked/new files or 23 browser JS bundles; no actual dotenv paths are tracked
   or in reachable filename history. Initial backend run had 630 passed and two
   new expiry fixtures violating existing DB checks; fixed the fixtures without
@@ -43,14 +43,34 @@ explicitly selected private temporary uploads without production sign-in. See th
   490.36 seconds**, disposable migration down/up/drift, matching OpenAPI and
   preserved legacy hashes/seeds. Its disposable database was removed.
 
-**Not released yet:** no new push or deployment occurred. Existing hosted
-revisions below remain live. After final checks, obtain this change's exact
-release-branch push authorization as required by the user's deployment
-instructions; the previous approval covered Phase 24 only. Then wait for green CI,
-release the additive backend before the frontend and verify uploads/interviews/
-isolation/deletion on the canonical site within normal visitor quotas. Production
-Clerk, live xKiro and the deferred full-data recovery drill remain outside this
-temporary upload release.
+The user explicitly authorized this release-branch push and free-tier release.
+Published `cf08aa49cc02a311a4637c2ba5770f13056bbb82` to the requested branch and
+verified all three jobs in [CI 40099102208](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40099102208)
+succeeded before deploying. Render `dep-dbebdotg1s2s73f29oo0` is live at that SHA;
+Vercel `dpl_HJMVCGL5ziQK86VkijTAbdnP9sMs` is READY with the canonical alias and
+same SHA. Backend health/readiness and new protected library checks passed before
+the frontend release. No migration, host variable change or paid resource.
+
+Hosted checks passed personal PDF upload/correction/reload, interview pause/
+follow-up/completion/review, questions, assessments, Project Defense, roadmap/
+progress and four-width upload overflow checks. Upload accessibility passed;
+inspected unedited desktop/mobile synthetic-upload screenshots. A second visitor
+could not read foreign uploaded/sample resume, project or assessment records
+(404). First UI exit returned 204 and redirected home. The main hosted suite was
+**1 passed / 1 failed** in 9.5 minutes: its post-delete Node dashboard read hit
+`getaddrinfo ENOTFOUND`; the second UI exit sequence did not run, but authenticated
+finally-cleanup erased that visitor (204). A separate **read-only follow-up passed
+in 4.7 seconds**: browser dashboard/library/workspace and Node dashboard reads
+returned 401, with no capability cookies or JavaScript page errors. No additional
+visitor was created or quota reset. Final Neon counts are **0 demo workspaces,
+0 sessions, 0 resumes and 0 resume versions**. The first journey captured 126 API
+responses with no 5xx or JavaScript page errors; upload returned 201 in 6.558s.
+
+New HTTPS/readiness/gateway/CORS/closed-account checks passed; 12 landing and
+16 public-route scripts had zero configured private-value matches. See the
+[release report](docs/RESUME_UPLOAD_RELEASE.md) for exact boundaries. Historical
+host revisions/failures below are superseded for current state. Production Clerk,
+live xKiro and the deferred full-data recovery drill remain outside this release.
 
 ## Phase 24 — current hosted verification
 

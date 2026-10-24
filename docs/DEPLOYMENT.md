@@ -1,68 +1,57 @@
 # Deployment: Vercel + Render Free + Neon
 
-Deployed with explicit user authorization on 24 October 2026 (Asia/Calcutta).
-The public mock-only demo is live at
-**[interview-prep-ai-icyshimakaze.vercel.app](https://interview-prep-ai-icyshimakaze.vercel.app)**.
-Choose **Try Interactive Demo**; no login or AI key is needed. Account sign-in
-and live xKiro are disabled in this initial profile.
+Released with explicit user authorization on 24 October 2026 (Asia/Calcutta).
+**[Open the website](https://interview-prep-ai-icyshimakaze.vercel.app)** and choose
+**Upload your resume** or **Try Interactive Demo**. Personal PDF uploads use an
+isolated temporary browser workspace. Feedback remains labelled simulation;
+production account sign-in and live xKiro are disabled.
 
-Local follow-up (pending release): the Resume screen accepts personal PDFs in the
-isolated temporary workspace, using existing cookie/CSRF/ownership and import
-limits. It retains selected evidence, discards raw PDFs, and offers no external
-AI review. Release the additive backend API before the frontend; no migration or
-hosting environment change is needed. The client first waits up to 75 seconds on
-a read-only readiness probe for sleeping hosting, then creates the workspace
-once. Interview requests allow 30 seconds and retain existing idempotency keys.
-Timeouts explain that a write may already have saved. See the
-[follow-up plan](../.agent/plans/resume-uploads-and-hosted-errors.md).
+| Resource              | Current deployment                                                                                                                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend              | Vercel Hobby, personal `icyshimakaze`; `dpl_HJMVCGL5ziQK86VkijTAbdnP9sMs`, READY; canonical alias verified                                                                        |
+| Backend               | [Render service](https://dashboard.render.com/web/srv-dbdrrr9srm7s73cpdt6g), Free Docker, Singapore, My Workspace; `dep-dbebdotg1s2s73f29oo0`, live                               |
+| Database              | [Existing Neon project](https://console.neon.tech/app/projects/autumn-sound-91017993/branches/br-twilight-resonance-b3ukxsc8?database=neondb), Singapore, `neondb`, revision 0012 |
+| Both source revisions | `cf08aa49cc02a311a4637c2ba5770f13056bbb82` from `rebuild/professional-v2`                                                                                                         |
+| Release CI            | [40099102208](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40099102208), all three jobs succeeded before deployment                                             |
 
-Phase 24 rechecked the live resources, release CI, security boundaries and current
-local quality gates. The user confirmed that no owned domain/production Clerk
-setup exists and no Render payment method is saved. Account mode stays disabled;
-see the [Phase 24 report](PHASE_24_REPORT.md) for fresh results, environment names,
-the unresolved hosted interview timeout and user-deferred full-data recovery drill.
-The retention-copy correction is now deployed on Vercel at `7e6bcfd`, after the
-explicitly authorized release-branch push and a complete successful CI run.
+The additive resume backend was released and checked before the frontend. No
+migration, environment change, paid resource or unrelated service change was
+needed. HTTPS, health/readiness, gateway rejection, canonical/foreign CORS, closed
+account APIs and the protected resume library passed. Twelve landing assets and
+16 scripts from public route HTML had zero configured private-value matches.
 
-| Resource        | Existing deployment                                                                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Frontend        | Vercel Hobby, personal `icyshimakaze` account; project `interview-prep-ai-icyshimakaze`                                                                                 |
-| Backend         | [Render service](https://dashboard.render.com/web/srv-dbdrrr9srm7s73cpdt6g), Free Docker, Singapore, My Workspace                                                       |
-| Database        | [Existing Free Neon project](https://console.neon.tech/app/projects/autumn-sound-91017993/branches/br-twilight-resonance-b3ukxsc8?database=neondb), Singapore, `neondb` |
-| Frontend source | `rebuild/professional-v2` at `7e6bcfd3029b29a62fcf121ffb4ca7496bce8cb6`                                                                                                 |
-| Backend source  | `c5ca23ea5a8b1d502f6e53d22b32b3bdde73debb`; backend/deployment Git trees match the new release                                                                          |
-| Release CI      | [Complete successful run](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40021576996)                                                                   |
+The new hosted journey passed personal PDF upload/correction/reload, interview
+pause/follow-up/completion/review, questions, assessments, Project Defense and
+roadmap/progress. Second-visitor reads of foreign resume/project/assessment IDs
+returned 404, first-visitor UI exit returned 204 and redirected home, and both
+workspaces were erased. The main hosted suite returned 1 passed/1 failed when a
+post-delete Node request hit `ENOTFOUND`; a read-only browser/API follow-up passed
+the 401 checks without creating another visitor. Final database counts are zero
+demo workspaces/sessions and resume/version records. See the
+[resume release report](RESUME_UPLOAD_RELEASE.md) and
+[current status](../PROJECT_STATUS.md) for exact results. The
+[Phase 24 report](PHASE_24_REPORT.md) records the earlier failures and limitations.
+The original interview creation timeout is not reproduced or proven; Vercel
+runtime-log reads still return 403.
 
-Neon migrations through `0012_ai_context_reviews`, 29 published questions,
-restricted runtime grants, verified TLS and frontend/backend readiness passed.
-Render reports `live`; Vercel reports `READY`. HTTPS, security headers, backend
-gateway enforcement, canonical/foreign CORS and closed account mode passed.
-The Phase 24 public Chrome check passed all four requested widths, accessibility,
-keyboard and unavailable-account checks. Its separate journey/account-disabled
-suite returned **1 passed, 1 failed**: profile/target/resume, questions and
-assessments passed, then interview creation showed **signal timed out** and never
-displayed the answer field. The root cause remains unresolved, and Vercel runtime
-log access returns 403. Hosted two-visitor isolation, UI exit and the remaining
-flows were not completed. The failed visitor and an unused diagnostic visitor were
-deleted with their own authenticated cleanup; final counts are **0 demo workspaces
-and 0 demo sessions**. The diagnostic runner closed stdin too early, consuming the
-remaining creation slot without testing the action. No quota was reset; the next
-normal window is **03:30 IST**. Earlier partial hosted runs remain historical in
-`PROJECT_STATUS.md`. A full recruiter walkthrough is not yet verified.
+Resume parsing accepts PDFs up to 5 MiB and 20 pages, discards raw bytes/full
+text, and retains selected evidence for review. Temporary access expires within
+24 hours. Physical cleanup waits for maintenance while free hosting is awake;
+**Exit and delete demo** erases the owned workspace from active storage. No resume
+content goes to an external AI service in this profile. Account release still
+requires the production Clerk/domain and privacy/security work in section H.
 
-Render automatic deploys are off. Vercel was deployed from the pinned Git source
-without connecting automatic Git deploys. Future pushes require a separate
-explicit release. The Render creation connector cannot set `healthCheckPath`;
-the current service uses TCP health checks, and both HTTP health endpoints were
-verified manually. The Blueprint below specifies `/health` for future imports.
-Existing unrelated hosting resources were preserved. No paid services were added.
+The client waits up to 75 seconds on a GET-only readiness probe before one
+bootstrap POST; interview requests allow 30 seconds and keep existing idempotency
+keys. No automatic write replay was added. Sleeping or unavailable hosting can
+still require an explicit retry. New visitor creation remains limited to two per
+network per UTC hour; never reset quotas or spoof addresses to repeat checks.
 
-**No provisioning steps remain for using this demo.** Sections A–S are the
-reproducible setup/redeployment reference. Do not import the Blueprint again for
-the existing service. Account mode still requires the release work in section H.
-Render Free sleeps when idle; the first visit may need time to wake. Demo
-creation is limited to two sessions per network per UTC hour; deployment checks
-used that allowance on the operator's network. Do not reset quotas to retry tests.
+Render automatic deploys remain off. Vercel uses pinned Git source without an
+automatic Git link. Pushes alone do not release either host. The current Render
+platform health check is TCP; explicit HTTP liveness/readiness passed. The
+Blueprint below specifies `/health` for future imports; do not import it again
+for the existing service. No provisioning remains for temporary resume uploads.
 
 This runbook supersedes the earlier paid Starter/cron proposal in
 [ADR 0001](adr/0001-managed-deployment.md). It prepares a small portfolio demo,

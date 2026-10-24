@@ -19,9 +19,8 @@ or remote reference fetching. Temporary workspaces expose no external AI review.
 Temporary access expires within 24 hours, with physical cleanup delayed while
 free hosting sleeps. Losing the cookie loses access; there is no recovery or
 cross-device login. **Exit and delete demo** erases the owned workspace and resume
-records from active storage. Remove private details before upload. This change
-must be released to both backend and frontend before it is available on the live
-site; see [current status](../PROJECT_STATUS.md).
+records from active storage. Remove private details before upload. This feature
+is live on both hosts at `cf08aa4`; see the [release report](RESUME_UPLOAD_RELEASE.md).
 
 ## Upload and processing
 

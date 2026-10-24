@@ -97,4 +97,21 @@ external blockers without treating incomplete tests as passes.
   sources) pass, including the updated harness. Whole-repo Prettier passes.
 - Security checkpoint: zero configured-secret/pattern findings in 477 tracked/new
   files and 23 browser JS bundles; no actual dotenv paths tracked or in history.
-- No push, hosted release, schema migration, paid resource or live AI call yet.
+- User authorized the normal release-branch push and existing free-tier release.
+  `cf08aa4` was pushed and remote SHA verified. All three jobs in GitHub Actions
+  40099102208 succeeded. Render `dep-dbebdotg1s2s73f29oo0` became live at that SHA;
+  HTTP health/readiness and protected library passed before creating Vercel
+  `dpl_HJMVCGL5ziQK86VkijTAbdnP9sMs`, now READY at the same SHA/canonical alias.
+- Hosted first-visitor checks passed the complete practice journey and real PDF
+  upload/correction/reload, upload accessibility and all four widths. Desktop/
+  mobile screenshots were inspected. After the natural quota boundary, foreign
+  uploaded/sample resume, project and assessment reads returned 404. First UI
+  deletion returned 204/landing redirect; a Node post-delete read hit ENOTFOUND,
+  so the combined suite is recorded as 1 passed/1 failed. The second UI exit did
+  not run; authenticated finally-cleanup erased that visitor. A read-only Chrome
+  follow-up passed the browser/Node 401 checks in 4.7 seconds without a new
+  visitor. Final workspace/session/resume/version counts are zero.
+- HTTPS/gateway/CORS/closed-account checks passed. Twelve landing assets and 16
+  public-route HTML scripts had zero configured private-value matches; temporary
+  upload and retention copy were found. No migration, host variable change,
+  quota reset, paid resource, real AI request or production data export occurred.

@@ -1,5 +1,17 @@
 # Product screenshot provenance
 
+## Hosted personal resume — 24 October 2026
+
+[hosted-resume-upload.png](hosted-resume-upload.png) (1440 pixels) and
+[hosted-resume-upload-mobile.png](hosted-resume-upload-mobile.png) (375 pixels)
+are unedited Chrome screenshots of the canonical site serving `cf08aa4`. They
+show an actual upload of the committed synthetic PDF, a corrected Python claim
+persisted after reload, and separate uploaded/sample labels. The real Vercel,
+Render and Neon path was used; no response was mocked. Both were visually
+inspected before copying from ignored hosted test output. No private resume or
+credential appears; this is synthetic test evidence, with simulated feedback.
+See the [release report](../RESUME_UPLOAD_RELEASE.md).
+
 ## Hosted captures — 24 October 2026
 
 [hosted-landing.png](hosted-landing.png) (1440 pixels) and

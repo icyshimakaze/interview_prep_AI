@@ -10,23 +10,24 @@ The application preserves those distinctions through its database, algorithms,
 API and UI. It does not predict hiring outcomes or calculate a readiness score.
 
 **[Open the hosted demo](https://interview-prep-ai-icyshimakaze.vercel.app)**, then
-choose **Try Interactive Demo**. It uses fictional data and labelled mock AI;
-no login or AI key is needed. Free hosting may take time to wake after inactivity.
+choose **Upload your resume** or **Try Interactive Demo**. Personal PDF uploads
+use a private temporary workspace alongside the fictional example; feedback is
+labelled mock. No login or AI key is needed. Free hosting may take time to wake.
 You can also [run locally](#run-locally) at <http://localhost:3000>.
 See the [deployment record and verification limits](docs/DEPLOYMENT.md).
 
 The hosted profile currently enables the recruiter demo. Production Clerk sign-in
 and xKiro account workflows remain disabled pending an owned domain/DNS setup and
 the account privacy/security release work. See the
-[Phase 24 verification report](docs/PHASE_24_REPORT.md) for fresh checks and exact
+[resume release report](docs/RESUME_UPLOAD_RELEASE.md) for current checks and exact
 remaining actions.
 
-The Phase 24 hosted journey passed questions and assessments, then interview
-creation timed out. A later retained visitor completed interview creation,
-pause/resume, follow-up and final review; a separate cold-start check observed a
-54-second Render wakeup. The follow-up adds startup handling and temporary
-personal PDF uploads locally. These changes are not yet deployed; see
-[current status](PROJECT_STATUS.md) for release and verification limits.
+Release `cf08aa4` is live on both hosts after green CI. The hosted browser journey
+passed personal PDF upload/correction/reload, interview pause/follow-up/completion,
+assessments, Project Defense and planning. Visitor isolation and deletion were
+verified, with a read-only follow-up after an operator DNS failure. Startup
+handling waits for sleeping hosting and reports safe timeout recovery. See
+[current status](PROJECT_STATUS.md) for exact test results and limits.
 
 [Recruiter walkthrough](#recruiter-walkthrough) ·
 [Architecture](docs/ARCHITECTURE.md) ·
@@ -48,8 +49,18 @@ practice defending real source code without executing it.
 
 ## Screenshots
 
-Screenshots are captured from the running application with fictional demo data;
+Screenshots are captured from the running application with fictional demo data
+and synthetic test resumes;
 they are product views, not evidence of real users or hiring outcomes.
+
+<details>
+<summary>Hosted personal PDF upload — desktop and mobile, 24 October 2026</summary>
+
+![Uploaded synthetic PDF with persisted correction on the live site](docs/screenshots/hosted-resume-upload.png)
+
+![Personal resume upload and review at 375 pixels](docs/screenshots/hosted-resume-upload-mobile.png)
+
+</details>
 
 <details>
 <summary>Hosted landing page — desktop and mobile, 24 October 2026</summary>
@@ -88,10 +99,10 @@ they are product views, not evidence of real users or hiring outcomes.
 
 </details>
 
-[Capture provenance and reproduction](docs/screenshots/README.md). The two hosted
-landing captures are from the 24 October 2026 public Chrome check. The four
-workspace/product captures below them are retained from the successful 22 October
-2026 local browser run.
+[Capture provenance and reproduction](docs/screenshots/README.md). The resume
+captures show the current `cf08aa4` hosted release. Landing captures show the
+earlier `c5ca23e` hosted version; the four other product captures are from the
+successful 22 October 2026 local browser run.
 
 ## What is implemented
 
@@ -134,11 +145,11 @@ No account, AI key or model download is needed. Use fictional answers and data.
    physical deletion waits for a wakeup when asleep. Creation is limited to two new
    workspaces per direct network identifier per hour; reuse the current session.
 
-The local follow-up supports **Upload your resume** without sign-in, using a
+The live site supports **Upload your resume** without sign-in, using a
 private temporary browser workspace. Review or correct the extracted evidence,
 then use **Exit and delete demo** to erase it. Access expires within 24 hours;
 physical cleanup can wait while free hosting sleeps. No resume data goes to AI
-in this mode. This feature requires the pending backend/frontend release.
+in this mode. PDF limits are 5 MiB and 20 pages; the raw PDF is discarded.
 
 Editable account profile/targets and durable account access require
 [Clerk setup](docs/AUTHENTICATION.md). Interactive live Clerk flows have not been
@@ -308,6 +319,7 @@ drift. Production disables Swagger UI.
 | `/health`, `/api/v1/health/ready`                                                      | Process liveness; database connectivity and exact schema revision |
 | `/api/v1/account/session`, `/profile`, `/targets`, `/resumes` under the account prefix | Account bootstrap and candidate context                           |
 | `/api/v1/demo/sessions`, `/workspace`, `/session` under the demo prefix                | Isolated demo bootstrap, restore and deletion                     |
+| `/api/v1/demo/resume-library` and its owned evidence routes                            | Temporary personal PDF upload, review and deletion                |
 | `/{account\|demo}/skill-evidence`, `/questions`, `/assessments` under `/api/v1`        | Evidence, browsing, saved practice and scoring                    |
 | `/{account\|demo}/interviews` under `/api/v1`                                          | Revision/idempotency-aware session commands and review            |
 | `/{account\|demo}/projects` under `/api/v1`                                            | Imports, snapshots and defense runs                               |
