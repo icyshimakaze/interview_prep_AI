@@ -63,3 +63,10 @@ keyboard/readiness/missing-key checks (8.3s). No local configuration was copied.
 Windows autocrlf initially changed baseline checkout line endings; formatting only
 the isolated checkout normalized them and the full Prettier check passed, with
 no additional Git source changes. Unrelated Phase 25 changes remain excluded.
+
+Commit `c6dfda14be38fbb85cc9e267a43d2ef510794b51` was pushed to the current
+release branch and all three jobs in GitHub Actions 40125359511 passed. Vercel's
+exact-SHA production creation request then returned 403 requiring renewed team
+access. The prescribed authorization tool issued a one-use link, presented to the
+user; retry the same request after they complete that browser authorization.
+The user confirmed no owned domain, so hosted account mode stays disabled.

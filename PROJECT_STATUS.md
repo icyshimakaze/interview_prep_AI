@@ -2,12 +2,18 @@
 
 Updated: 2026-10-25 (Asia/Calcutta).
 
-## Clerk GitHub/Vercel release — authorized and verified for publication
+## Clerk GitHub/Vercel release — pushed; Vercel authorization pending
 
 The user explicitly requested committing/pushing the existing Clerk changes and
 updating the Vercel website. See the
 [release plan](.agent/plans/clerk-github-vercel-release.md). The GitHub release
-branch is `rebuild/professional-v2`; its verified starting head is `d23d276`.
+branch is `rebuild/professional-v2`; its verified starting head was `d23d276`.
+Committed and pushed **`c6dfda14be38fbb85cc9e267a43d2ef510794b51`**, then verified
+the remote head. All three jobs in
+[CI 40125359511](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40125359511)
+passed, including backend tests/migrations and browser/container packaging.
+Unauthenticated GitHub API status polling reached its rate limit; the current
+public run page independently confirmed all three named jobs completed successfully.
 
 - Isolated the Clerk/frontend/local-launcher/docs changes in a separate checkout,
   preserving unrelated Phase 25 backend/parser/evaluation work. No local
@@ -24,11 +30,18 @@ branch is `rebuild/professional-v2`; its verified starting head is `d23d276`.
   `dpl_HJMVCGL5ziQK86VkijTAbdnP9sMs` at `cf08aa4`, canonical alias
   `interview-prep-ai-icyshimakaze.vercel.app`, and no Clerk environment keys.
   Production account mode is not enabled by a Git push or frontend code release.
-  The user has been asked whether they now control a production domain. Preserve
-  the current hosted profile until its production Clerk prerequisites are met.
+  The user confirmed they have only the `vercel.app` address and no owned domain.
+  Preserve the hosted demo profile; the new account controls cannot become active
+  until production Clerk/domain configuration is available.
+- The authorized exact-SHA Vercel production deployment request returned **403**:
+  the connection must reauthorize access to `icy-shimakaze` / the existing account
+  scope. Called Vercel's prescribed `authorize_team_access` recovery and presented
+  its one-use, 10-minute consent link to the user. This is service authorization,
+  not a new request for permission to deploy. No new deployment was created.
 
-Next: push the explicit Clerk commit, verify its GitHub Actions gates, deploy that
-exact revision to the existing Vercel project, and record canonical-site checks.
+Next: after user-completed Vercel authorization, retry the same pinned production
+deployment and record actual build/canonical-site results. GitHub publication is
+complete; the public website still serves the preceding deployment meanwhile.
 Render/Neon settings and schema remain outside this frontend code release.
 
 ## Clerk development setup — configured and user verified
