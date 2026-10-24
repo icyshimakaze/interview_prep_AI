@@ -229,8 +229,8 @@ export function createInterviewApi(
     return (
       await request(url, {
         signal: signal
-          ? AbortSignal.any([signal, AbortSignal.timeout(15000)])
-          : AbortSignal.timeout(15000),
+          ? AbortSignal.any([signal, AbortSignal.timeout(30000)])
+          : AbortSignal.timeout(30000),
       })
     ).json();
   }
@@ -243,7 +243,7 @@ export function createInterviewApi(
       await (
         await request(url, {
           method,
-          signal: AbortSignal.timeout(15000),
+          signal: AbortSignal.timeout(30000),
           headers: {
             "Content-Type": "application/json",
             ...(mode === "demo" ? { "X-CSRF-Token": csrfToken() } : {}),

@@ -8,6 +8,7 @@ import { parseDashboard } from "../../src/lib/api/workspace";
 import { checkQuestionBank } from "./question-bank-flow";
 import { checkAssessments } from "./assessment-flow";
 import { checkInterviews } from "./interview-flow";
+import { checkResumeUpload } from "./resume-flow";
 
 // Two real demo creations consume the production hourly budget. Retrying this
 // journey would test quota exhaustion instead of the original failure.
@@ -94,6 +95,9 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
       path: test.info().outputPath("persisted-progress.png"),
       fullPage: true,
     });
+    const uploadedResume =
+      await test.step("personal PDF upload, review and reload", () =>
+        checkResumeUpload(page));
     await second.goto(`${baseURL}/demo`);
     await expect(second.getByRole("heading", { level: 1 })).toContainText(
       "Aarav",
@@ -121,6 +125,13 @@ test("isolated fictional demo persists edits, rejects foreign IDs, and erases on
       `${baseURL}/api/v1/demo/resumes/${firstResume.id}`,
     );
     expect(foreign.status()).toBe(404);
+    expect(
+      (
+        await second.request.get(
+          `${baseURL}/api/v1/demo/resume-library/${uploadedResume}`,
+        )
+      ).status(),
+    ).toBe(404);
     expect(
       (
         await second.request.get(

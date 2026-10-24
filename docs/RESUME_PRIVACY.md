@@ -10,15 +10,23 @@ Free, cleanup runs at startup/hourly while awake; physical deletion is delayed
 while sleeping or suspended. Review results expire from reuse after 30 days.
 This feedback does not auto-confirm evidence. [Full provider/privacy details](XKIRO.md).
 
-The account Resume screen supports PDF upload, server-side text extraction,
-editable evidence review, additions and deletion. The fictional recruiter demo
-continues to accept no real files. No AI, OCR, external document service or remote
-reference fetching is used. Clerk authentication is required for every operation.
+The Resume screen supports PDF upload, server-side text extraction, editable
+evidence review, additions and deletion. The temporary workspace now also accepts
+personal resumes through its isolated browser capability; account routes still
+require Clerk authentication. Parsing uses no AI, OCR, external document service
+or remote reference fetching. Temporary workspaces expose no external AI review.
+
+Temporary access expires within 24 hours, with physical cleanup delayed while
+free hosting sleeps. Losing the cookie loses access; there is no recovery or
+cross-device login. **Exit and delete demo** erases the owned workspace and resume
+records from active storage. Remove private details before upload. This change
+must be released to both backend and frontend before it is available on the live
+site; see [current status](../PROJECT_STATUS.md).
 
 ## Upload and processing
 
 - Send a binary body with `Content-Type: application/pdf` to
-  `POST /api/v1/account/resumes`, and a UTF-8 percent-encoded filename in
+  `POST /api/v1/account/resumes` or `POST /api/v1/demo/resume-library`, and a UTF-8 percent-encoded filename in
   `X-Resume-Filename`. This intentionally avoids multipart spooling or temporary
   files. Browser uploads use the original `File` as the request body.
 - Require PDF MIME, a `.pdf` extension (case insensitive), PDF signature and
@@ -27,7 +35,7 @@ reference fetching is used. Clerk authentication is required for every operation
   The filename is only an escaped display label, never a filesystem path.
 - Limit 5 MiB (5,242,880 bytes), 1–20 pages, 100,000 extracted characters,
   2 MiB decoded content/filter streams and 100 retained evidence entries.
-  Five resumes are allowed per account. Inputs and outputs are bounded separately.
+  Five resumes are allowed per workspace, including its seeded sample. Inputs and outputs are bounded separately.
 - Two in-flight read/parse operations per API process; streamed reads have a
   15-second deadline. A short-lived Python/pypdf worker has a 15-second wall-time
   deadline and a 512 MiB OS memory limit (Linux address space or Windows Job
@@ -124,6 +132,14 @@ the active-database deletion control. Self-service full account erasure remains
 unavailable.
 
 ## Migration and verification limits
+
+The temporary library uses the existing owned resume tables without a migration.
+Its operations mirror the account table above under `/api/v1/demo/resume-library`.
+Every mutation requires the demo capability, exact allowed Origin and matching
+CSRF token; the server derives ownership. The historical demo `/resumes/{id}`
+summary route is unchanged. `is_sample` is derived from the server's extraction
+version, never from a filename or a client assertion. Import quotas cover failed
+parses and delete/reimport loops. Upload completion rechecks principal expiry.
 
 Apply `0004_resume_evidence` after `0003_candidate_context` before starting the
 updated API/frontend. The additive migration defaults old evidence to `other` /

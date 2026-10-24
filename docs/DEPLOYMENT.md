@@ -6,6 +6,16 @@ The public mock-only demo is live at
 Choose **Try Interactive Demo**; no login or AI key is needed. Account sign-in
 and live xKiro are disabled in this initial profile.
 
+Local follow-up (pending release): the Resume screen accepts personal PDFs in the
+isolated temporary workspace, using existing cookie/CSRF/ownership and import
+limits. It retains selected evidence, discards raw PDFs, and offers no external
+AI review. Release the additive backend API before the frontend; no migration or
+hosting environment change is needed. The client first waits up to 75 seconds on
+a read-only readiness probe for sleeping hosting, then creates the workspace
+once. Interview requests allow 30 seconds and retain existing idempotency keys.
+Timeouts explain that a write may already have saved. See the
+[follow-up plan](../.agent/plans/resume-uploads-and-hosted-errors.md).
+
 Phase 24 rechecked the live resources, release CI, security boundaries and current
 local quality gates. The user confirmed that no owned domain/production Clerk
 setup exists and no Render payment method is saved. Account mode stays disabled;
@@ -432,8 +442,9 @@ docker run --rm --env-file .env.runtime.local interview-prep-api:release python 
 ```
 
 There is no public admin/cleanup URL. Operator backups/provider logs have separate
-retention. Do not enter private resumes, repository secrets or personal answers in
-the recruiter demo. See [privacy/security limits](SECURITY.md).
+retention. Temporary resume uploads are optional; remove private contact details
+before uploading. Never import repository secrets. Expiring access is not a
+physical deletion SLA. See [privacy/security limits](SECURITY.md).
 
 ## O. Verify real xKiro — synthetic input only
 

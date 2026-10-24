@@ -17,7 +17,7 @@ from interview_prep.modules.context.models import (
     ResumeVersion,
     ReviewStatus,
 )
-from interview_prep.modules.identity.models import User
+from interview_prep.modules.identity.models import PrincipalStatus, User
 from interview_prep.modules.resumes.extraction import EXTRACTION_VERSION, MAX_EVIDENCE
 from interview_prep.modules.resumes.schemas import (
     EvidenceInput,
@@ -65,6 +65,7 @@ async def get_resume(session: AsyncSession, owner: UUID, id: UUID) -> ResumeDeta
         page_count=version.page_count if version else None,
         extraction_note=version.extraction_note if version else None,
         evidence=[EvidenceView.model_validate(item) for item in evidence],
+        is_sample=version is not None and version.extraction_version == "fictional-text-v1",
     )
 
 
@@ -83,7 +84,18 @@ async def list_resumes(session: AsyncSession, owner: UUID) -> ResumeList:
 async def save_upload(
     session: AsyncSession, owner: UUID, label: str, data: bytes, parsed: ParsedPdf
 ) -> ResumeDetail:
-    await session.scalar(select(User).where(User.id == owner).with_for_update())
+    user = await session.scalar(
+        select(User)
+        .where(User.id == owner)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    if (
+        user is None
+        or user.status != PrincipalStatus.ACTIVE
+        or (user.expires_at is not None and user.expires_at <= datetime.now(UTC))
+    ):
+        raise HTTPException(401)
     count = await session.scalar(
         select(func.count()).select_from(Resume).where(Resume.owner_id == owner)
     )

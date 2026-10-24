@@ -6,6 +6,7 @@ export const resumeFixture: Resume = {
   revision: 1,
   page_count: 1,
   extraction_note: null,
+  is_sample: false,
   evidence: [
     {
       id: "python-mention",

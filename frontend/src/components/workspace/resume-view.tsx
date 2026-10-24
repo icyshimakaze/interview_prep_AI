@@ -21,7 +21,13 @@ import { AIReview } from "./ai-review";
 
 type Editor = { resume: Resume; evidence?: Evidence };
 
-export function ResumeView({ api }: { api: ResumeApi }) {
+export function ResumeView({
+  api,
+  temporary = false,
+}: {
+  api: ResumeApi;
+  temporary?: boolean;
+}) {
   const [items, setItems] = useState<Resume[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -190,7 +196,7 @@ export function ResumeView({ api }: { api: ResumeApi }) {
         />
       ) : (
         <>
-          <ResumeUpload busy={busy} onUpload={upload} />
+          <ResumeUpload busy={busy} onUpload={upload} temporary={temporary} />
           <p className="mt-4 min-h-6 text-sm text-accent" role="status">
             {notice}
           </p>
@@ -233,7 +239,9 @@ export function ResumeView({ api }: { api: ResumeApi }) {
                         {resume.page_count
                           ? `${resume.page_count} ${resume.page_count === 1 ? "page" : "pages"} · `
                           : ""}
-                        Raw PDF discarded · evidence is editable
+                        {resume.is_sample
+                          ? "Fictional example · no PDF uploaded"
+                          : "Raw PDF discarded · evidence is editable"}
                       </p>
                     </div>
                     <Button

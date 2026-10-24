@@ -41,6 +41,7 @@ class ResumeDetail(BaseModel):
     page_count: int | None
     extraction_note: str | None
     evidence: list[EvidenceView]
+    is_sample: bool = False
 
 
 class ResumeList(BaseModel):

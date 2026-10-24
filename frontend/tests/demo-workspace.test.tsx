@@ -33,6 +33,8 @@ describe("demo lifecycle and recoverable states", () => {
       expect(init.credentials).toBe("same-origin");
       expect(new Headers(init.headers).get("Authorization")).toBeNull();
       if (path.endsWith("/sessions")) return Response.json({});
+      if (path.endsWith("/health/ready"))
+        return Response.json({ status: "ok" });
       if (path.endsWith("/dashboard")) {
         if (first) {
           first = false;
@@ -64,6 +66,8 @@ describe("demo lifecycle and recoverable states", () => {
     const user = userEvent.setup();
     let deletes = 0;
     const fetchMock = vi.fn(async (path: string, init: RequestInit) => {
+      if (path.endsWith("/health/ready"))
+        return Response.json({ status: "ok" });
       if (path.endsWith("/sessions")) return Response.json({});
       if (path.endsWith("/dashboard")) return Response.json(workspaceFixture);
       if (path.endsWith("/session") && init.method === "DELETE") {
@@ -113,6 +117,8 @@ describe("demo lifecycle and recoverable states", () => {
       "fetch",
       vi.fn(async (path: string, init: RequestInit) => {
         calls.push(path);
+        if (path.endsWith("/health/ready"))
+          return Response.json({ status: "ok" });
         if (path.endsWith("/reset")) {
           expect(init.method).toBe("POST");
           expect(new Headers(init.headers).get("X-CSRF-Token")).toBe(
@@ -138,8 +144,10 @@ describe("demo lifecycle and recoverable states", () => {
       "Aarav Rao",
     );
     expect(calls).toEqual([
+      "/api/v1/health/ready",
       "/api/v1/demo/sessions",
       "/api/v1/demo/reset",
+      "/api/v1/health/ready",
       "/api/v1/demo/sessions",
       "/api/v1/demo/dashboard",
     ]);

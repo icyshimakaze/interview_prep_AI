@@ -15,6 +15,13 @@ export function ResumeEvidence({
 }) {
   return (
     <>
+      <div className="mt-5">
+        <Badge tone={resume.is_sample ? "amber" : "neutral"}>
+          {resume.is_sample
+            ? "Fictional sample resume"
+            : "Your uploaded resume"}
+        </Badge>
+      </div>
       <p className="mt-5 max-w-3xl text-sm leading-7 text-muted">
         Extraction finds explicit text mentions, including negative or
         aspirational mentions. Review the excerpt before accepting a claim.

@@ -70,6 +70,11 @@ export function Overview({ data }: { data: Dashboard }) {
                 : "Set up your profile"}
             <Icon name="arrow" width={17} height={17} />
           </ButtonLink>
+          {demo && (
+            <ButtonLink href={href("resume")} variant="outline">
+              Upload your resume
+            </ButtonLink>
+          )}
           {!demo && hasProfile && (
             <ButtonLink href="/demo" variant="outline">
               Explore the demo

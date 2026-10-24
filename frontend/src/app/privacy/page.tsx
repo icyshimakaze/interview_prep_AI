@@ -15,11 +15,11 @@ export default function PrivacyPage() {
             This development preview keeps fictional demo data separate from
             account data. Here is what the current product does.
           </p>
-          <p className="mt-4 text-xs text-muted">Updated 23 October 2026</p>
+          <p className="mt-4 text-xs text-muted">Updated 24 October 2026</p>
           {[
             [
               "The interactive demo",
-              "Each visitor gets a separate workspace with a fictional candidate and simulated history. Use fictional information in the demo. Project Defense offers an illustrative fixture and optional public GitHub or ZIP imports. The demo uses a session cookie and a security cookie to save your sample task changes. Demo access expires within 24 hours. Expired data is cleaned at startup and hourly while the service runs; on sleeping or suspended free hosting, physical deletion waits for the next successful maintenance run. “Exit and delete demo” removes your workspace immediately.",
+              "Each visitor gets a separate temporary workspace with a fictional candidate and simulated history. You may upload your own resume; uploaded evidence is labelled separately from the fictional sample. Feedback remains simulated and no resume data goes to an external AI service in this workspace. Project Defense also offers a fixture and optional public GitHub or ZIP imports. A private session cookie grants access; a security cookie protects changes. Access expires within 24 hours. Losing the session cookie loses access; there is no email recovery or access from another device. Expired data is cleaned at startup and hourly while the service runs; on sleeping or suspended free hosting, physical deletion waits for the next successful maintenance run. “Exit and delete demo” removes your workspace, uploaded resume records, excerpts and practice from active storage immediately.",
             ],
             [
               "Your account and profile",
@@ -31,7 +31,7 @@ export default function PrivacyPage() {
             ],
             [
               "Your resume and evidence",
-              "Signed-in accounts can upload PDF resumes up to 5 MiB and 20 pages. Remove contact details and other private information before uploading. The server extracts selectable text in memory, then discards the raw PDF and full extracted text after the request. It stores the validated filename as a label, a content checksum, page/size metadata, and selected evidence excerpts and your corrections. No raw PDF download or permanent file storage is provided. Excerpts may still contain personal information from your resume, so review them.",
+              "Temporary browser workspaces and signed-in accounts can upload PDF resumes up to 5 MiB and 20 pages. Remove contact details and other private information before uploading. The server extracts selectable text in memory, then discards the raw PDF and full extracted text after the request. It stores the validated filename as a label, a content checksum, page/size metadata, and selected evidence excerpts and your corrections. No raw PDF download or permanent file storage is provided. Excerpts may still contain personal information from your resume, so review them. Temporary uploads expire with their workspace; account evidence has no automatic expiry.",
             ],
             [
               "Review and deletion",

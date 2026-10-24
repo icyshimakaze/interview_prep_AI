@@ -21,9 +21,12 @@ the account privacy/security release work. See the
 [Phase 24 verification report](docs/PHASE_24_REPORT.md) for fresh checks and exact
 remaining actions.
 
-The latest hosted journey passed questions and assessments, then interview
-creation timed out. The full hosted walkthrough and visitor-isolation/exit checks
-remain incomplete; this limitation is recorded in that report.
+The Phase 24 hosted journey passed questions and assessments, then interview
+creation timed out. A later retained visitor completed interview creation,
+pause/resume, follow-up and final review; a separate cold-start check observed a
+54-second Render wakeup. The follow-up adds startup handling and temporary
+personal PDF uploads locally. These changes are not yet deployed; see
+[current status](PROJECT_STATUS.md) for release and verification limits.
 
 [Recruiter walkthrough](#recruiter-walkthrough) ·
 [Architecture](docs/ARCHITECTURE.md) ·
@@ -92,16 +95,16 @@ workspace/product captures below them are retained from the successful 22 Octobe
 
 ## What is implemented
 
-| Area                   | Behavior                                                                                                                                                                    |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Candidate context      | Account profile and target-job CRUD, versioned job descriptions, bounded PDF resume ingestion and editable source-backed evidence. Demo context is fictional and read-only. |
-| Skill Matrix           | Separates job importance, resume mentions and eligible demonstrated results; explains Practice / Validate / Maintain priorities and source eligibility.                     |
-| Question Bank          | Search, category/topic/type/difficulty/role filters, bookmarks, attempt history and attempt-first concept review.                                                           |
-| Assessments            | Frozen question/option allocations, saved drafts, deterministic objective scoring, optional written-answer feedback and saved review.                                       |
-| Interviews             | Seven interview types; typed answers, adaptive main-question selection, bounded follow-ups, pause/resume, durable evaluation and partial final review.                      |
-| Project Defense        | Public GitHub or ZIP snapshot analysis, file/line citations and saved, unscored explanation practice; includes an explicitly illustrative offline project.                  |
-| Roadmap and progress   | Deterministic weekly recommendations, preserved plan versions/completions and analytics derived from persisted work with sample-size/provenance limits.                     |
-| Account/demo isolation | Clerk account integration and separate expiring demo principals; server ownership checks and database constraints protect private records.                                  |
+| Area                   | Behavior                                                                                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Candidate context      | Account profile and target-job CRUD, versioned job descriptions, bounded PDF resume ingestion and editable source-backed evidence. Temporary workspaces support personal PDFs alongside the fictional sample. |
+| Skill Matrix           | Separates job importance, resume mentions and eligible demonstrated results; explains Practice / Validate / Maintain priorities and source eligibility.                                                       |
+| Question Bank          | Search, category/topic/type/difficulty/role filters, bookmarks, attempt history and attempt-first concept review.                                                                                             |
+| Assessments            | Frozen question/option allocations, saved drafts, deterministic objective scoring, optional written-answer feedback and saved review.                                                                         |
+| Interviews             | Seven interview types; typed answers, adaptive main-question selection, bounded follow-ups, pause/resume, durable evaluation and partial final review.                                                        |
+| Project Defense        | Public GitHub or ZIP snapshot analysis, file/line citations and saved, unscored explanation practice; includes an explicitly illustrative offline project.                                                    |
+| Roadmap and progress   | Deterministic weekly recommendations, preserved plan versions/completions and analytics derived from persisted work with sample-size/provenance limits.                                                       |
+| Account/demo isolation | Clerk account integration and separate expiring demo principals; server ownership checks and database constraints protect private records.                                                                    |
 
 ## Recruiter walkthrough
 
@@ -131,7 +134,13 @@ No account, AI key or model download is needed. Use fictional answers and data.
    physical deletion waits for a wakeup when asleep. Creation is limited to two new
    workspaces per direct network identifier per hour; reuse the current session.
 
-Account-only PDF upload and editable profile/targets require
+The local follow-up supports **Upload your resume** without sign-in, using a
+private temporary browser workspace. Review or correct the extracted evidence,
+then use **Exit and delete demo** to erase it. Access expires within 24 hours;
+physical cleanup can wait while free hosting sleeps. No resume data goes to AI
+in this mode. This feature requires the pending backend/frontend release.
+
+Editable account profile/targets and durable account access require
 [Clerk setup](docs/AUTHENTICATION.md). Interactive live Clerk flows have not been
 established by the mock demo/browser suite.
 

@@ -13,7 +13,7 @@ const features: {
     title: "Job targets and resume evidence",
     description:
       "Keep the job requirements and your experience in view, so preparation has a purpose.",
-    status: "PDF upload and evidence review in accounts",
+    status: "Upload your own PDF in a temporary private workspace",
   },
   {
     title: "Assessments and interviews",
@@ -55,13 +55,14 @@ export default function Home() {
                 Try Interactive Demo{" "}
                 <Icon name="arrow" width={17} height={17} />
               </ButtonLink>
-              <ButtonLink href="/sign-up" variant="outline">
-                Create account
+              <ButtonLink href="/demo/resume" variant="outline">
+                Upload your resume
               </ButtonLink>
             </div>
             <p className="mt-4 max-w-sm text-xs leading-6 text-muted">
-              No sign-up needed for the demo. Fictional candidate, simulated
-              history, no AI key required.
+              No sign-up needed. Explore the sample or upload your own PDF.
+              Temporary browser workspace; simulated feedback, no AI key
+              required.
             </p>
           </div>
           <WorkspacePreview />
@@ -81,7 +82,8 @@ export default function Home() {
               Save the requirements of a target job, review the claims in your
               resume, and practice explaining what you know. Each recommendation
               shows the evidence behind it. The demo lets you try the workflow
-              with a fictional candidate and simulated history.
+              with a fictional candidate and simulated history. You can also
+              upload your own resume and review its extracted evidence.
             </p>
             <Link href="#features" className="text-link">
               Explore the workspace <Icon name="arrow" width={17} height={17} />
@@ -158,10 +160,10 @@ export default function Home() {
           </div>
           <div>
             <p className="text-base leading-8 text-muted">
-              The demo uses fictional information in a separate, temporary
-              workspace. Project Defense includes an offline teaching fixture
-              and optional repository imports. Defense practice sends no source
-              or answers to an AI service.
+              Each visitor gets a private, temporary workspace with sample data
+              and optional personal resume uploads. Project Defense includes an
+              offline teaching fixture and optional repository imports. Defense
+              practice sends no source or answers to an AI service.
             </p>
             <ul className="mt-6 space-y-4 text-sm text-ink">
               {[

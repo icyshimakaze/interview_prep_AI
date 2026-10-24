@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "./fixtures";
 import AxeBuilder from "@axe-core/playwright";
 import { workspaceFixture } from "../workspace-fixture";
+import { resumeFixture } from "../resume-fixture";
 import { roadmap, progress } from "../planning-fixture";
 import {
   sectionHref,
@@ -10,6 +11,9 @@ import {
 // These fixtures exercise frontend states only; the real service/ownership
 // regression remains in demo.spec.ts against an isolated PostgreSQL database.
 async function mockDemo(page: Page) {
+  await page.route("**/api/v1/demo/resume-library", (route) =>
+    route.fulfill({ json: { items: [{ ...resumeFixture, is_sample: true }] } }),
+  );
   await page.route("**/api/v1/demo/roadmap", (route) =>
     route.fulfill({ json: { ...roadmap(), mode: "demo" } }),
   );

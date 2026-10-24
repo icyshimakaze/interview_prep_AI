@@ -1,4 +1,5 @@
 import type { components } from "./generated";
+import { waitForWorkspace } from "./readiness";
 
 export type Dashboard = components["schemas"]["DashboardView"];
 export type ProfileInput = components["schemas"]["ProfileInput"];
@@ -210,12 +211,33 @@ export async function workspaceRequest(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  const response = await fetch(path, {
-    ...init,
-    cache: "no-store",
-    credentials: "same-origin",
-    signal: init.signal ?? AbortSignal.timeout(10000),
-  });
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      ...init,
+      cache: "no-store",
+      credentials: "same-origin",
+      signal: init.signal ?? AbortSignal.timeout(10000),
+    });
+  } catch (reason: unknown) {
+    const name =
+      reason && typeof reason === "object" && "name" in reason
+        ? reason.name
+        : undefined;
+    if (
+      init.signal?.aborted &&
+      init.signal.reason === reason &&
+      name !== "TimeoutError"
+    )
+      throw reason;
+    const timeout = name === "TimeoutError";
+    throw new WorkspaceError(
+      timeout
+        ? "The server took too long to respond. Your request may have been saved. Reload saved work before retrying."
+        : "The server could not be reached. Check your connection and reload saved work before retrying.",
+      timeout ? "request_timeout" : "network_unavailable",
+    );
+  }
   if (!response.ok) {
     const messages: Record<number, string> = {
       401: "Your session expired. Sign in again or start a new demo.",
@@ -223,7 +245,9 @@ export async function workspaceRequest(
       409: "This record changed in another tab. Reload and try again.",
       422: "Check the field values and try again. Your changes have not been saved.",
       429: "Operation limit reached. Try again after the hourly or daily quota resets.",
+      502: "The practice server is starting or temporarily unavailable. Please try again in a minute.",
       503: "The workspace is temporarily unavailable. Please try again.",
+      504: "The server took too long to respond. Reload saved work before retrying.",
     };
     const payload: unknown = await response.json().catch(() => null);
     if (payload && typeof payload === "object" && "code" in payload) {
@@ -358,6 +382,7 @@ export async function workspaceRequest(
 let bootstrapping: Promise<Dashboard> | undefined;
 export function enterDemo(): Promise<Dashboard> {
   bootstrapping ??= (async () => {
+    await waitForWorkspace();
     await workspaceRequest("/api/v1/demo/sessions", {
       method: "POST",
       headers: {

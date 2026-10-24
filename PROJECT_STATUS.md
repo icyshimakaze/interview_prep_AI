@@ -2,6 +2,56 @@
 
 Updated: 2026-10-24 (Asia/Calcutta).
 
+## Personal resume uploads and hosted reliability — local follow-up
+
+The user requested fixes for hosted failures and support for real resumes, then
+explicitly selected private temporary uploads without production sign-in. See the
+[plan](.agent/plans/resume-uploads-and-hosted-errors.md).
+
+- Added **Upload your resume** on the landing page and dashboard. `/demo/resume`
+  now uses the existing real PDF parser and evidence review/correction/deletion
+  screen. Server-derived provenance distinguishes uploads from the fictional
+  example. Account authentication remains unchanged and disabled on the hosted
+  profile; temporary uploads expose no external AI review.
+- New `/api/v1/demo/resume-library` routes derive ownership from the opaque demo
+  capability, require allowed Origin/CSRF for mutations and reuse parser bounds,
+  revisions and import quotas. Raw PDFs/full text are discarded; retained excerpts
+  expire with the workspace or are erased by exit. Upload completion refreshes
+  principal state to reject expiry/suspension during parsing. No migration, host
+  variable change or new dependency is required.
+- Reproduced bootstrap HTTP 502 and measured a **53.66-second Render wakeup**.
+  Added a bounded 75-second GET-only readiness wait before one bootstrap POST,
+  safe network/timeout recovery and 30-second interview deadlines. A retained
+  hosted visitor completed start, pause/resume, follow-up and final review. One
+  browser request took **12.367 seconds** versus **178 ms** of Render processing.
+  The original Phase 24 creation timeout was not reproduced; its exact cause is
+  unproven and Vercel runtime logs remain unavailable (403). Test deletion returned
+  204, then dashboard 401; Neon counts are zero workspaces/sessions. No quota reset.
+- Verified **173 frontend tests / 19 files**, lint, strict types and production
+  builds. **25 local Chrome tests passed in 1.8 minutes**, including the complete
+  demo, real synthetic PDF upload/correction/reload, foreign resume rejection,
+  erasure, upload layouts at 375/768/1440/1920 and accessibility. The production
+  TLS/container harness also passed PDF upload/isolation/deletion in its non-root
+  512 MiB Linux backend with restricted DB grants. Owned disposable services and
+  ephemeral credentials were removed.
+- Ruff (210 files), strict mypy (197 sources), whole-repo Prettier and whitespace
+  checks pass. Security scan found no configured-secret/pattern matches in 477
+  tracked/new files or 23 browser JS bundles; no actual dotenv paths are tracked
+  or in reachable filename history. Initial backend run had 630 passed and two
+  new expiry fixtures violating existing DB checks; fixed the fixtures without
+  weakening constraints. Final complete backend gate passed: **633 tests in
+  490.36 seconds**, disposable migration down/up/drift, matching OpenAPI and
+  preserved legacy hashes/seeds. Its disposable database was removed.
+
+**Not released yet:** no new push or deployment occurred. Existing hosted
+revisions below remain live. After final checks, obtain this change's exact
+release-branch push authorization as required by the user's deployment
+instructions; the previous approval covered Phase 24 only. Then wait for green CI,
+release the additive backend before the frontend and verify uploads/interviews/
+isolation/deletion on the canonical site within normal visitor quotas. Production
+Clerk, live xKiro and the deferred full-data recovery drill remain outside this
+temporary upload release.
+
 ## Phase 24 — current hosted verification
 
 See the [phase plan](.agent/plans/phase-24.md) and

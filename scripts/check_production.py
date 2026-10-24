@@ -217,6 +217,31 @@ def verify_http(frontend: str, backend: str, ca: Path, secret: str, cookie_file:
             )
             assert visitor.get("/api/v1/account/dashboard").status_code == 403
         assert identifiers[0] != identifiers[1]
+        # Exercise PDF parsing inside the non-root 512 MiB Linux container using
+        # the restricted database role, not just the development Python worker.
+        upload_path = "/api/v1/demo/resume-library"
+        upload_headers = {
+            "Origin": frontend,
+            "X-CSRF-Token": first.cookies.get("interview_prep_csrf") or "",
+            "Content-Type": "application/pdf",
+            "X-Resume-Filename": "synthetic-resume.pdf",
+        }
+        uploaded = first.post(
+            upload_path,
+            headers=upload_headers,
+            content=(ROOT / "frontend/tests/e2e/fixtures/synthetic-resume.pdf").read_bytes(),
+        )
+        assert uploaded.status_code == 201, "Production PDF upload failed"
+        resume = uploaded.json()
+        assert resume["is_sample"] is False and resume["page_count"] == 1
+        assert any(item["claim"] == "Python" for item in resume["evidence"])
+        resource = f"{upload_path}/{resume['id']}"
+        assert second.get(resource).status_code == 404
+        assert (
+            first.delete(f"{resource}?expected_revision=1", headers=upload_headers).status_code
+            == 204
+        )
+        assert first.get(resource).status_code == 404
         with httpx.Client(base_url=frontend, verify=context, timeout=30, trust_env=False) as third:
             assert (
                 third.post(

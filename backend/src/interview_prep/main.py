@@ -39,6 +39,7 @@ from interview_prep.modules.projects.router import account_router as project_acc
 from interview_prep.modules.projects.router import demo_router as project_demo_router
 from interview_prep.modules.questions.router import account_router as question_account_router
 from interview_prep.modules.questions.router import demo_router as question_demo_router
+from interview_prep.modules.resumes.router import demo_router as resume_demo_router
 from interview_prep.modules.resumes.router import router as resume_router
 from interview_prep.modules.resumes.upload import PdfParser
 from interview_prep.modules.roadmaps.router import account_router as roadmap_account_router
@@ -125,6 +126,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(account_router)
     app.include_router(target_router)
     app.include_router(resume_router)
+    app.include_router(resume_demo_router)
     app.include_router(ai_router)
     app.include_router(skill_router)
     app.include_router(question_account_router)

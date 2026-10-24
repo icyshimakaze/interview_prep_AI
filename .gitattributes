@@ -1,6 +1,8 @@
 * text=auto
 # Preserve the immutable source fixture, including original line endings/whitespace.
 content/provenance/streamlit-v1.txt binary
+# Keep PDF cross-reference byte offsets intact on Windows checkouts.
+frontend/tests/e2e/fixtures/*.pdf binary
 *.sh text eol=lf
 *.py text eol=lf
 *.ts text eol=lf

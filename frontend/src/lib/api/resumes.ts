@@ -1,5 +1,5 @@
 import type { components } from "./generated";
-import { WorkspaceError } from "./workspace";
+import { csrfToken, WorkspaceError } from "./workspace";
 import { createAIReviewApi, type AIReviewApi } from "./ai-review";
 
 export type Resume = components["schemas"]["ResumeDetail"];
@@ -96,6 +96,7 @@ function parseEvidence(value: unknown): Evidence {
 export function parseResume(value: unknown): Resume {
   const row = object(value);
   if (
+    (row.is_sample !== undefined && typeof row.is_sample !== "boolean") ||
     !Array.isArray(row.evidence) ||
     row.evidence.length > 100 ||
     (row.extraction_note !== null &&
@@ -114,6 +115,7 @@ export function parseResume(value: unknown): Resume {
     page_count,
     extraction_note: row.extraction_note,
     evidence: row.evidence.map(parseEvidence),
+    is_sample: row.is_sample === true,
   };
 }
 
@@ -146,13 +148,24 @@ export type ResumeApi = {
 };
 export function createResumeApi(
   request: (path: string, init?: RequestInit) => Promise<Response>,
+  mode: "account" | "demo" = "account",
 ): ResumeApi {
-  const root = "/api/v1/account/resumes";
+  const root =
+    mode === "account"
+      ? "/api/v1/account/resumes"
+      : "/api/v1/demo/resume-library";
+  const send = (url: string, init?: RequestInit) => {
+    if (mode !== "demo" || !init?.method || init.method === "GET")
+      return request(url, init);
+    const headers = new Headers(init.headers);
+    headers.set("X-CSRF-Token", csrfToken());
+    return request(url, { ...init, headers });
+  };
   const path = (id: string) => `${root}/${encodeURIComponent(id)}`;
   const result = async (url: string, init?: RequestInit) =>
-    parseResume(await (await request(url, init)).json());
+    parseResume(await (await send(url, init)).json());
   return {
-    ai: createAIReviewApi(request),
+    ...(mode === "account" ? { ai: createAIReviewApi(request) } : {}),
     list: async (signal) => {
       const row = object(await (await request(root, { signal })).json());
       if (!Array.isArray(row.items) || row.items.length > 5)
@@ -191,7 +204,7 @@ export function createResumeApi(
         { method: "DELETE" },
       ),
     remove: async (resume) => {
-      await request(`${path(resume.id)}?expected_revision=${resume.revision}`, {
+      await send(`${path(resume.id)}?expected_revision=${resume.revision}`, {
         method: "DELETE",
       });
     },

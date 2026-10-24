@@ -116,7 +116,10 @@ never fetched. See [candidate context, contracts and retention](CANDIDATE_CONTEX
 
 Resume upload/review now uses the same account boundary. Every list, detail,
 evidence edit/add/delete and resume deletion resolves the verified owner on the
-server. Uploads are bounded PDF bodies, never accepted in the fictional demo.
+server. Uploads are bounded PDF bodies. The temporary workspace also accepts
+personal PDFs under `/api/v1/demo/resume-library`, using its separate opaque
+capability plus Origin/CSRF checks; this does not enable account routes or bypass
+Clerk. Its uploads expire with the workspace and offer no external AI review.
 Evidence mutations and deletion include the aggregate revision; foreign IDs are 404. See [resume processing, API and retention](RESUME_PRIVACY.md).
 
 Short-lived custom JWTs can remain valid after managed sign-out until expiry plus

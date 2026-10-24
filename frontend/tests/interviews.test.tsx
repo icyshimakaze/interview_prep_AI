@@ -6,6 +6,7 @@ import { InterviewConfigure } from "@/components/workspace/interview-configure";
 import { InterviewReviewView } from "@/components/workspace/interview-review";
 import {
   parseInterview,
+  createInterviewApi,
   type Interview,
   type InterviewApi,
   type InterviewOptions,
@@ -112,6 +113,44 @@ const options: InterviewOptions = {
 };
 
 describe("mock interviews", () => {
+  it("accepts a slow hosted response while keeping the request deadline bounded", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(AbortSignal, "timeout").mockImplementation((duration) => {
+        const controller = new AbortController();
+        setTimeout(
+          () => controller.abort(new DOMException("timeout", "TimeoutError")),
+          duration,
+        );
+        return controller.signal;
+      });
+      const request = vi.fn(
+        (_path: string, init?: RequestInit) =>
+          new Promise<Response>((resolve, reject) => {
+            const timer = setTimeout(
+              () => resolve(Response.json(fixture())),
+              20000,
+            );
+            init?.signal?.addEventListener(
+              "abort",
+              () => {
+                clearTimeout(timer);
+                reject(init.signal?.reason);
+              },
+              { once: true },
+            );
+          }),
+      );
+      const result = expect(
+        createInterviewApi(request, "demo").read("session-1"),
+      ).resolves.toMatchObject({ id: "session-1", status: "active" });
+      await vi.advanceTimersByTimeAsync(20000);
+      await result;
+      expect(request).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it("offers one explicit retry for an unavailable current evaluation", async () => {
     const user = userEvent.setup(),
       initial = fixture(),

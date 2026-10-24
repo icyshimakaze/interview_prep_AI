@@ -14,6 +14,7 @@ READ_SECONDS = 10
 logger = logging.getLogger(__name__)
 UPLOADS = {
     "/api/v1/account/resumes",
+    "/api/v1/demo/resume-library",
     "/api/v1/account/projects/zip",
     "/api/v1/demo/projects/zip",
 }

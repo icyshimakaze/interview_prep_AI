@@ -139,7 +139,9 @@ export function WorkspaceShell({
             <p className="text-xs leading-6">
               <strong>Fictional demo data · simulated history.</strong> Aarav is
               a fictional candidate; no real platform usage or AI evaluation.
-              This workspace expires within 24 hours.
+              You can upload your own resume in Resume. Your uploads and
+              practice stay private to this browser session; access expires
+              within 24 hours.
             </p>
           </aside>
         )}
@@ -155,7 +157,7 @@ export function WorkspaceShell({
           <span>
             Interview Prep ·{" "}
             {mode === "demo"
-              ? "Fictional demo workspace"
+              ? "Temporary practice workspace"
               : "Private preparation workspace"}
           </span>
           <Link href="/privacy" className="underline underline-offset-4">

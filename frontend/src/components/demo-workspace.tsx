@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -13,6 +13,11 @@ import { createAssessmentApi } from "@/lib/api/assessments";
 import { createPlanningApi } from "@/lib/api/planning";
 import { createProjectApi } from "@/lib/api/projects";
 import { createInterviewApi } from "@/lib/api/interviews";
+import {
+  createResumeApi,
+  type Resume,
+  type ResumeApi,
+} from "@/lib/api/resumes";
 import {
   csrfToken,
   enterDemo,
@@ -27,6 +32,7 @@ const assessmentApi = createAssessmentApi(workspaceRequest, "demo");
 const planningApi = createPlanningApi(workspaceRequest, "demo");
 const projectApi = createProjectApi(workspaceRequest, "demo");
 const interviewApi = createInterviewApi(workspaceRequest, "demo");
+const demoResumes = createResumeApi(workspaceRequest, "demo");
 
 export function DemoWorkspace({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -36,6 +42,53 @@ export function DemoWorkspace({ children }: { children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [confirmExit, setConfirmExit] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const resumeApi = useMemo<ResumeApi>(() => {
+    const update = async (operation: Promise<Resume>) => {
+      const result = await operation;
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              resumes: [
+                {
+                  id: result.id,
+                  label: result.label,
+                  evidence: result.evidence
+                    .filter((item) => item.review_status !== "rejected")
+                    .map(
+                      (item) =>
+                        item.user_correction ??
+                        item.source_excerpt ??
+                        item.claim,
+                    ),
+                },
+                ...current.resumes.filter((item) => item.id !== result.id),
+              ],
+            }
+          : current,
+      );
+      return result;
+    };
+    return {
+      ...demoResumes,
+      upload: (file) => update(demoResumes.upload(file)),
+      saveEvidence: (...args) => update(demoResumes.saveEvidence(...args)),
+      removeEvidence: (...args) => update(demoResumes.removeEvidence(...args)),
+      remove: async (resume) => {
+        await demoResumes.remove(resume);
+        setData((current) =>
+          current
+            ? {
+                ...current,
+                resumes: current.resumes.filter(
+                  (item) => item.id !== resume.id,
+                ),
+              }
+            : current,
+        );
+      },
+    };
+  }, []);
   useEffect(() => {
     let active = true;
     void enterDemo()
@@ -173,6 +226,7 @@ export function DemoWorkspace({ children }: { children: ReactNode }) {
             interviewApi,
             projectApi,
             planningApi,
+            resumeApi,
             onComplete: (id) => void complete(id),
           }}
         >
@@ -180,7 +234,7 @@ export function DemoWorkspace({ children }: { children: ReactNode }) {
         </WorkspaceContext>
       ) : (
         !error && (
-          <WorkspaceSkeleton label="Preparing your isolated fictional workspace…" />
+          <WorkspaceSkeleton label="Preparing your isolated workspace. Free hosting can take about a minute to start…" />
         )
       )}
       {error && !data && (
@@ -199,9 +253,9 @@ export function DemoWorkspace({ children }: { children: ReactNode }) {
         busy={busy}
       >
         <p className="mt-4 text-sm leading-7 text-muted">
-          This removes your fictional profile, sample history, and any task
-          changes in this demo. Your real account is separate. This cannot be
-          undone.
+          This removes your sample profile, practice history, uploaded resumes,
+          retained evidence and other saved changes. Your real account is
+          separate. This cannot be undone.
         </p>
         {deleteError && <ErrorDisplay message={deleteError} />}
         <div className="mt-7 flex flex-wrap justify-end gap-3">

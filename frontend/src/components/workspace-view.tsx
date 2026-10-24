@@ -47,8 +47,11 @@ export function WorkspaceView({
         <EvidenceView data={data} section="targets" />
       );
     case "resume":
-      return data.mode === "account" && workspace.resumeApi ? (
-        <ResumeView api={workspace.resumeApi} />
+      return workspace.resumeApi ? (
+        <ResumeView
+          api={workspace.resumeApi}
+          temporary={data.mode === "demo"}
+        />
       ) : (
         <EvidenceView data={data} section={section} />
       );

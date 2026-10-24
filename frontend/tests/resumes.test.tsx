@@ -30,6 +30,51 @@ function apiFixture(): ResumeApi {
 }
 
 describe("secure resume UI", () => {
+  it("protects guest mutations with CSRF and never offers external AI review", async () => {
+    document.cookie = "interview_prep_csrf=guest-csrf; path=/";
+    const request = vi
+      .fn()
+      .mockImplementation(async () => Response.json(resumeFixture));
+    const api = createResumeApi(request, "demo");
+    expect(api.ai).toBeUndefined();
+    await api.upload(pdf());
+    await api.saveEvidence(resumeFixture, {
+      category: "tool",
+      claim: "Owned claim",
+      review_status: "confirmed",
+    });
+    const evidence = resumeFixture.evidence[0];
+    if (!evidence) throw new Error("Missing test evidence");
+    await api.removeEvidence(resumeFixture, evidence);
+    await api.remove(resumeFixture);
+    for (const [path, init] of request.mock.calls) {
+      expect(path).toMatch(/^\/api\/v1\/demo\/resume-library/);
+      expect(new Headers(init.headers).get("X-CSRF-Token")).toBe("guest-csrf");
+    }
+  });
+
+  it("shows temporary upload retention and labels real and sample resumes separately", async () => {
+    const api = apiFixture();
+    vi.mocked(api.list).mockResolvedValue([
+      resumeFixture,
+      {
+        ...resumeFixture,
+        id: "sample",
+        label: "sample resume",
+        is_sample: true,
+      },
+    ]);
+    const user = userEvent.setup();
+    render(<ResumeView api={api} temporary />);
+    expect(await screen.findByText("Your uploaded resume")).toBeVisible();
+    expect(screen.getByText(/Access expires within 24 hours/)).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Review resume evidence" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /^sample resume$/ }));
+    expect(screen.getByText("Fictional sample resume")).toBeVisible();
+    expect(screen.queryByText("Your uploaded resume")).not.toBeInTheDocument();
+  });
   it("checks PDF type, extension, size and malformed server evidence", () => {
     expect(validateResumeFile(pdf())).toBeNull();
     expect(

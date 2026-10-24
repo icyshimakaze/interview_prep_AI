@@ -26,17 +26,12 @@ export async function checkCandidateContext(page: Page, data: Dashboard) {
       page.getByRole("heading", { name: resume.label, exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByText("Fictional resume", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Recorded evidence", exact: true }),
+      page.getByText("Fictional sample resume", { exact: true }),
     ).toBeVisible();
     expect(resume.evidence.length).toBeGreaterThan(0);
     for (const excerpt of resume.evidence)
       await expect(page.getByText(excerpt, { exact: true })).toBeVisible();
-    await expect(
-      page.getByText(/Resume claims are preparation context/),
-    ).toBeVisible();
-    await expect(page.getByLabel(/PDF resume/)).toHaveCount(0);
+    await expect(page.getByText(/Missing evidence never means/)).toBeVisible();
+    await expect(page.getByLabel("PDF resume", { exact: true })).toBeVisible();
   });
 }

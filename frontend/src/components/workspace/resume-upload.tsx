@@ -9,9 +9,11 @@ import { validateResumeFile } from "@/lib/api/resumes";
 export function ResumeUpload({
   busy,
   onUpload,
+  temporary = false,
 }: {
   busy: boolean;
   onUpload: (file: File) => Promise<void>;
+  temporary?: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string>();
@@ -53,14 +55,23 @@ export function ResumeUpload({
       <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
         Choose a PDF with selectable text, up to 5 MiB and 20 pages. Remove
         contact details or anything you do not want to share. The raw PDF is
-        discarded after parsing; selected evidence excerpts stay until you
-        delete them.
+        discarded after parsing; selected evidence excerpts are saved for
+        review.
+      </p>
+      <p
+        className="mt-3 max-w-2xl text-sm leading-7 text-muted"
+        id="resume-retention"
+      >
+        {temporary
+          ? "Your upload stays in this private browser workspace. Access expires within 24 hours; expired data is removed when cleanup next runs, which can be delayed while free hosting sleeps. Use Exit and delete demo to erase it now. Losing the session cookie loses access. Feedback remains simulated; no resume data is sent to an AI service."
+          : "Evidence stays until you delete it. Uploading does not send your resume to an AI service."}
       </p>
       <form
         className="mt-6 space-y-5"
         onSubmit={(event) => void submit(event)}
         noValidate
         aria-busy={busy}
+        aria-describedby="resume-retention"
       >
         <InputField
           type="file"
