@@ -1,32 +1,43 @@
 # Deployment: Vercel + Render Free + Neon
 
-Released with explicit user authorization on 24 October 2026 (Asia/Calcutta).
+Latest frontend update released with explicit user authorization on
+25 October 2026 (Asia/Calcutta); the resume backend release remains 24 October.
 **[Open the website](https://interview-prep-ai-icyshimakaze.vercel.app)** and choose
 **Upload your resume** or **Try Interactive Demo**. Personal PDF uploads use an
 isolated temporary browser workspace. Feedback remains labelled simulation;
 production account sign-in and live xKiro are disabled.
 
-Publishing the Clerk integration code does not activate hosted accounts. Local
+The Clerk integration code is now deployed; this does not activate hosted accounts. Local
 `frontend/.env.local` development keys are ignored and are never uploaded with a
 Git push. Production sign-in requires the selected app's production instance,
 owned domain/DNS, matching live Vercel keys and Render token-verification settings
 in section H. Keep the hosted demo profile until those steps are complete.
 
-| Resource              | Current deployment                                                                                                                                                                |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Frontend              | Vercel Hobby, personal `icyshimakaze`; `dpl_HJMVCGL5ziQK86VkijTAbdnP9sMs`, READY; canonical alias verified                                                                        |
-| Backend               | [Render service](https://dashboard.render.com/web/srv-dbdrrr9srm7s73cpdt6g), Free Docker, Singapore, My Workspace; `dep-dbebdotg1s2s73f29oo0`, live                               |
-| Database              | [Existing Neon project](https://console.neon.tech/app/projects/autumn-sound-91017993/branches/br-twilight-resonance-b3ukxsc8?database=neondb), Singapore, `neondb`, revision 0012 |
-| Both source revisions | `cf08aa49cc02a311a4637c2ba5770f13056bbb82` from `rebuild/professional-v2`                                                                                                         |
-| Release CI            | [40099102208](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40099102208), all three jobs succeeded before deployment                                             |
+| Resource        | Current deployment                                                                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend        | Vercel Hobby, personal `icyshimakaze`; `dpl_53VkStbwKUFnBnoigpBv28hhJNeN`, READY; canonical alias verified                                                                        |
+| Frontend source | `c6dfda14be38fbb85cc9e267a43d2ef510794b51`, pinned Git source from `rebuild/professional-v2`                                                                                      |
+| Backend         | [Render service](https://dashboard.render.com/web/srv-dbdrrr9srm7s73cpdt6g), Free Docker, Singapore, My Workspace; `dep-dbebdotg1s2s73f29oo0`, live                               |
+| Backend source  | `cf08aa49cc02a311a4637c2ba5770f13056bbb82`; backend Git tree is unchanged in the frontend release                                                                                 |
+| Database        | [Existing Neon project](https://console.neon.tech/app/projects/autumn-sound-91017993/branches/br-twilight-resonance-b3ukxsc8?database=neondb), Singapore, `neondb`, revision 0012 |
+| Release CI      | [40125359511](https://github.com/icyshimakaze/interview_prep_AI/actions/runs/40125359511), all three jobs succeeded before deployment                                             |
 
-The additive resume backend was released and checked before the frontend. No
+The Clerk code release passed four hosted Chrome checks in 15.2s for public
+desktop/mobile/accessibility, keyboard, backend readiness and the unavailable
+account screens. The canonical alias resolves to the new exact-SHA deployment.
+Account APIs still return the intentional `403 demo_only`; thirteen landing
+JavaScript assets had zero private Clerk key pattern matches. The new deployment's
+queried runtime error/fatal counts had no recorded groups. No environment,
+database, Render resource or paid feature changed. See the
+[Clerk code release report](CLERK_CODE_RELEASE.md).
+
+For the 24 October resume release, the additive backend was checked before the frontend. No
 migration, environment change, paid resource or unrelated service change was
 needed. HTTPS, health/readiness, gateway rejection, canonical/foreign CORS, closed
 account APIs and the protected resume library passed. Twelve landing assets and
 16 scripts from public route HTML had zero configured private-value matches.
 
-The new hosted journey passed personal PDF upload/correction/reload, interview
+That resume-release hosted journey passed personal PDF upload/correction/reload, interview
 pause/follow-up/completion/review, questions, assessments, Project Defense and
 roadmap/progress. Second-visitor reads of foreign resume/project/assessment IDs
 returned 404, first-visitor UI exit returned 204 and redirected home, and both
@@ -37,8 +48,8 @@ demo workspaces/sessions and resume/version records. See the
 [resume release report](RESUME_UPLOAD_RELEASE.md) and
 [current status](../PROJECT_STATUS.md) for exact results. The
 [Phase 24 report](PHASE_24_REPORT.md) records the earlier failures and limitations.
-The original interview creation timeout is not reproduced or proven; Vercel
-runtime-log reads still return 403.
+The original interview creation timeout is not reproduced or proven. Vercel
+runtime-log access was restored during the 25 October Clerk code release.
 
 Resume parsing accepts PDFs up to 5 MiB and 20 pages, discards raw bytes/full
 text, and retains selected evidence for review. Temporary access expires within

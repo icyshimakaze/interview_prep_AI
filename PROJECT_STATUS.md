@@ -2,7 +2,7 @@
 
 Updated: 2026-10-25 (Asia/Calcutta).
 
-## Clerk GitHub/Vercel release — pushed; Vercel authorization pending
+## Clerk GitHub/Vercel release — deployed and verified
 
 The user explicitly requested committing/pushing the existing Clerk changes and
 updating the Vercel website. See the
@@ -26,23 +26,40 @@ public run page independently confirmed all three named jobs completed successfu
   isolated checkout restored the unchanged whole-repo Prettier gate. No unrelated
   source change was added to the release.
 - Live Vercel inspection confirms project `prj_wsxEcvVC17paXs5pco4K9eHwWKgd`,
-  account `team_vyOtLBqMjk5sQ9DTmzCcbwiN`, existing READY production deployment
-  `dpl_HJMVCGL5ziQK86VkijTAbdnP9sMs` at `cf08aa4`, canonical alias
-  `interview-prep-ai-icyshimakaze.vercel.app`, and no Clerk environment keys.
+  account `team_vyOtLBqMjk5sQ9DTmzCcbwiN`, new **READY** production deployment
+  **`dpl_53VkStbwKUFnBnoigpBv28hhJNeN`** at **`c6dfda1`**, and canonical alias
+  **https://interview-prep-ai-icyshimakaze.vercel.app** pointing to that deployment.
+  Both deployment-ID and canonical-alias lookups confirm the exact source SHA.
+  The existing hosted environment still has no Clerk keys.
   Production account mode is not enabled by a Git push or frontend code release.
   The user confirmed they have only the `vercel.app` address and no owned domain.
   Preserve the hosted demo profile; the new account controls cannot become active
   until production Clerk/domain configuration is available.
-- The authorized exact-SHA Vercel production deployment request returned **403**:
+- The initial exact-SHA Vercel production deployment request returned **403**:
   the connection must reauthorize access to `icy-shimakaze` / the existing account
   scope. Called Vercel's prescribed `authorize_team_access` recovery and presented
   its one-use, 10-minute consent link to the user. This is service authorization,
-  not a new request for permission to deploy. No new deployment was created.
+  not a new request for permission to deploy. After the user completed renewed
+  authorization, the identical pinned request succeeded. Vercel's build log
+  reports completion in 10s; the deployment reached READY with no alias error.
+- **Post-release:** four Chrome checks passed on the canonical website in
+  **15.2s**, covering public desktop/mobile/axe, keyboard/reduced motion, actual
+  backend readiness and the explicitly unavailable account screens. Inspected
+  unedited hosted desktop/mobile screenshots. HTTPS/security headers, missing
+  asset 404s, proxied readiness at schema 0012, and account API **403 `demo_only`**
+  with no-store passed. Thirteen referenced public JavaScript assets had zero
+  private Clerk key pattern matches. These read-only checks created no accounts,
+  demo visitors or uploaded data.
+- Runtime error/fatal counts for the new deployment in the queried 30-minute
+  window returned no recorded groups. This does not establish long-term
+  monitoring; drains were not inspected. See the
+  [release report](docs/CLERK_CODE_RELEASE.md) for scope and verification limits.
 
-Next: after user-completed Vercel authorization, retry the same pinned production
-deployment and record actual build/canonical-site results. GitHub publication is
-complete; the public website still serves the preceding deployment meanwhile.
-Render/Neon settings and schema remain outside this frontend code release.
+GitHub publication and the Vercel code update are complete. Render/Neon settings,
+schema and the hosted demo profile were unchanged. The previous Vercel deployment
+remains available for rollback. Hosted Clerk sign-in still requires an owned
+domain, production Clerk keys/instance and matching backend configuration; do not
+describe this code-only release as activation of public accounts.
 
 ## Clerk development setup — configured and user verified
 

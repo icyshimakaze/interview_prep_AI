@@ -67,6 +67,12 @@ no additional Git source changes. Unrelated Phase 25 changes remain excluded.
 Commit `c6dfda14be38fbb85cc9e267a43d2ef510794b51` was pushed to the current
 release branch and all three jobs in GitHub Actions 40125359511 passed. Vercel's
 exact-SHA production creation request then returned 403 requiring renewed team
-access. The prescribed authorization tool issued a one-use link, presented to the
-user; retry the same request after they complete that browser authorization.
-The user confirmed no owned domain, so hosted account mode stays disabled.
+access. The user completed the prescribed browser authorization and the identical
+request succeeded. Production deployment `dpl_53VkStbwKUFnBnoigpBv28hhJNeN` is
+READY at the exact commit, with the canonical website alias verified. Four hosted
+Chrome checks passed (15.2s), along with HTTPS/headers/readiness/disabled-account/
+missing-asset and thirteen public asset key-pattern checks. Runtime error/fatal
+counts for the new deployment returned no groups in the queried window. No
+Render/Neon/environment change or new paid resource. The user confirmed no owned
+domain, so hosted account mode stays disabled. Code publication and deployment
+are complete; see `docs/CLERK_CODE_RELEASE.md` for exact limits.
