@@ -23,7 +23,11 @@ export default function PrivacyPage() {
             ],
             [
               "Your account and profile",
-              "When account access is configured, Clerk handles sign-in. The app stores your target role, experience level, timezone, and study budget. You may also supply a display name, short education description, graduation year, technologies/interests, and interview date. Those details are optional. Delete your preparation profile in Settings to remove its details; this preserves your account and other saved work.",
+              "When account access is configured, the selected authentication provider handles sign-in. Better Auth stores account identifiers, password hashes and sessions in our application database; Clerk-backed accounts remain managed by Clerk during migration. The app stores your target role, experience level, timezone, and study budget. You may also supply a display name, short education description, graduation year, technologies/interests, and interview date. Those details are optional. Delete your preparation profile in Settings to remove its details; this preserves your account and other saved work.",
+            ],
+            [
+              "Social sign-in when enabled",
+              "Google and GitHub sign-in are available only in explicitly enabled test environments for authorized accounts. The provider shares basic identity details so we can recognize your sign-in; we store its account identifier and basic account details, not access or refresh tokens for its APIs. GitHub login reads your email addresses, including a private primary address, for account identity. It requests no repository permission and is separate from public repository import. We do not request mailbox contents, contacts, Drive or ongoing offline access. Matching email addresses never connects existing accounts automatically. Connect another provider from Account access after signing in again. Provider and hosting logs follow their own policies. Email verification and password recovery remain unavailable.",
             ],
             [
               "Your target jobs",

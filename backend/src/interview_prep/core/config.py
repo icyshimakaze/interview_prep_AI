@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     demo_rate_limit_key: SecretStr = Field(min_length=32)
     demo_ttl_seconds: int = Field(default=86400, ge=60, le=86400)
     auth_enabled: bool = False
+    auth_provider: Literal["clerk", "better_auth"] = "clerk"
+    auth_jwks_endpoint: str | None = Field(default=None, validation_alias="AUTH_JWKS_URL")
     public_demo_only: bool = False
     backend_proxy_secret: SecretStr = Field(default_factory=lambda: SecretStr(""), exclude=True)
     auth_issuer: str | None = None
@@ -147,18 +149,29 @@ class Settings(BaseSettings):
             from urllib.parse import urlsplit
 
             parsed = urlsplit(self.auth_issuer or "")
+            local_auth = (
+                self.auth_provider == "better_auth"
+                and self.app_env != "production"
+                and parsed.scheme == "http"
+                and parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+            )
             if (
-                parsed.scheme != "https"
+                (parsed.scheme != "https" and not local_auth)
                 or not parsed.hostname
                 or parsed.username
                 or parsed.password
                 or parsed.path
                 or parsed.query
                 or parsed.fragment
-                or parsed.port not in {None, 443}
+                or (parsed.port not in {None, 443} and not local_auth)
                 or not self.auth_audience.strip()
             ):
                 raise ValueError("Account mode requires a trusted HTTPS issuer origin and audience")
+            if self.auth_provider == "better_auth":
+                if self.auth_jwks_endpoint != (self.auth_issuer or "") + "/api/auth/jwks":
+                    raise ValueError(
+                        "Better Auth requires its exact configured issuer JWKS endpoint"
+                    )
         if self.app_env == "production":
             if any(not origin.startswith("https://") for origin in self.allowed_origins):
                 raise ValueError("Production requires HTTPS origins")
@@ -195,6 +208,10 @@ class Settings(BaseSettings):
     def auth_jwks_url(self) -> str:
         if not self.auth_enabled or not self.auth_issuer:
             raise ValueError("Account authentication is not configured")
+        if self.auth_provider == "better_auth":
+            if not self.auth_jwks_endpoint:
+                raise ValueError("Better Auth JWKS is not configured")
+            return self.auth_jwks_endpoint
         return self.auth_issuer + "/.well-known/jwks.json"
 
 

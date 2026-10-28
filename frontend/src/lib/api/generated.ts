@@ -3585,7 +3585,7 @@ export interface components {
             database: "connected";
             /**
              * Schema Revision
-             * @default 0012_ai_context_reviews
+             * @default 0013_better_auth
              */
             schema_revision: string;
             /**

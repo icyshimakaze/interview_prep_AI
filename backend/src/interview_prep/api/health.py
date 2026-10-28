@@ -38,10 +38,12 @@ async def ready(
     request: Request, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> ReadinessResponse:
     try:
-        await verify_schema(session)
+        revision = await verify_schema(
+            session, require_auth=request.app.state.settings.auth_provider == "better_auth"
+        )
     except Exception:
         # Never expose connection strings, driver errors, or credentials.
         from fastapi import HTTPException
 
         raise HTTPException(status_code=503) from None
-    return ReadinessResponse()
+    return ReadinessResponse(schema_revision=revision)

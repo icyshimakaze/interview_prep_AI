@@ -17,14 +17,15 @@ describe("server gateway headers", () => {
         "x-forwarded-for": "192.0.2.88",
         "x-vercel-forwarded-for": "2001:db8::1",
         "x-csrf-token": "csrf",
-        cookie: "session=owned",
+        cookie:
+          "session=unrelated; interview_prep_demo=owned; __Secure-interview-auth.session_token=private",
       }),
     );
     expect(headers?.get("x-interview-prep-gateway")).toBe(
       "server-only-test-secret-longer-than-32-characters",
     );
     expect(headers?.get("x-interview-prep-client-ip")).toBe("2001:db8::1");
-    expect(headers?.get("cookie")).toBe("session=owned");
+    expect(headers?.get("cookie")).toBe("interview_prep_demo=owned");
     expect(headers?.get("x-csrf-token")).toBe("csrf");
   });
 

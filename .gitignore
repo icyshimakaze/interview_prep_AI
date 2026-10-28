@@ -1,5 +1,6 @@
 # Credentials and local configuration (examples are safe to commit)
 .env
+.env.local
 .env.*
 !.env.example
 !**/.env.example

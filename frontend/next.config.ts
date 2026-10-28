@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { betterAuthSettings } from "./src/lib/better-auth/settings";
+
+const authProvider = process.env.AUTH_PROVIDER ?? "clerk";
+if (!["clerk", "better_auth", "off"].includes(authProvider))
+  throw new Error("Unsupported authentication provider.");
 
 const workspaceRoot = fileURLToPath(new URL("..", import.meta.url));
 
@@ -43,17 +48,28 @@ if (process.env.VERCEL_ENV === "production") {
   if (
     process.env.PUBLIC_DEMO_ONLY === "true" &&
     (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-      process.env.CLERK_SECRET_KEY)
+      process.env.CLERK_SECRET_KEY ||
+      process.env.BETTER_AUTH_SECRET ||
+      process.env.GOOGLE_CLIENT_SECRET ||
+      process.env.GITHUB_CLIENT_SECRET ||
+      process.env.GOOGLE_AUTH_ENABLED === "true" ||
+      process.env.GITHUB_AUTH_ENABLED === "true")
   )
     throw new Error("The public demo must not configure account credentials.");
   if (
     process.env.PUBLIC_DEMO_ONLY !== "true" &&
+    authProvider === "clerk" &&
     (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith("pk_live_") ||
       !process.env.CLERK_SECRET_KEY?.startsWith("sk_live_"))
   )
     throw new Error(
       "Production accounts require Clerk production publishable and secret keys, or PUBLIC_DEMO_ONLY=true.",
     );
+  if (process.env.PUBLIC_DEMO_ONLY !== "true") {
+    if (authProvider === "better_auth") betterAuthSettings(process.env);
+    if (authProvider === "off")
+      throw new Error("Production accounts require an enabled provider.");
+  }
 }
 
 const config: NextConfig = {

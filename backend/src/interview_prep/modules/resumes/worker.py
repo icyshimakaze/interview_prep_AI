@@ -14,16 +14,36 @@ from interview_prep.modules.resumes.worker_limits import restrict_memory
 MAX_BYTES = 5 * 1024 * 1024
 MAX_TEXT = 100_000
 MAX_STREAM = 2 * 1024 * 1024
+MAX_PARSE_TOKENS = 100_000
 
 
 def parse_pdf(data: bytes) -> dict[str, object]:
-    from pypdf import PdfReader, filters
+    from pypdf import Configuration, apply_configuration
+    from pypdf.errors import LimitReachedError
 
-    filters.ZLIB_MAX_OUTPUT_LENGTH = MAX_STREAM
-    filters.LZW_MAX_OUTPUT_LENGTH = MAX_STREAM
-    filters.RUN_LENGTH_MAX_OUTPUT_LENGTH = MAX_STREAM
-    filters.MAX_ARRAY_BASED_STREAM_OUTPUT_LENGTH = MAX_STREAM
-    filters.MAX_DECLARED_STREAM_LENGTH = MAX_STREAM
+    # Use the supported context-local API; byte caps alone do not bound the
+    # object graph created by many tiny operations/array entries (pypdf advisories).
+    limits = Configuration(
+        zlib_maximum_output_length=MAX_STREAM,
+        lzw_maximum_output_length=MAX_STREAM,
+        run_length_maximum_output_length=MAX_STREAM,
+        array_based_stream_maximum_output_length=MAX_STREAM,
+        maximum_declared_stream_length=MAX_STREAM,
+        stream_parsing_work_maximum_count=MAX_PARSE_TOKENS,
+        array_maximum_element_count=10_000,
+        dictionary_maximum_element_count=10_000,
+        jbig2dec_binary=None,
+    )
+    try:
+        with apply_configuration(limits):
+            return _read_pdf(data)
+    except LimitReachedError:
+        return {"error": "pdf_complex"}
+
+
+def _read_pdf(data: bytes) -> dict[str, object]:
+    from pypdf import PdfReader
+
     reader = PdfReader(BytesIO(data), strict=True)
     if reader.is_encrypted:
         return {"error": "pdf_encrypted"}
@@ -34,8 +54,13 @@ def parse_pdf(data: bytes) -> dict[str, object]:
     total = 0
     for page in reader.pages:
         contents = page.get_contents()
-        if contents is not None and len(contents.get_data()) > MAX_STREAM:
-            return {"error": "pdf_complex"}
+        if contents is not None:
+            if len(contents.get_data()) > MAX_STREAM:
+                return {"error": "pdf_complex"}
+            # Parsing is lazy, and extract_text skips streams without font
+            # resources. Enforce the configured work budget on those pages too.
+            if len(contents.operations) > MAX_PARSE_TOKENS:
+                return {"error": "pdf_complex"}
         text = page.extract_text() or ""
         total += len(text)
         if total > MAX_TEXT:

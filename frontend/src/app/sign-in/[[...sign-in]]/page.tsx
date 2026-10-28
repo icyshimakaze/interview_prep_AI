@@ -1,10 +1,21 @@
+import { BetterAuthForm } from "@/components/better-auth/auth-form";
 import { SignIn } from "@clerk/nextjs";
 import { Suspense } from "react";
 import { AuthSetup } from "@/components/auth-setup";
-import { accountAuthConfigured } from "@/lib/auth-config";
+import { accountAuthConfigured, accountAuthProvider } from "@/lib/auth-config";
 import { PublicShell } from "@/components/public/public-shell";
+import {
+  betterAuthSettings,
+  localRegistrationEnabled,
+} from "@/lib/better-auth/settings";
+import { socialProviderNames } from "@/lib/better-auth/social-settings";
 
-export default function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ social_error?: string }>;
+}) {
+  const query = await searchParams;
   if (!accountAuthConfigured()) return <AuthSetup />;
   return (
     <PublicShell>
@@ -22,12 +33,22 @@ export default function SignInPage() {
         </div>
         <div className="flex justify-center">
           <Suspense fallback={<p role="status">Loading sign-in…</p>}>
-            <SignIn
-              routing="path"
-              path="/sign-in"
-              signUpUrl="/sign-up"
-              forceRedirectUrl="/app/dashboard"
-            />
+            {accountAuthProvider() === "better_auth" ? (
+              <BetterAuthForm
+                socialProviders={socialProviderNames(
+                  betterAuthSettings(process.env).social,
+                )}
+                socialError={query.social_error === "1"}
+                registrationEnabled={localRegistrationEnabled(process.env)}
+              />
+            ) : (
+              <SignIn
+                routing="path"
+                path="/sign-in"
+                signUpUrl="/sign-up"
+                forceRedirectUrl="/app/dashboard"
+              />
+            )}
           </Suspense>
         </div>
       </div>

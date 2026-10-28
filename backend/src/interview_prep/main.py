@@ -57,7 +57,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             app.state.session_factory = async_sessionmaker(engine, expire_on_commit=False)
             if configuration.app_env == "production":
-                await require_production_database(app.state.session_factory)
+                await require_production_database(
+                    app.state.session_factory,
+                    require_auth=configuration.auth_provider == "better_auth",
+                )
             file_slots = asyncio.Semaphore(configuration.file_worker_slots)
             app.state.pdf_parser = PdfParser(file_slots)
             app.state.assessment_slots = asyncio.Semaphore(2)

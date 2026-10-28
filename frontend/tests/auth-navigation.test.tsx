@@ -7,6 +7,7 @@ const auth = vi.hoisted(() => ({ configured: false, signedIn: false }));
 
 vi.mock("@/lib/auth-config", () => ({
   accountAuthConfigured: () => auth.configured,
+  accountAuthProvider: () => "clerk",
 }));
 
 vi.mock("@clerk/nextjs", () => ({

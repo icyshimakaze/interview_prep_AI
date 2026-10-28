@@ -43,6 +43,7 @@ export default function proxy(request: NextRequest, event: NextFetchEvent) {
     return NextResponse.next({ request: { headers } });
   }
   if (
+    (process.env.AUTH_PROVIDER ?? "clerk") !== "clerk" ||
     !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
     !process.env.CLERK_SECRET_KEY
   ) {

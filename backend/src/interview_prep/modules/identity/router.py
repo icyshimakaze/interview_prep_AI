@@ -1,14 +1,13 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from interview_prep.core.errors import ErrorResponse
 from interview_prep.db.session import get_session
 from interview_prep.modules.identity import profiles
+from interview_prep.modules.identity.accounts import bootstrap_account as bootstrap_principal
 from interview_prep.modules.identity.dependencies import require_account, verified_identity
 from interview_prep.modules.identity.models import PrincipalKind, PrincipalStatus, User
 from interview_prep.modules.identity.queries import dashboard, owned_target
@@ -33,17 +32,13 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 
 @router.post("/session", response_model=SessionView)
 async def bootstrap_account(
+    request: Request,
     body: EmptyRequest,
     identity: Annotated[VerifiedIdentity, Depends(verified_identity)],
     session: Session,
 ) -> SessionView:
-    await session.execute(
-        insert(User)
-        .values(kind=PrincipalKind.ACCOUNT, issuer=identity.issuer, subject=identity.subject)
-        .on_conflict_do_nothing(index_elements=[User.issuer, User.subject])
-    )
-    user = await session.scalar(
-        select(User).where(User.issuer == identity.issuer, User.subject == identity.subject)
+    user = await bootstrap_principal(
+        session, identity, bindings=request.app.state.settings.auth_provider == "better_auth"
     )
     if user is None or user.status != PrincipalStatus.ACTIVE or user.kind != PrincipalKind.ACCOUNT:
         raise HTTPException(status_code=403)

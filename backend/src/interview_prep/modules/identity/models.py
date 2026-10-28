@@ -2,7 +2,15 @@ from datetime import date, datetime
 from enum import StrEnum
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, Date, DateTime, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    CheckConstraint,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from interview_prep.db.model_support import OwnedRecord, Record, enum_column, owned_args, owned_fk
@@ -53,6 +61,20 @@ class User(Record):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
     deletion_generation: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     profile: Mapped["Profile | None"] = relationship(viewonly=True, lazy="raise")
+
+
+class PrincipalIdentity(Record):
+    __tablename__ = "principal_identities"
+    __table_args__ = (
+        UniqueConstraint("issuer", "subject"),
+        UniqueConstraint("principal_id", "issuer"),
+        CheckConstraint("length(trim(issuer)) > 0 AND length(trim(subject)) > 0", name="identity"),
+    )
+    principal_id: Mapped[UUID] = mapped_column(
+        ForeignKey("principals.id", ondelete="CASCADE"), index=True
+    )
+    issuer: Mapped[str] = mapped_column(String(500))
+    subject: Mapped[str] = mapped_column(String(255))
 
 
 class Profile(OwnedRecord):

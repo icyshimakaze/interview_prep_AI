@@ -67,6 +67,7 @@ def test_settings(
     return Settings(
         _env_file=None,
         app_env="test",
+        auth_provider="clerk",
         database_url=SecretStr(database_url),
         demo_rate_limit_key=SecretStr("test-only-rate-limit-key-at-least-32-characters"),
         allowed_origins=["http://localhost:3000"],

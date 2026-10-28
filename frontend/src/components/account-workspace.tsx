@@ -50,12 +50,40 @@ export function AccountWorkspace({ children }: { children: ReactNode }) {
       </WorkspaceShell>
     );
   // A subject change remounts all private data, forms and pending UI state.
-  return <AccountSession key={userId}>{children}</AccountSession>;
+  return <ClerkAccountSession key={userId}>{children}</ClerkAccountSession>;
 }
 
-function AccountSession({ children }: { children: ReactNode }) {
+function ClerkAccountSession({ children }: { children: ReactNode }) {
   const { getToken } = useAuth();
   const { signOut } = useClerk();
+  const getAPIToken = useCallback(
+    () => getToken({ template: "interview-prep-api" }),
+    [getToken],
+  );
+  return (
+    <AccountSession
+      getToken={getAPIToken}
+      signOut={signOut}
+      userControl={<UserButton />}
+    >
+      {children}
+    </AccountSession>
+  );
+}
+
+export function AccountSession({
+  children,
+  getToken,
+  signOut,
+  userControl,
+  onSignedOut,
+}: {
+  children: ReactNode;
+  getToken: () => Promise<string | null>;
+  signOut: () => Promise<void>;
+  userControl: ReactNode;
+  onSignedOut?: () => void;
+}) {
   const router = useRouter();
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +98,7 @@ function AccountSession({ children }: { children: ReactNode }) {
   }, []);
   const authenticatedRequest = useCallback(
     async (path: string, init: RequestInit = {}) => {
-      const token = await getToken({ template: "interview-prep-api" });
+      const token = await getToken();
       if (!active.current)
         throw new Error(
           "Your account changed. Open your current workspace again.",
@@ -407,8 +435,11 @@ function AccountSession({ children }: { children: ReactNode }) {
     setError(null);
     try {
       await signOut();
-      router.replace("/");
-      router.refresh();
+      if (onSignedOut) onSignedOut();
+      else {
+        router.replace("/");
+        router.refresh();
+      }
     } catch {
       setError("Sign-out could not complete. Please try again.");
       setBusy(false);
@@ -433,7 +464,7 @@ function AccountSession({ children }: { children: ReactNode }) {
       mode="account"
       onLeave={() => void leave()}
       busy={busy}
-      userControl={<UserButton />}
+      userControl={userControl}
     >
       {error && (
         <ErrorDisplay

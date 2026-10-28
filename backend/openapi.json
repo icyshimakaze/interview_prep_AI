@@ -4876,7 +4876,7 @@
             "type": "string"
           },
           "schema_revision": {
-            "default": "0012_ai_context_reviews",
+            "default": "0013_better_auth",
             "title": "Schema Revision",
             "type": "string"
           },

@@ -29,12 +29,14 @@ class Claims(BaseModel):
     exp: int
     iat: int
     nbf: int
+    sid: str | None = Field(default=None, min_length=1, max_length=255)
 
 
 @dataclass(frozen=True)
 class VerifiedIdentity:
     issuer: str
     subject: str
+    session_id: str | None = None
 
 
 class TokenVerifier:
@@ -163,6 +165,8 @@ class TokenVerifier:
                 or payload.get("sts") == "pending"
             ):
                 raise AuthenticationError()
-            return VerifiedIdentity(issuer=claims.iss, subject=claims.sub)
+            if self.settings.auth_provider == "better_auth" and claims.sid is None:
+                raise AuthenticationError()
+            return VerifiedIdentity(issuer=claims.iss, subject=claims.sub, session_id=claims.sid)
         except (jwt.PyJWTError, ValidationError, ValueError, TypeError):
             raise AuthenticationError() from None

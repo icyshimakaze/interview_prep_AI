@@ -3,6 +3,13 @@ import { isIP } from "node:net";
 // These are request headers only. They must never be sent as response headers.
 export function gatewayHeaders(incoming: Headers): Headers | null {
   const forwarded = new Headers(incoming);
+  const cookies = incoming
+    .get("cookie")
+    ?.split(";")
+    .map((part) => part.trim())
+    .filter((part) => /^(interview_prep_demo|interview_prep_csrf)=/.test(part));
+  forwarded.delete("cookie");
+  if (cookies?.length) forwarded.set("cookie", cookies.join("; "));
   forwarded.delete("x-interview-prep-gateway");
   forwarded.delete("x-interview-prep-client-ip");
   const secret = process.env.BACKEND_PROXY_SECRET;

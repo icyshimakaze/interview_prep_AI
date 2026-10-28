@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { accountAuthConfigured } from "@/lib/auth-config";
+import { accountAuthConfigured, accountAuthProvider } from "@/lib/auth-config";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        {accountAuthConfigured() ? (
+        {accountAuthProvider() === "clerk" && accountAuthConfigured() ? (
           <ClerkProvider
             signInUrl="/sign-in"
             signUpUrl="/sign-up"

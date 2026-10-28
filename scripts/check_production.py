@@ -141,10 +141,7 @@ def verify_http(frontend: str, backend: str, ca: Path, secret: str, cookie_file:
         )
         assert first.get("/").status_code == 200
         ready = first.get("/api/v1/health/ready")
-        assert (
-            ready.status_code == 200
-            and ready.json()["schema_revision"] == "0012_ai_context_reviews"
-        )
+        assert ready.status_code == 200 and ready.json()["schema_revision"] == "0013_better_auth"
         assert secret not in ready.text and secret not in str(ready.headers)
         assert direct.get("/api/v1/health/ready").status_code == 200
         assert (
@@ -556,7 +553,7 @@ def main() -> None:
                 "tls_database": True,
                 "tls_frontend_backend": True,
                 "restricted_runtime_role": True,
-                "migrations": "0012_ai_context_reviews",
+                "migrations": "0013_better_auth",
                 "published": 29,
                 "repeat_seed_writes": 0,
                 "secure_cookie_csrf": True,

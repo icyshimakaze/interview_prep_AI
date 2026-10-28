@@ -1,0 +1,162 @@
+{
+  "version": "answer-quality-v1",
+  "cases": [
+    {
+      "id": "technical_strong",
+      "content": {
+        "question": "Explain when a PostgreSQL B-tree index can help a query and its costs. Does adding an index always make a query faster?",
+        "answer": "A B-tree index can narrow a selective lookup or range scan. The planner may still prefer a sequential scan for a small table or when many rows qualify. An index consumes additional storage. Inserts, deletes and updates to indexed values maintain index entries, so writes cost more. I would compare EXPLAIN ANALYZE plans using representative data and measure reads and writes before keeping the index.",
+        "expected_concepts": [
+          "selective lookup",
+          "sequential scan",
+          "additional storage",
+          "writes maintain index entries"
+        ],
+        "rubric": [
+          "Explain selective access, planner choice, storage and write costs. Do not require implementation details beyond this question."
+        ],
+        "profile": "technical"
+      },
+      "expected_mock_matches": [
+        "selective lookup",
+        "sequential scan",
+        "additional storage",
+        "writes maintain index entries"
+      ],
+      "human_review": [
+        "Recognize selectivity, planner choice, storage and write costs as demonstrated.",
+        "Do not invent a missing requirement to discuss unrelated index types.",
+        "A useful follow-up asks how representative query plans would be compared."
+      ]
+    },
+    {
+      "id": "technical_partial",
+      "content": {
+        "question": "Explain when a PostgreSQL B-tree index can help a query and its costs. Does adding an index always make a query faster?",
+        "answer": "An index helps a selective lookup and needs additional storage. I am unsure when the planner chooses another access method or how modifications affect it.",
+        "expected_concepts": [
+          "selective lookup",
+          "sequential scan",
+          "additional storage",
+          "writes maintain index entries"
+        ],
+        "rubric": [
+          "Explain selective access, planner choice, storage and write costs. Distinguish missing explanation from a false claim."
+        ],
+        "profile": "technical"
+      },
+      "expected_mock_matches": ["selective lookup", "additional storage"],
+      "human_review": [
+        "Credit selective access and storage; identify absent scan-choice and write-maintenance explanations.",
+        "Do not describe the admitted uncertainty as a confidently false assertion.",
+        "Follow up on write maintenance or planner choice."
+      ]
+    },
+    {
+      "id": "technical_incorrect",
+      "content": {
+        "question": "Explain when a PostgreSQL B-tree index can help a query and its costs. Does adding an index always make a query faster?",
+        "answer": "An index always makes every selective lookup faster. PostgreSQL never uses a sequential scan when an index exists. Indexes need no additional storage. Writes never maintain index entries, so there is no write overhead.",
+        "expected_concepts": [
+          "selective lookup",
+          "sequential scan",
+          "additional storage",
+          "writes maintain index entries"
+        ],
+        "rubric": [
+          "Reject the false claims that indexes always win, require no storage, and incur no write maintenance. Keyword presence is not correctness."
+        ],
+        "profile": "technical"
+      },
+      "expected_mock_matches": [
+        "selective lookup",
+        "sequential scan",
+        "additional storage",
+        "writes maintain index entries"
+      ],
+      "human_review": [
+        "Flag the central false claims and score correctness/technical accuracy at the low anchors.",
+        "Do not credit negated concepts as demonstrated understanding.",
+        "Explain why any aggregate is insufficient without the criterion breakdown.",
+        "Follow up with a counterexample to the always-faster claim."
+      ]
+    },
+    {
+      "id": "technical_irrelevant",
+      "content": {
+        "question": "Explain when a PostgreSQL B-tree index can help a query and its costs. Does adding an index always make a query faster?",
+        "answer": "I enjoy hiking on weekends and prefer tea with breakfast.",
+        "expected_concepts": [
+          "selective lookup",
+          "sequential scan",
+          "additional storage",
+          "writes maintain index entries"
+        ],
+        "rubric": [
+          "Identify that the answer does not address database indexes; do not invent technical strengths."
+        ],
+        "profile": "technical"
+      },
+      "expected_mock_matches": [],
+      "human_review": [
+        "Use low relevance/completeness anchors and identify the absent technical explanation.",
+        "Do not infer lack of general ability from this one irrelevant answer.",
+        "Prompt the candidate to address index behavior and costs."
+      ]
+    },
+    {
+      "id": "behavioral_star",
+      "content": {
+        "question": "Describe a disagreement with a teammate, your responsibility, what you did, the result and what you learned.",
+        "answer": "Situation: during a fictional class project we disagreed about releasing an untested change. Task: I owned the API integration and needed to help reach a release decision. Action: I asked my teammate to explain the deadline, reproduced the failure together, and proposed a small regression test before release. Result: we agreed to add the test and postponed the change until it passed. Reflection: I learned to ask about constraints before proposing a solution; next time I would agree on release criteria earlier.",
+        "expected_concepts": [
+          "situation",
+          "task",
+          "action",
+          "result",
+          "reflection"
+        ],
+        "rubric": [
+          "Assess specificity, personal action, stated outcome and reflection as supplied claims; do not verify biography or demand numerical impact."
+        ],
+        "profile": "behavioral"
+      },
+      "expected_mock_matches": [
+        "situation",
+        "task",
+        "action",
+        "result",
+        "reflection"
+      ],
+      "human_review": [
+        "Recognize the complete structure and personal contribution without asserting the event occurred.",
+        "Qualitative supported outcomes are sufficient; do not invent or require a percentage.",
+        "Follow up on how earlier release criteria would have changed the disagreement."
+      ]
+    },
+    {
+      "id": "behavioral_incomplete",
+      "content": {
+        "question": "Describe a disagreement with a teammate, your responsibility, what you did, the result and what you learned.",
+        "answer": "Situation: our class team disagreed about a release. Task: I was responsible for the API integration. We talked about it.",
+        "expected_concepts": [
+          "situation",
+          "task",
+          "action",
+          "result",
+          "reflection"
+        ],
+        "rubric": [
+          "Credit context and responsibility, but request personal action, outcome and learning without fabricating them."
+        ],
+        "profile": "behavioral"
+      },
+      "expected_mock_matches": ["situation", "task"],
+      "human_review": [
+        "Identify insufficient detail about personal action, outcome and learning.",
+        "Do not supply a fictional success story or claim that the disagreement was resolved.",
+        "Follow up on the candidate's concrete contribution."
+      ]
+    }
+  ]
+}
