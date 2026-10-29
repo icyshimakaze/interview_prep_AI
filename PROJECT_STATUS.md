@@ -2,6 +2,21 @@
 
 Updated: 2026-10-30 (Asia/Calcutta).
 
+## Acceptance repair and documentation publication authorized
+
+Read-only evidence confirmed two authorizations in separate tabs; the old runner
+tracked the first state and retained the provider tab. Its cleanup sent the
+relative logout request to GitHub, where it returned 422. The operator observer
+and origin guards are repaired locally; application runtime and all accounts
+remain unchanged. Focused checks: 15 correlation/cohort tests, six isolated
+browser checks and nine pinned-library/database tests passed. Strict frontend
+types, focused ESLint, Python Ruff and strict mypy passed.
+
+The user separately authorized publishing this documentation-only branch and a
+reviewable PR. The earlier publication hold is superseded; no merge or settings
+change is authorized. Production remains closed/demo. See the
+[diagnosis and verification boundary](docs/PRODUCTION_ACCEPTANCE_REPAIR.md).
+
 ## GitHub-only launch attempted; closed rollback verified
 
 **Production: ROLLED BACK. Public GitHub signup acceptance: FAILED.** The public

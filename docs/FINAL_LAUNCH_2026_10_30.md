@@ -130,3 +130,13 @@ Suggested repository About text, topics, social preview and the safe
 default-branch transition are documented in the prepared presentation guide. No
 settings were changed and no GitHub PR was published. The old Python `main`
 remains the default until a separately authorized transition.
+
+## Subsequent repair and documentation publication
+
+The [focused investigation](PRODUCTION_ACCEPTANCE_REPAIR.md) recovered two
+authorizations in different tabs and the wrong-origin GitHub cleanup request.
+The operator runner is repaired locally; the application release is unchanged.
+The user subsequently authorized documentation-only branch publication and a
+reviewable PR. That approval supersedes the historical publication hold recorded
+above. No merge, repository-setting change or further production cutover is
+authorized. Public registration remains unlaunched.

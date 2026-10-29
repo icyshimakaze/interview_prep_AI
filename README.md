@@ -55,6 +55,10 @@ stored evidence.
 > remains closed. Free hosting may take time to wake.
 > [Verified release result](docs/FINAL_LAUNCH_2026_10_30.md).
 
+The [acceptance repair](docs/PRODUCTION_ACCEPTANCE_REPAIR.md) identifies the two
+operator-runner defects and their focused regressions. Production stays closed
+until a separately approved independent live test passes.
+
 ## See the product
 
 Bring in context, inspect its source, then practice and revisit saved work.

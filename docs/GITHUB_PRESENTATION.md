@@ -2,7 +2,9 @@
 
 Prepared 30 October 2026. These are reviewable recommendations; repository
 settings, topics, social preview and default branch have not been changed. The
-documentation branch is local because the production acceptance gate failed.
+user has separately authorized publication of the documentation-only branch and
+a reviewable PR. Production remains closed/demo; no merge or settings change is
+authorized.
 
 ## Suggested About settings
 
@@ -72,9 +74,10 @@ walkthrough
 
 **Base:** `release/github-only-public-2026-10-30-37bbc9a5`
 
-**Head:** `docs/portfolio-homepage-2026-10-30` (local; not pushed)
+**Head:** `docs/portfolio-homepage-2026-10-30` (documentation-only publication)
 
-The PR description and completed validation record are retained alongside the
-local worktree for review. Publication is held until the requested release
-condition is satisfied. A temporary release branch need not become the permanent
-default; the maintainer should explicitly choose the durable branch.
+The PR description and validation record accompany the documentation
+publication. The earlier publication hold was superseded by the user's explicit
+approval on 30 October 2026. Public account registration remains unlaunched. A
+temporary release branch need not become the permanent default; the maintainer
+should explicitly choose the durable branch.
