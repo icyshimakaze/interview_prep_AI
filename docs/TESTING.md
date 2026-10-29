@@ -1,5 +1,17 @@
 # Automated testing and quality gates
 
+## Current release verification boundary
+
+The [30 October production attempt](FINAL_LAUNCH_2026_10_30.md) reached a hosted
+READY build and passed Android provider-policy/anonymous-security preflight, but
+its independent callback-correlation gate failed. Saved-work, normal-restart,
+returning-login and revocation checks were not reached for that new account. Do
+not treat the demo suite as proof of public signup. The source retains focused
+[Better Auth](../backend/tests/test_better_auth.py),
+[social policy](../backend/tests/test_social_auth.py), and
+[callback diagnostics](../frontend/tests/oauth-diagnostics.test.ts) tests. These
+are separate from human-controlled production consent and device acceptance.
+
 The supported pipeline tests the current V2 application with PostgreSQL, the
 production frontend and deterministic MockAIProvider. It does not require Clerk
 keys, model downloads or paid AI credentials. The archived V1 runtime is outside

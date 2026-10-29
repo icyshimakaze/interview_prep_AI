@@ -1,6 +1,73 @@
 # Project Status
 
-Updated: 2026-10-25 (Asia/Calcutta).
+Updated: 2026-10-30 (Asia/Calcutta).
+
+## Acceptance runner repaired; documentation PR open
+
+Read-only evidence confirmed two authorizations in separate tabs; the old runner
+tracked the first state and retained the provider tab. Its cleanup sent the
+relative logout request to GitHub, where it returned 422. The operator observer
+and origin guards are repaired locally; application runtime and all accounts
+remain unchanged. Focused checks: 15 correlation/cohort tests, six isolated
+browser checks and nine pinned-library/database tests passed. Strict frontend
+types, focused ESLint, Python Ruff and strict mypy passed.
+
+The separately authorized [documentation PR #1](https://github.com/icyshimakaze/interview_prep_AI/pull/1)
+is open against the modern release branch. The earlier publication hold is
+superseded; no merge or settings change is authorized. Production remains closed/demo. See the
+[diagnosis and verification boundary](docs/PRODUCTION_ACCEPTANCE_REPAIR.md).
+
+## GitHub-only launch attempted; closed rollback verified
+
+**Production: ROLLED BACK. Public GitHub signup acceptance: FAILED.** The public
+demo remains available at <https://interviewprepai.webredirect.org>. See
+[the final launch report](docs/FINAL_LAUNCH_2026_10_30.md). This result
+supersedes the preparation GO below.
+
+- Published only the frozen 464-file candidate on temporary branch
+  `release/github-only-public-2026-10-30-37bbc9a5`, commit
+  `dbbe982186373ccaea1c7a34bd60a3d9f0f5d3a3`. Hosted production build
+  `dpl_8m3CbKEnmcD3oLtyd9k2LgJTqYsu` reached READY; all 462 uploaded source
+  files matched (Vercel excludes the two root ignore files). All 464 match the
+  published commit; no dirty-tree application build.
+- Approved bridge/restoration/promotion completed. Physical Android preflight
+  passed Terms/Privacy 200, GitHub-only UI, disabled Google/password
+  registration/ recovery, public RSA JWKS, anonymous protected denial and
+  readiness 200/0013.
+- One real callback completed public enrollment and a distinct-email verified
+  third account exists, but the callback did not match the runner's fresh state.
+  No matching callback arrived within four minutes. Mandatory first step failed;
+  saved work, restart, revocation, returning login and new-owner isolation were
+  not reached in this attempt. No public signup success or root cause is
+  claimed.
+- Exact rollback verified: canonical frontend
+  `dpl_A5RrDr2ro6Qw52ipZCcvWgyzNBLu`; backend `dep-dbhpqbui0phs73f0jrtg` LIVE,
+  reusing compatible artifact `dep-dbh6t7l9fdbs7384h740`. Original five frontend
+  bindings and saved closed backend environment restored; rotated credentials,
+  0013 and gateway preserved.
+- All 399 pre-launch business rows across 52 public tables, existing UUID
+  mappings, three auth users and both encrypted backups preserved. Automatic
+  signout was 422; cleanup subsequently revoked only the exact
+  phone-cookie-proven test session. Final physical closed-route/security and
+  demo create/read/dashboard/ delete smoke passed. Only owned ADB forwarding
+  removed.
+- Portfolio README, source-verified feature/stack overview, architecture,
+  reviewer walkthrough, local setup, testing/security/troubleshooting guidance,
+  sanitized screenshots/provenance and repository-presentation recommendations
+  are prepared on local branch `docs/portfolio-homepage-2026-10-30`. Previous
+  technical README retained. Markdownlint: 12 files / zero errors; 259 relative
+  references valid; README diagram and six images render at desktop/mobile
+  widths. 12 external URLs returned 200 on Windows; the two canonical URLs
+  failed transport there and returned 200 on Android. Four public remote tip
+  trees: 1,611 entries / 640 unique blobs, zero known-credential matches or
+  private artifact paths; not a complete history audit. Documentation PR
+  publication is held because the user conditioned it on verified live release.
+  No default-branch change, merge, DNS edit, purchase, Google activation or
+  second release attempt.
+
+Next: review the prepared local documentation; before any separately authorized
+retry, resolve callback correlation and the cleanup 422. The new account is
+retained and must not be described as never enrolled in a later test.
 
 ## Clerk GitHub/Vercel release — deployed and verified
 
@@ -15,45 +82,48 @@ passed, including backend tests/migrations and browser/container packaging.
 Unauthenticated GitHub API status polling reached its rate limit; the current
 public run page independently confirmed all three named jobs completed successfully.
 
-- Isolated the Clerk/frontend/local-launcher/docs changes in a separate checkout,
-  preserving unrelated Phase 25 backend/parser/evaluation work. No local
-  environment file, account state or private key was copied into that checkout.
-- Fresh isolated lint, strict types, production build and **177 tests / 20 files**
-  passed (59.30s). Four Chrome tests passed in **8.3s**: public desktop/mobile
-  navigation/axe, keyboard/reduced motion, real backend readiness and missing-key
-  account screens. Launcher syntax and whitespace checks passed. Windows Git
-  checkout CRLF initially caused formatting failures; normalizing only the
-  isolated checkout restored the unchanged whole-repo Prettier gate. No unrelated
-  source change was added to the release.
+- Isolated the Clerk/frontend/local-launcher/docs changes in a separate
+  checkout, preserving unrelated Phase 25 backend/parser/evaluation work. No
+  local environment file, account state or private key was copied into that
+  checkout.
+- Fresh isolated lint, strict types, production build and **177 tests / 20
+  files** passed (59.30s). Four Chrome tests passed in **8.3s**: public
+  desktop/mobile navigation/axe, keyboard/reduced motion, real backend readiness
+  and missing-key account screens. Launcher syntax and whitespace checks passed.
+  Windows Git checkout CRLF initially caused formatting failures; normalizing
+  only the isolated checkout restored the unchanged whole-repo Prettier gate. No
+  unrelated source change was added to the release.
 - Live Vercel inspection confirms project `prj_wsxEcvVC17paXs5pco4K9eHwWKgd`,
   account `team_vyOtLBqMjk5sQ9DTmzCcbwiN`, new **READY** production deployment
   **`dpl_53VkStbwKUFnBnoigpBv28hhJNeN`** at **`c6dfda1`**, and canonical alias
-  **https://interview-prep-ai-icyshimakaze.vercel.app** pointing to that deployment.
-  Both deployment-ID and canonical-alias lookups confirm the exact source SHA.
-  The existing hosted environment still has no Clerk keys.
+  **<https://interview-prep-ai-icyshimakaze.vercel.app>** pointing to that
+  deployment. Both deployment-ID and canonical-alias lookups confirm the exact
+  source SHA. The existing hosted environment still has no Clerk keys.
   Production account mode is not enabled by a Git push or frontend code release.
-  The user confirmed they have only the `vercel.app` address and no owned domain.
-  Preserve the hosted demo profile; the new account controls cannot become active
-  until production Clerk/domain configuration is available.
+  The user confirmed they have only the `vercel.app` address and no owned
+  domain. Preserve the hosted demo profile; the new account controls cannot
+  become active until production Clerk/domain configuration is available.
 - The initial exact-SHA Vercel production deployment request returned **403**:
-  the connection must reauthorize access to `icy-shimakaze` / the existing account
-  scope. Called Vercel's prescribed `authorize_team_access` recovery and presented
-  its one-use, 10-minute consent link to the user. This is service authorization,
-  not a new request for permission to deploy. After the user completed renewed
-  authorization, the identical pinned request succeeded. Vercel's build log
-  reports completion in 10s; the deployment reached READY with no alias error.
+  the connection must reauthorize access to `icy-shimakaze` / the existing
+  account scope. Called Vercel's prescribed `authorize_team_access` recovery and
+  presented its one-use, 10-minute consent link to the user. This is service
+  authorization, not a new request for permission to deploy. After the user
+  completed renewed authorization, the identical pinned request succeeded.
+  Vercel's build log reports completion in 10s; the deployment reached READY
+  with no alias error.
 - **Post-release:** four Chrome checks passed on the canonical website in
   **15.2s**, covering public desktop/mobile/axe, keyboard/reduced motion, actual
   backend readiness and the explicitly unavailable account screens. Inspected
   unedited hosted desktop/mobile screenshots. HTTPS/security headers, missing
-  asset 404s, proxied readiness at schema 0012, and account API **403 `demo_only`**
-  with no-store passed. Thirteen referenced public JavaScript assets had zero
-  private Clerk key pattern matches. These read-only checks created no accounts,
-  demo visitors or uploaded data.
+  asset 404s, proxied readiness at schema 0012, and account API **403
+  `demo_only`** with no-store passed. Thirteen referenced public JavaScript
+  assets had zero private Clerk key pattern matches. These read-only checks
+  created no accounts, demo visitors or uploaded data.
 - Runtime error/fatal counts for the new deployment in the queried 30-minute
   window returned no recorded groups. This does not establish long-term
   monitoring; drains were not inspected. See the
-  [release report](docs/CLERK_CODE_RELEASE.md) for scope and verification limits.
+  [release report](docs/CLERK_CODE_RELEASE.md) for scope and verification
+  limits.
 
 GitHub publication and the Vercel code update are complete. Render/Neon settings,
 schema and the hosted demo profile were unchanged. The previous Vercel deployment
@@ -129,15 +199,16 @@ application `app_3L935GM9Y4AtOVdSfyYKtxgbBm0` (`interview_prep_ai`). See the
   journeys have not been exercised; component/ownership regression coverage is
   preserved. Backend source was unchanged and its full test gate was not rerun.
 
-The configured local app remains at **http://localhost:3100**, PID **22988**;
+The configured local app remains at **<http://localhost:3100>**, PID **22988**;
 ignored logs and runtime override are in `.cache/clerk-setup/`. Existing Docker
-frontend/database/cleanup remain on 3000/5433; backend 8000 now runs current source
-with the local auth override. The root environment file was not inspected or
-modified; application processes loaded the ignored frontend configuration normally
-without printing it. No hosted settings, production account mode, commit, push or
-deployment changed. **Next:** continue using the local account and complete
-profile-save/sign-out plus a second-account live isolation check before claiming
-the full account journey verified. Production prerequisites remain in the runbook.
+frontend/database/cleanup remain on 3000/5433; backend 8000 now runs current
+source with the local auth override. The root environment file was not inspected
+or modified; application processes loaded the ignored frontend configuration
+normally without printing it. No hosted settings, production account mode,
+commit, push or deployment changed. **Next:** continue using the local account
+and complete profile-save/sign-out plus a second-account live isolation check
+before claiming the full account journey verified. Production prerequisites
+remain in the runbook.
 
 ## Personal resume uploads and hosted reliability — released
 
@@ -278,9 +349,9 @@ readiness is not established. Account mode remains gated by the listed prerequis
 
 The user confirmed Render **My Workspace** and the personal Vercel Hobby account
 `icyshimakaze`. The authorized Free deployment is live at
-**https://interview-prep-ai-icyshimakaze.vercel.app**. README and the deployment
-runbook now link to the real site. No manual provisioning remains for this
-mock-only profile.
+**<https://interview-prep-ai-icyshimakaze.vercel.app>**. README and the
+deployment runbook now link to the real site. No manual provisioning remains for
+this mock-only profile.
 
 - Render: `srv-dbdrrr9srm7s73cpdt6g`, Free Docker in Singapore, automatic deploys
   off, status `live`. It uses the restricted Neon runtime role and private gateway
@@ -746,7 +817,7 @@ explicitly superseded rather than presented as an existing decision.
   not a promise of free hosting. Existing local `.env` and application data were
   preserved, along with all preceding UI and cleanup work.
 
-### Verification
+### Verification — Production deployment preparation (preceding phase)
 
 - Local production-mode check passed with **no AI credentials**, using an owned
   TLS PostgreSQL container, the non-root production API image, a restricted login,
@@ -771,7 +842,7 @@ explicitly superseded rather than presented as an existing decision.
   files**), disposable migration downgrade/re-upgrade, schema drift, OpenAPI and
   legacy preservation all passed. No application database was downgraded or reset.
 
-### Limits and next task
+### Limits and next task — Production deployment preparation (preceding phase)
 
 No Vercel/Render/Neon/Clerk account, project, DNS entry, callback or hosted database
 was created or changed. No push, deployment, paid inference, external repository
@@ -821,12 +892,13 @@ changelog work from the preceding startup phase was preserved.
   changed; no new library was added. Production audit then reported **zero known
   advisories**, compared with one critical and one high advisory before the fix.
 
-### Verification
+### Verification — Product quality and accessibility review (preceding phase)
 
-- Frontend zero-warning **lint**, strict **typecheck**, all **134 component tests
-  across 15 files**, and the **production build** passed. Repository Prettier and
-  `git diff --check` passed. The initial sandbox build worker failure was rerun
-  with process access; the subsequent security stop was resolved by the patch.
+- Frontend zero-warning **lint**, strict **typecheck**, all **134 component
+  tests across 15 files**, and the **production build** passed. Repository
+  Prettier and `git diff --check` passed. The initial sandbox build worker
+  failure was rerun with process access; the subsequent security stop was
+  resolved by the patch.
 - **25 Playwright tests across four specs passed**, including two new keyboard/
   mobile-filter/reduced-motion regressions, all workspace screens at desktop,
   375px and 320px, and actual account-form component fixtures at the same sizes.
@@ -838,11 +910,12 @@ changelog work from the preceding startup phase was preserved.
   semantics, text/control contrast, alerts/retry and reduced motion. Final axe
   A/AA scans reported zero violations; this is not a full conformance claim.
 - Built the Linux frontend image and refreshed only the local frontend service.
-  The app remains at **http://localhost:3000**. Readiness and same-origin HTTP/API/
-  PostgreSQL smoke passed. Browser runners removed their temporary servers and
-  disposable databases; the application database and other services were retained.
+  The app remains at **<http://localhost:3000>**. Readiness and same-origin
+  HTTP/API/ PostgreSQL smoke passed. Browser runners removed their temporary
+  servers and disposable databases; the application database and other services
+  were retained.
 
-### Limits and next task
+### Limits and next task — Product quality and accessibility review (preceding phase)
 
 Live Clerk sign-in is unconfigured. Account forms were inspected as labelled
 static fixtures and tested with authenticated-client component mocks, not a real
@@ -949,7 +1022,7 @@ That preceding quality-pipeline commit has been pushed to `rebuild/professional-
   regeneration was byte-identical. Playwright discovery found 23 tests in four
   specs; discovery is not a new browser execution.
 
-### Limits and next task
+### Limits and next task — Engineering portfolio presentation (preceding phase)
 
 Docker Desktop was stopped and left stopped. This documentation phase did not
 start/migrate/seed the application database, launch the full Compose/native stack,
@@ -995,7 +1068,7 @@ requested domains and documents the real, intercepted and static browser checks.
   package/lockfile, Dockerfile and action ecosystems. No application dependencies,
   schema migrations or API contracts were added.
 
-### Verification
+### Verification — Full-stack automated quality pipeline (preceding phase)
 
 - A single complete `scripts/check_all.py --api-port 18101 --frontend-port 13101`
   run passed against real disposable PostgreSQL databases on Windows, using the
@@ -1032,7 +1105,7 @@ requested domains and documents the real, intercepted and static browser checks.
   The application database was not migrated, seeded or truncated by these checks.
   Docker Desktop was stopped afterward, restoring its original state.
 
-### Limits and next task
+### Limits and next task — Full-stack automated quality pipeline (preceding phase)
 
 - Live browser verification uses a disposable database and mock AI. Real Clerk
   sign-in and authenticated account browser flows remain separate integration
@@ -1077,7 +1150,7 @@ evaluation, Project Defense and roadmap work is preserved.
   quota/receipt rows so rollback cannot silently refund budgets or lose retry
   state. API readiness now requires this revision.
 
-### Verification
+### Verification — Application security and privacy review (preceding phase)
 
 - Final full backend harness: **510 passed in 430.32 seconds**, including **21
   new security regression cases**. One cryptography deprecation warning arose
@@ -1168,7 +1241,7 @@ scheduling, preservation, aggregation denominators, provenance and coverage limi
   Populated downgrade refuses data loss. Old demo task completion delegates to the
   same revision-aware service. Prior Project Defense and evaluation work is kept.
 
-### Verification
+### Verification — Personalized roadmap and persisted progress analytics (preceding phase)
 
 - Full backend run: **488 passed, 1 failed**. That new regression case failed
   because its test session expired ORM records after commit; its fixture now uses
@@ -1191,7 +1264,7 @@ scheduling, preservation, aggregation denominators, provenance and coverage limi
   lint rule, type check or database guard was weakened. No commit, push or
   deployment was performed.
 
-### Limits and next task
+### Limits and next task — Personalized roadmap and persisted progress analytics (preceding phase)
 
 - Apply `0009_personal_roadmaps` (and preceding migrations) before starting the
   updated API. Next: operator rollout and a browser smoke check in the intended
@@ -1240,7 +1313,7 @@ coverage, security boundaries, limits, retention, API and migration recovery.
 - Updated account/demo navigation wiring, generated API contracts, landing-page and
   privacy disclosures. Preserved the preceding structured-evaluation work.
 
-### Verification
+### Verification — Project Defense Mode (preceding phase)
 
 - Full backend regression: **469 passed**. Final focused run: **39 passed,
   432 deselected**, including two additional cases and the final path/order edits.
@@ -1262,7 +1335,7 @@ coverage, security boundaries, limits, retention, API and migration recovery.
 - Whole-repository Prettier and `git diff --check` passed. Docker Desktop was
   stopped after verification, restoring its original state.
 
-### Limits and next task
+### Limits and next task — Project Defense Mode (preceding phase)
 
 - Apply `0008_project_defense` before running the updated API; the application
   database remains unchanged. Next: operator rollout and a browser/live-public-
@@ -1305,7 +1378,7 @@ score meanings, aggregation, simulation behavior, storage and compatibility.
   assessments retain their committed draft and revision when grading rolls back.
   Existing ownership, demo isolation, fencing/retry and evidence exclusions remain.
 
-### Verification
+### Verification — Structured, versioned answer evaluation (preceding phase)
 
 - Full backend regression: **432 passed**. Final focused verification passed
   **166 tests, 269 deselected**, including the additional adapter validation and
@@ -1325,7 +1398,7 @@ score meanings, aggregation, simulation behavior, storage and compatibility.
   OpenAI/Ollama, Clerk and browser E2E were not exercised. Schema/transport tests
   do not establish real-model scoring quality.
 
-### Limits and next task
+### Limits and next task — Structured, versioned answer evaluation (preceding phase)
 
 - Historical results and generated follow-up answers are not regraded. Old
   in-progress interviews pin their original provider descriptor: the mock version
@@ -1405,7 +1478,7 @@ was already present locally. Final verification results are recorded below.
   and disposable databases were removed; Docker Desktop was stopped afterward,
   restoring its original stopped state.
 
-### Limits and next task
+### Limits and next task — Complete mock interviews (preceding phase)
 
 - The 23 typed catalogue prompts limit longer specialized interviews. Broader
   independently reviewed content remains needed; no automatic substitute questions.
@@ -1493,7 +1566,7 @@ paid API call, model download, commit, push or deployment was performed.
   records remain readable. Objective grading, ownership and evidence eligibility
   remain intact. OpenAPI and generated TypeScript contracts are updated.
 
-### Verification
+### Verification — AI-provider architecture (preceding phase)
 
 | Check                | Actual result                                                                                                                                                                                                                                                                           |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1513,7 +1586,7 @@ seed the application database. Verification databases were removed by the harnes
 Docker Desktop was stopped afterward, restoring its original stopped state.
 Whole-repository Prettier and `git diff --check` passed after the documentation update.
 
-### Limitations and next task
+### Limitations and next task — AI-provider architecture (preceding phase)
 
 - The other five provider operations are implemented and tested internal services;
   their owned user workflows and review screens are future work. Resume upload
@@ -1559,7 +1632,7 @@ provider, dependency installation, schema migration, commit, push or deployment.
   resume excerpts, keys and rubrics. Partial evidence disables performance
   adjustment. Existing assessment retention applies; no new external sharing.
 
-### Verification
+### Verification — Explainable adaptive selection (preceding phase)
 
 | Check                | Actual result                                                                                                                                                                                                                               |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1581,7 +1654,7 @@ Both disposable databases were removed. Docker Desktop was stopped after
 verification, restoring its original stopped state. The first cleanup attempt
 was blocked by an automatic approval-review usage limit; the resumed cleanup succeeded.
 
-### Limitations and next task
+### Limitations and next task — Explainable adaptive selection (preceding phase)
 
 - Adaptation happens between assessments. A single-question pure API is available
   for a future interview workflow; production interview delivery is not added.
@@ -1636,7 +1709,7 @@ No dependency installation, push, live migration, live seed or deployment occurr
   deletion does not erase preparation history. Demo exit/expiry and principal
   erasure cascade. Privacy/setup/legacy docs and generated contracts are updated.
 
-### Verification
+### Verification — Real assessments (preceding phase)
 
 | Check                | Actual result                                                                                                                                                                                                                                                                        |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1707,7 +1780,7 @@ push, live migration, application-data seed or deployment occurred.
   confirmation before response deletion. Filters/results/history are separate small
   components; privacy, authentication, development and rollout docs are updated.
 
-### Verification
+### Verification — Production question bank (preceding phase)
 
 | Check                            | Actual result                                                                                                                                                                                                                                                                                               |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1782,7 +1855,7 @@ was introduced. Existing application data and Compose services were preserved.
   loading/empty/error/retry states and stale-response protection. Account changes
   remount private state. Demo sources never validate real competence.
 
-### Verification
+### Verification — Explainable skill evidence engine (preceding phase)
 
 | Check                     | Actual result                                                                                                                                                                                                                        |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1799,7 +1872,7 @@ defense tests remain in memory and are rolled back. Windows frontend checks used
 reviewed child-process access. Browser checks removed their temporary API/database;
 the owned port-3100 frontend was stopped.
 
-### Limits and next task
+### Limits and next task — Explainable skill evidence engine (preceding phase)
 
 - The engine consumes existing structured history; production assessment/interview
   creation and a requirement-review editor remain separate work. New raw job text
@@ -1866,7 +1939,7 @@ does not deploy or migrate them.
 - Updated public privacy/product availability copy, README, authentication,
   development and data-model notes; added [resume API/privacy guide](docs/RESUME_PRIVACY.md).
 
-### Verification
+### Verification — Secure resume upload and evidence review (preceding phase)
 
 | Check                     | Actual result                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1890,7 +1963,7 @@ temporary API/database, and the owned port-3100 frontend was stopped. A targeted
 review of 80 commit candidates found no configured secrets, credential-shaped
 strings or environment files; cache/test/runtime artifacts remain ignored.
 
-### Rollout limits and next task
+### Rollout limits and next task — Secure resume upload and evidence review (preceding phase)
 
 - Apply migrations through `0004_resume_evidence` before starting the updated
   API/frontend. Existing services still serve the previous implementation.
@@ -1967,7 +2040,7 @@ regression and safe 503 handling for database timeouts instead of unexpected 500
 responses. Windows process permissions used reviewed local execution. The browser
 harness removed its test API/databases; the temporary native frontend was stopped.
 
-### Rollout limits and next task
+### Rollout limits and next task — Candidate profile and target jobs (preceding phase)
 
 - Apply migration `0003_candidate_context` before starting the updated API/frontend
   in the intended environment. Existing Compose services still serve the preceding
@@ -2058,7 +2131,7 @@ API/database resources were removed by the harness; the temporary native fronten
 was stopped. Existing Compose services were not rebuilt or replaced, so their UI
 remains the earlier version until an explicitly authorized local update.
 
-### Limits and next task
+### Limits and next task — Public and authenticated UI foundation (preceding phase)
 
 - Real Clerk credentials remain absent. Live sign-up/sign-in/profile-save/sign-out
   against Clerk was **not run**; account UI integration tests use mocked SDK/transport.
@@ -2330,9 +2403,10 @@ Keep accounts, ingestion, AI, and Project Defense within their later phases.
 
 ### Foundation local entry points
 
-- Frontend: [http://localhost:3000](http://localhost:3000)
-- Liveness: [http://localhost:8000/health](http://localhost:8000/health)
-- Readiness: [http://localhost:8000/api/v1/health/ready](http://localhost:8000/api/v1/health/ready)
+- Frontend: [<http://localhost:3000](http://localhost:3000>)
+- Liveness: [<http://localhost:8000/health](http://localhost:8000/health>)
+- Readiness:
+  [<http://localhost:8000/api/v1/health/ready](http://localhost:8000/api/v1/health/ready>)
 
 Stop with `docker compose down`; retain the database volume during ordinary
 shutdown. Reproduce setup and checks using [README.md](README.md) and the

@@ -1,5 +1,18 @@
 # Deployment: Vercel + Render Free + Neon
 
+## Current profile — 30 October 2026
+
+The canonical website is <https://interviewprepai.webredirect.org>. The
+GitHub-only release was attempted and rolled back; the closed/demo frontend and
+compatible backend are verified, with database revision `0013_better_auth`
+retained. Use the
+[current deployment IDs, failed gate and recovery result](FINAL_LAUNCH_2026_10_30.md).
+The deployment table and Clerk rollout instructions below are dated historical
+records, not the current production bindings. Do not deploy an old 0012-only
+backend against the current database.
+
+## Historical deployment record — 25 October 2026
+
 Latest frontend update released with explicit user authorization on
 25 October 2026 (Asia/Calcutta); the resume backend release remains 24 October.
 **[Open the website](https://interview-prep-ai-icyshimakaze.vercel.app)** and choose

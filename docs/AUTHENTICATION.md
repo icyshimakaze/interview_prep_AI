@@ -1,5 +1,28 @@
 # Accounts and recruiter demo
 
+## Current source and hosted status — 30 October 2026
+
+The source now supports `AUTH_PROVIDER=better_auth` in addition to retained
+Clerk compatibility. Better Auth lives under
+[frontend/src/lib/better-auth](../frontend/src/lib/better-auth); FastAPI
+resolves issuer/subject into stable owned principals and checks active sessions.
+Migration `0013_better_auth` and restricted auth grants are additive. Google and
+GitHub are implemented, but the live site is currently closed/demo after the
+[failed GitHub-only acceptance and verified rollback](FINAL_LAUNCH_2026_10_30.md).
+Public password signup and email recovery remain disabled. The demo needs no
+IdP. Do not follow the historical Clerk setup below as instructions to activate
+Better Auth.
+
+Local/demo development can keep `AUTH_ENABLED=false`. For account-profile code
+and placeholder settings, inspect
+[frontend profile](../deploy/frontend.github-only.production.env.example),
+[backend profile](../deploy/backend.oauth.production.env.example), and
+[reviewed auth grants](../deploy/better-auth-grants.sql). These templates are
+not credentials and do not authorize production changes. The independent live
+acceptance gate remains unmet.
+
+## Historical Clerk configuration and account context
+
 For the prepared Vercel/Render/Neon public release, follow
 [DEPLOYMENT.md](DEPLOYMENT.md). Its `PUBLIC_DEMO_ONLY=true` profile enforces mock AI
 and disabled accounts; no Clerk or AI key is required. Enable accounts only in a
@@ -184,8 +207,10 @@ are rejected. The configured discovery pattern follows
 Discovery has a 3-second request timeout, 64 KiB budget, bounded RSA key set,
 no redirects and no environment-proxy inheritance. Keys cache for 300 seconds
 by default. Unknown key IDs trigger a bounded refresh; expired keys and failed
-discovery fail closed with a sanitized 503. Invalid/missing tokens return structured
-401 with `WWW-Authenticate: Bearer`; inactive/capability-denied identities return 403. Missing or foreign private resources return indistinguishable 404 responses.
+discovery fail closed with a sanitized 503. Invalid or missing tokens return
+HTTP 401 with a `WWW-Authenticate: Bearer` header. Inactive or capability-denied
+identities return HTTP 403. Missing or foreign private resources return
+indistinguishable HTTP 404 responses.
 All errors contain a request ID, omit raw claims/driver errors, and use `no-store`.
 
 Account bootstrap is explicit `POST /api/v1/account/session` with `{}` after
@@ -242,9 +267,10 @@ accessible confirmation dialog before calling the same owned deletion endpoint.
 Demo APIs accept only their cookie and reject any Authorization header. Every
 visitor owns a separate principal and distinct records; neither another demo's
 UUID nor a real account resource ID grants access. Task completion is idempotent,
-requires exact Origin/CSRF, and records one simulated progress event. Demo practice accepts bounded typed responses. Project Defense accepts public
+requires exact Origin/CSRF, and records one simulated progress event. Demo
+practice accepts bounded typed responses. Project Defense accepts public
 GitHub and ZIP imports through the same bounded analyzer as accounts. Resume PDF
-upload and target-job editing remain account-only. Demo evaluation always uses
+upload is available in a private temporary demo workspace. Demo evaluation uses
 local mock simulation; imported source and defense answers are not sent to AI.
 
 Cookies are host-only, SameSite=Lax; the session is HttpOnly and scoped to
