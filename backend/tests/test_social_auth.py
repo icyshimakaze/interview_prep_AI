@@ -3,6 +3,7 @@
 import base64
 import hashlib
 import json
+import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from http.cookies import SimpleCookie
@@ -235,6 +236,214 @@ async def test_new_returning_social_user_same_principal_and_revocation(
         ).one()
         assert tuple(row) == (None, None, None)
         assert await connection.scalar(text('SELECT "emailVerified" FROM auth."user"')) is True
+
+
+@pytest.mark.parametrize("provider", ["google", "github"])
+async def test_unknown_eligible_public_identity_registers_without_test_allowlist(
+    social_database: AsyncEngine, provider: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    settings = SOCIAL[provider]
+    assert isinstance(settings, dict)
+    old_subjects = settings["allowedSubjects"]
+    unknown = "previously-unknown-google-identity" if provider == "google" else "30003"
+    assert isinstance(old_subjects, list) and unknown not in old_subjects
+    monkeypatch.setitem(
+        SOCIAL, provider, {**settings, "allowedSubjects": [], "publicRegistration": True}
+    )
+    fixture: dict[str, object] = {
+        "sub": unknown,
+        "githubId": 30003,
+        "email": "independent-public@example.invalid",
+        "privateEmail": True,
+    }
+    path, cookie = await begin(social_database, provider)
+    first = await request(social_database, path, cookie=cookie, fixture=fixture)
+    assert first["location"] == ISSUER + "/app/dashboard"
+    reference = first["callbackRequestId"]
+    assert isinstance(reference, str) and len(reference) == 36
+    assert first["callbackDiagnostics"] == [
+        {
+            "event": "oauth_callback_result",
+            "requestId": reference,
+            "provider": provider,
+            "admission": "public",
+            "status": 302,
+            "reason": "completed",
+        }
+    ]
+    signed_in = cookies(cookie, first)
+    original_token = await token(social_database, signed_in)
+    subject = jwt.decode(original_token, options={"verify_signature": False})["sub"]
+    async with account_api(social_database) as client:
+        client.headers["Authorization"] = "Bearer " + original_token
+        assert (await client.post("/api/v1/account/session", json={})).status_code == 200
+    async with social_database.connect() as connection:
+        principal = await connection.scalar(text("SELECT id FROM public.principals"))
+        assert principal is not None
+        assert await connection.scalar(text('SELECT "accountId" FROM auth.account')) == unknown
+        assert await connection.scalar(text('SELECT "emailVerified" FROM auth."user"')) is True
+        assert await connection.scalar(text('SELECT count(*) FROM auth."user"')) == 1
+    await request(social_database, "/sign-out", cookie=signed_in, body={})
+    returning = await login(social_database, provider, fixture=fixture)
+    returned_subject = jwt.decode(
+        await token(social_database, returning), options={"verify_signature": False}
+    )["sub"]
+    assert returned_subject == subject
+    async with social_database.connect() as connection:
+        assert await connection.scalar(text("SELECT id FROM public.principals")) == principal
+        assert await connection.scalar(text('SELECT count(*) FROM auth."user"')) == 1
+    denied = await request(social_database, "/sign-up/email", body={})
+    assert denied["status"] == 404
+
+
+async def test_public_google_email_collision_with_github_fails_closed_then_distinct_email_enrolls(
+    social_database: AsyncEngine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for provider, settings in tuple(SOCIAL.items()):
+        assert isinstance(settings, dict)
+        monkeypatch.setitem(
+            SOCIAL, provider, {**settings, "allowedSubjects": [], "publicRegistration": True}
+        )
+    await login(social_database, "google", fixture={"email": "existing-google@example.invalid"})
+    github_cookie = await login(social_database, "github")
+    github_token = await token(social_database, github_cookie)
+    async with account_api(social_database) as client:
+        client.headers["Authorization"] = "Bearer " + github_token
+        assert (await client.post("/api/v1/account/session", json={})).status_code == 200
+        assert (await client.put("/api/v1/account/profile", json=PROFILE)).status_code == 200
+        async with social_database.connect() as connection:
+            original_principal = await connection.scalar(text("SELECT id FROM public.principals"))
+        path, state_cookie = await begin(social_database, "google")
+        rejected = await request(
+            social_database,
+            path,
+            cookie=state_cookie,
+            fixture={"sub": "unknown-google-with-github-email"},
+        )
+        assert rejected["location"] == ISSUER + "/sign-in?social_error=1"
+        events = rejected["callbackDiagnostics"]
+        assert isinstance(events, list) and len(events) == 1
+        assert events[0]["reason"] == "account_not_linked"
+        assert events[0]["admission"] == "public"
+        async with social_database.connect() as connection:
+            assert await connection.scalar(text('SELECT count(*) FROM auth."user"')) == 2
+            assert await connection.scalar(text("SELECT count(*) FROM auth.account")) == 2
+            assert (
+                await connection.scalar(text("SELECT id FROM public.principals"))
+                == original_principal
+            )
+        assert (await client.get("/api/v1/account/profile")).json()["target_role"] == PROFILE[
+            "target_role"
+        ]
+        enrolled = await login(
+            social_database,
+            "google",
+            fixture={
+                "sub": "unknown-google-distinct-email",
+                "email": "independent-google@example.invalid",
+            },
+        )
+        new_token = await token(social_database, enrolled)
+        assert (
+            jwt.decode(new_token, options={"verify_signature": False})["sub"]
+            != jwt.decode(github_token, options={"verify_signature": False})["sub"]
+        )
+        client.headers["Authorization"] = "Bearer " + new_token
+        assert (await client.post("/api/v1/account/session", json={})).status_code == 200
+        async with social_database.connect() as connection:
+            assert await connection.scalar(text('SELECT count(*) FROM auth."user"')) == 3
+            assert await connection.scalar(text("SELECT count(*) FROM public.principals")) == 2
+
+
+async def test_github_only_public_release_unknown_user_saved_work_isolation_and_revocation(
+    social_database: AsyncEngine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    github = SOCIAL["github"]
+    assert isinstance(github, dict)
+    monkeypatch.delitem(SOCIAL, "google")
+    monkeypatch.setitem(
+        SOCIAL, "github", {**github, "allowedSubjects": [], "publicRegistration": True}
+    )
+    disabled = await request(social_database, "/sign-in/social", body={"provider": "google"})
+    assert disabled["status"] == 400
+    assert not disabled["oauthCalls"]
+    for path in ["/sign-up/email", "/request-password-reset", "/send-verification-email"]:
+        assert (await request(social_database, path, body={}))["status"] == 404
+    old_cookie = await login(
+        social_database, "github", fixture={"email": "existing-github@example.invalid"}
+    )
+    old_token = await token(social_database, old_cookie)
+    fixture: dict[str, object] = {
+        "githubId": 30003,
+        "email": "independent-github@example.invalid",
+        "privateEmail": True,
+    }
+    new_cookie = await login(social_database, "github", fixture=fixture)
+    new_token = await token(social_database, new_cookie)
+    old_claims = jwt.decode(old_token, options={"verify_signature": False})
+    new_claims = jwt.decode(new_token, options={"verify_signature": False})
+    assert old_claims["sub"] != new_claims["sub"]
+    assert jwt.get_unverified_header(new_token)["alg"] == "RS256"
+    assert new_claims["exp"] - new_claims["iat"] == 60
+    async with account_api(social_database) as client:
+        client.headers["Authorization"] = "Bearer " + old_token
+        assert (await client.post("/api/v1/account/session", json={})).status_code == 200
+        old = await client.post(
+            "/api/v1/account/targets",
+            json={"title": "Existing test work", "description": "Synthetic only"},
+        )
+        assert old.status_code == 201
+        old_path = "/api/v1/account/targets/" + old.json()["id"]
+        client.headers["Authorization"] = "Bearer " + new_token
+        assert (await client.post("/api/v1/account/session", json={})).status_code == 200
+        assert (await client.put("/api/v1/account/profile", json=PROFILE)).status_code == 200
+        assert (await client.get(old_path)).status_code == 404
+        assert (
+            await client.put(
+                old_path,
+                json={
+                    "title": "Forbidden edit",
+                    "description": "Synthetic only",
+                    "expected_revision": 1,
+                },
+            )
+        ).status_code == 404
+        owned = await client.post(
+            "/api/v1/account/targets",
+            json={"title": "Independent saved work", "description": "Synthetic only"},
+        )
+        assert owned.status_code == 201
+        owned_path = "/api/v1/account/targets/" + owned.json()["id"]
+        assert (await client.get(owned_path)).status_code == 200
+        assert new_claims["exp"] > time.time()
+        await request(social_database, "/sign-out", cookie=new_cookie, body={})
+        assert (await client.get(owned_path)).status_code == 401
+        returning = await login(social_database, "github", fixture=fixture)
+        returning_token = await token(social_database, returning)
+        assert (
+            jwt.decode(returning_token, options={"verify_signature": False})["sub"]
+            == new_claims["sub"]
+        )
+        client.headers["Authorization"] = "Bearer " + returning_token
+        assert (await client.post("/api/v1/account/session", json={})).status_code == 200
+        assert (await client.get(owned_path)).status_code == 200
+        assert (await client.get(old_path)).status_code == 404
+        assert (await client.get("/api/v1/account/profile")).status_code == 200
+    async with social_database.connect() as connection:
+        assert await connection.scalar(text('SELECT count(*) FROM auth."user"')) == 2
+        assert await connection.scalar(text("SELECT count(*) FROM public.principals")) == 2
+        assert (
+            await connection.scalar(
+                text("SELECT count(*) FROM auth.account WHERE \"providerId\"='google'")
+            )
+            == 0
+        )
+        row = (
+            await connection.execute(
+                text('SELECT "accessToken","refreshToken","idToken" FROM auth.account LIMIT 1')
+            )
+        ).one()
+        assert tuple(row) == (None, None, None)
 
 
 async def test_same_email_requires_explicit_link_and_retains_completed_history(

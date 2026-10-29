@@ -15,7 +15,7 @@ export default function PrivacyPage() {
             This development preview keeps fictional demo data separate from
             account data. Here is what the current product does.
           </p>
-          <p className="mt-4 text-xs text-muted">Updated 24 October 2026</p>
+          <p className="mt-4 text-xs text-muted">Updated 29 October 2026</p>
           {[
             [
               "The interactive demo",
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
             ],
             [
               "Social sign-in when enabled",
-              "Google and GitHub sign-in are available only in explicitly enabled test environments for authorized accounts. The provider shares basic identity details so we can recognize your sign-in; we store its account identifier and basic account details, not access or refresh tokens for its APIs. GitHub login reads your email addresses, including a private primary address, for account identity. It requests no repository permission and is separate from public repository import. We do not request mailbox contents, contacts, Drive or ongoing offline access. Matching email addresses never connects existing accounts automatically. Connect another provider from Account access after signing in again. Provider and hosting logs follow their own policies. Email verification and password recovery remain unavailable.",
+              "When enabled, GitHub sign-in allows public registration using a verified provider email. Google sign-in remains disabled for this release. The provider shares basic identity details so we can recognize your sign-in; we store its account identifier and basic account details, not access or refresh tokens for its APIs. GitHub login reads your email addresses, including a private primary address, for account identity. It requests no repository permission and is separate from public repository import. We do not request mailbox contents, contacts, Drive or ongoing offline access. Matching email addresses never connects existing accounts automatically. Any account connection requires a recent signed-in session and proof of both identities. Callback diagnostics contain only a random request reference, provider, admission mode, HTTP status and a fixed result code; they contain no email, provider account ID, OAuth code/state, cookie or token. Provider and hosting logs follow their own policies. Public email/password registration, verification-email delivery and password recovery remain unavailable.",
             ],
             [
               "Your target jobs",

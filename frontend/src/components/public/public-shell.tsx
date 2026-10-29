@@ -59,6 +59,9 @@ export function PublicShell({ children }: { children: ReactNode }) {
             <Link href="/privacy" className="text-link">
               Privacy & data
             </Link>
+            <Link href="/terms" className="text-link">
+              Terms of Service
+            </Link>
             <Link href="/status" className="text-link">
               Service status
             </Link>

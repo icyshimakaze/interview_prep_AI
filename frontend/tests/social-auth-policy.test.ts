@@ -20,6 +20,28 @@ const env = {
 };
 const origin = "https://auth.example.test";
 describe("restricted social authentication policy", () => {
+  it("keeps Google unavailable in an explicit public GitHub-only profile", () => {
+    const settings = socialAuthSettings({
+      ...env,
+      SOCIAL_REGISTRATION_MODE: "public",
+      GOOGLE_AUTH_ENABLED: "false",
+      GITHUB_AUTH_ENABLED: "true",
+      GITHUB_CLIENT_ID: "synthetic-github-client",
+      GITHUB_CLIENT_SECRET: "synthetic-github-secret",
+      GITHUB_ALLOWED_SUBJECTS: "[]",
+    });
+    expect(socialProviderNames(settings)).toEqual(["github"]);
+    expect(admittedSocialIdentity(settings, "google", { sub: "new" })).toBe(
+      false,
+    );
+    expect(admittedSocialIdentity(settings, "github", { id: 30003 })).toBe(
+      true,
+    );
+    expect(
+      socialRequestBody({ provider: "google" }, origin, false, settings),
+    ).toBeUndefined();
+  });
+
   it("requires explicit public opt-in and validates provider subjects in public mode", () => {
     const settings = socialAuthSettings({
       ...env,

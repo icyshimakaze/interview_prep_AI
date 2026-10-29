@@ -51,6 +51,22 @@ const settings = {
   rateLimitKey: "synthetic-rate-limit-secret-00000000000000000000",
   production: true,
 };
+// Capture only the app's fixed diagnostic event in this disposable bridge;
+// keep stdout a single JSON object for the Python verifier.
+const callbackDiagnostics = [];
+const originalInfo = console.info;
+console.info = (...args) => {
+  try {
+    const value = typeof args[0] === "string" ? JSON.parse(args[0]) : null;
+    if (value?.event === "oauth_callback_result") {
+      callbackDiagnostics.push(value);
+      return;
+    }
+  } catch {
+    // Non-diagnostic test-process output retains its original behavior.
+  }
+  originalInfo(...args);
+};
 try {
   if (process.argv.includes("--generate")) {
     const auth = createBetterAuth(pool, settings);
@@ -134,6 +150,8 @@ try {
         location: response.headers.get("location"),
         oauthCalls,
         cacheControl: response.headers.get("cache-control"),
+        callbackRequestId: response.headers.get("x-auth-request-id"),
+        callbackDiagnostics,
       }),
     );
   }

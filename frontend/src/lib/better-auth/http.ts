@@ -12,6 +12,7 @@ import {
   validSocialCallback,
 } from "./social-http";
 import { SOCIAL_ERROR_PATH, SOCIAL_FRESH_SECONDS } from "./social-settings";
+import { recordOAuthCallback } from "./oauth-diagnostics";
 
 type Auth = ReturnType<typeof createBetterAuth>;
 const reads = new Set(["/ok", "/get-session", "/token", "/jwks"]);
@@ -198,8 +199,24 @@ export async function authRequest(
         body,
       }),
     );
-    if (response.status >= 500) return failure(503, "auth_unavailable");
+    const callbackRequestId =
+      callbackProvider === "google" || callbackProvider === "github"
+        ? recordOAuthCallback(
+            callbackProvider,
+            settings.social?.[callbackProvider]?.publicRegistration === true,
+            response.status,
+            response.headers.get("location"),
+            settings.origin,
+          )
+        : undefined;
+    if (response.status >= 500) {
+      const unavailable = failure(503, "auth_unavailable");
+      if (callbackRequestId)
+        unavailable.headers.set("X-Auth-Request-Id", callbackRequestId);
+      return unavailable;
+    }
     const outgoing = new Headers(response.headers);
+    if (callbackRequestId) outgoing.set("X-Auth-Request-Id", callbackRequestId);
     for (const [key, value] of Object.entries(safeHeaders))
       outgoing.set(key, value);
     if (callback && response.status >= 300 && response.status < 400)
@@ -241,6 +258,18 @@ export async function authRequest(
     });
   } catch {
     // Never return/log driver, request, password or key material.
-    return failure(503, "auth_unavailable");
+    const unavailable = failure(503, "auth_unavailable");
+    if (callbackProvider === "google" || callbackProvider === "github")
+      unavailable.headers.set(
+        "X-Auth-Request-Id",
+        recordOAuthCallback(
+          callbackProvider,
+          settings.social?.[callbackProvider]?.publicRegistration === true,
+          503,
+          null,
+          settings.origin,
+        ),
+      );
+    return unavailable;
   }
 }
