@@ -67,10 +67,12 @@ No merge, force-push, default-branch change, automatic release or deletion is
 part of this documentation preparation.
 [GitHub default-branch instructions](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch).
 
-## Prepared PR
+## Published PR
 
-**Title:** Document the modern Interview Prep AI application and reviewer
-walkthrough
+[Review documentation PR #1](https://github.com/icyshimakaze/interview_prep_AI/pull/1).
+It is open and unmerged; the default branch remains `main`.
+
+**Title:** Document the modern application and recruiter walkthrough
 
 **Base:** `release/github-only-public-2026-10-30-37bbc9a5`
 

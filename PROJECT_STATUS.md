@@ -2,7 +2,7 @@
 
 Updated: 2026-10-30 (Asia/Calcutta).
 
-## Acceptance repair and documentation publication authorized
+## Acceptance runner repaired; documentation PR open
 
 Read-only evidence confirmed two authorizations in separate tabs; the old runner
 tracked the first state and retained the provider tab. Its cleanup sent the
@@ -12,9 +12,9 @@ remain unchanged. Focused checks: 15 correlation/cohort tests, six isolated
 browser checks and nine pinned-library/database tests passed. Strict frontend
 types, focused ESLint, Python Ruff and strict mypy passed.
 
-The user separately authorized publishing this documentation-only branch and a
-reviewable PR. The earlier publication hold is superseded; no merge or settings
-change is authorized. Production remains closed/demo. See the
+The separately authorized [documentation PR #1](https://github.com/icyshimakaze/interview_prep_AI/pull/1)
+is open against the modern release branch. The earlier publication hold is
+superseded; no merge or settings change is authorized. Production remains closed/demo. See the
 [diagnosis and verification boundary](docs/PRODUCTION_ACCEPTANCE_REPAIR.md).
 
 ## GitHub-only launch attempted; closed rollback verified
@@ -96,7 +96,7 @@ public run page independently confirmed all three named jobs completed successfu
 - Live Vercel inspection confirms project `prj_wsxEcvVC17paXs5pco4K9eHwWKgd`,
   account `team_vyOtLBqMjk5sQ9DTmzCcbwiN`, new **READY** production deployment
   **`dpl_53VkStbwKUFnBnoigpBv28hhJNeN`** at **`c6dfda1`**, and canonical alias
-  **<https://interview-prep-ai-icyshimakaze.vercel.app**> pointing to that
+  **<https://interview-prep-ai-icyshimakaze.vercel.app>** pointing to that
   deployment. Both deployment-ID and canonical-alias lookups confirm the exact
   source SHA. The existing hosted environment still has no Clerk keys.
   Production account mode is not enabled by a Git push or frontend code release.
@@ -199,7 +199,7 @@ application `app_3L935GM9Y4AtOVdSfyYKtxgbBm0` (`interview_prep_ai`). See the
   journeys have not been exercised; component/ownership regression coverage is
   preserved. Backend source was unchanged and its full test gate was not rerun.
 
-The configured local app remains at **<http://localhost:3100**>, PID **22988**;
+The configured local app remains at **<http://localhost:3100>**, PID **22988**;
 ignored logs and runtime override are in `.cache/clerk-setup/`. Existing Docker
 frontend/database/cleanup remain on 3000/5433; backend 8000 now runs current
 source with the local auth override. The root environment file was not inspected
@@ -349,7 +349,7 @@ readiness is not established. Account mode remains gated by the listed prerequis
 
 The user confirmed Render **My Workspace** and the personal Vercel Hobby account
 `icyshimakaze`. The authorized Free deployment is live at
-**<https://interview-prep-ai-icyshimakaze.vercel.app**>. README and the
+**<https://interview-prep-ai-icyshimakaze.vercel.app>**. README and the
 deployment runbook now link to the real site. No manual provisioning remains for
 this mock-only profile.
 
@@ -910,7 +910,7 @@ changelog work from the preceding startup phase was preserved.
   semantics, text/control contrast, alerts/retry and reduced motion. Final axe
   A/AA scans reported zero violations; this is not a full conformance claim.
 - Built the Linux frontend image and refreshed only the local frontend service.
-  The app remains at **<http://localhost:3000**>. Readiness and same-origin
+  The app remains at **<http://localhost:3000>**. Readiness and same-origin
   HTTP/API/ PostgreSQL smoke passed. Browser runners removed their temporary
   servers and disposable databases; the application database and other services
   were retained.
