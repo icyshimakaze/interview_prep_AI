@@ -1,5 +1,28 @@
 # Product screenshot provenance
 
+## Portfolio refresh — 30 October 2026 (Asia/Calcutta)
+
+[preview-landing-desktop.png](preview-landing-desktop.png) is a 1440 × 900
+Chrome capture of the actual frozen application's homepage, rendered locally
+from the retained optimized synthetic build. No rebuild, response interception,
+provider login or private workspace was used. It represents the candidate UI,
+not the currently rolled-back production auth profile. Its workspace
+illustration is explicitly labelled interface preview in the product.
+
+[launch-landing-mobile.png](launch-landing-mobile.png) is an unedited viewport
+capture from physical Android Chrome of the current canonical closed/demo site,
+frontend `dpl_A5RrDr2ro6Qw52ipZCcvWgyzNBLu`. Its CSS viewport was 360 × 678 (the
+PNG uses the device's pixel density). No account screen, real resume, cookie,
+token or provider consent page appears. Both new PNGs were visually reviewed.
+Actual account access remains closed; see the
+[release result](../FINAL_LAUNCH_2026_10_30.md).
+
+A desktop network capture failed with `ERR_CONNECTION_RESET`; an Android
+desktop-width attempt produced repeated tiles and was discarded. Neither is
+presented as a valid screenshot. The locally rendered desktop capture above has
+explicit provenance. Existing desktop/mobile feature captures below are retained
+with their original dates and boundaries.
+
 ## Hosted personal resume — 24 October 2026
 
 [hosted-resume-upload.png](hosted-resume-upload.png) (1440 pixels) and

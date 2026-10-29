@@ -1,5 +1,12 @@
 # Development and verification
 
+The current source requires schema `0013_better_auth`; `alembic upgrade head`
+applies it locally. The zero-key demo works with authentication disabled. The
+hosted site currently uses the closed/demo profile; see the
+[30 October release result](FINAL_LAUNCH_2026_10_30.md). Older Clerk-specific
+configuration below remains an optional compatibility path, not a requirement
+for demo development.
+
 ## Prerequisites and configuration
 
 Use Node 24 LTS (24.15+; Node 26 is also supported for local development), pnpm
@@ -46,8 +53,9 @@ loops described below. API/frontend containers run as non-root.
 
 The frontend's backend destination is resolved at build time. Rebuild its image
 when changing that destination. Services are local development configurations;
-public HTTPS ingress, verified proxy trust, separate migration/runtime DB roles,
-Clerk instance setup, backup/restore, and production CSP are future release work.
+public-host configuration is described in the [deployment guide](DEPLOYMENT.md)
+and [current release result](FINAL_LAUNCH_2026_10_30.md). Local Compose settings
+do not by themselves reproduce production identity, TLS or role configuration.
 The demo creation quota uses the direct peer address; behind an unconfigured
 gateway that means a shared gateway quota. Public ingress must establish trusted
 client IP handling before a recruiter demo release.
@@ -79,12 +87,13 @@ first: `docker compose stop frontend backend cleanup`. Both workflows use the
 same persisted application database. After a schema change, apply its migration
 before restarting services; the API does not auto-create tables.
 
-The current application requires migrations through `0010_security_budgets`,
-including `0007_mock_interviews` for the interview workflow. The API starts
-two bounded database-backed worker loops by default (`INTERVIEW_WORKER_ENABLED=true`).
-They evaluate already-saved main answers, prepare optional follow-ups and recover
-expired/interrupted work. Default/demo use stays local with `AI_PROVIDER=mock`.
-See [interview operations and recovery](MOCK_INTERVIEWS.md).
+The current application requires migrations through `0013_better_auth`,
+including `0007_mock_interviews` for the interview workflow. The API starts two
+bounded database-backed worker loops by default
+(`INTERVIEW_WORKER_ENABLED=true`). They evaluate already-saved main answers,
+prepare optional follow-ups and recover expired/interrupted work. Default/demo
+use stays local with `AI_PROVIDER=mock`. See
+[interview operations and recovery](MOCK_INTERVIEWS.md).
 
 ## Quality gates
 
@@ -160,20 +169,21 @@ run only on disposable test databases.
 
 ## Minimal demo identity contract
 
-`POST /api/v1/demo/sessions` accepts only `{}` and an exact allowed `Origin`, sets
-an opaque HttpOnly cookie, and returns the current expiring workspace. Subsequent
-creation requests reuse that workspace only with its `X-CSRF-Token` from the
-non-HttpOnly CSRF cookie. `GET /api/v1/demo/workspace` resolves only the cookie's
-workspace and has no owner-ID parameter. Any bearer credentials never become
-demo access. Tokens are stored as SHA-256 hashes; creation is limited to two new
-workspaces per network identifier/hour. Demo access expires within 24 hours;
-cleanup deletes principals, all their private records and credentials with FK
-cascade, plus expired hashed rate identifiers. The fictional recruiter workspace
-has a dashboard, saved practice, roadmap and local Project Defense imports.
-It accepts fictional user-entered answers and repository data, always uses mock
-AI, and does not accept resume PDFs. Exit deletes that visitor's records.
-Expired credentials can be cleared with a same-origin reset; resetting a live
-workspace still requires CSRF and does not bypass creation quotas.
+`POST /api/v1/demo/sessions` accepts only `{}` and an exact allowed `Origin`,
+sets an opaque HttpOnly cookie, and returns the current expiring workspace.
+Subsequent creation requests reuse that workspace only with its `X-CSRF-Token`
+from the non-HttpOnly CSRF cookie. `GET /api/v1/demo/workspace` resolves only
+the cookie's workspace and has no owner-ID parameter. Any bearer credentials
+never become demo access. Tokens are stored as SHA-256 hashes; creation is
+limited to two new workspaces per network identifier/hour. Demo access expires
+within 24 hours; cleanup deletes principals, all their private records and
+credentials with FK cascade, plus expired hashed rate identifiers. The fictional
+recruiter workspace has a dashboard, saved practice, roadmap and local Project
+Defense imports. It accepts fictional user-entered answers and repository data,
+always uses mock AI, and supports bounded personal PDF uploads alongside the
+fictional sample. Exit deletes that visitor's records. Expired credentials can
+be cleared with a same-origin reset; resetting a live workspace still requires
+CSRF and does not bypass creation quotas.
 
 See [the relational model and seeds](DATA_MODEL.md) and
 [Clerk setup, account routes and demo isolation](AUTHENTICATION.md). Load the
@@ -193,10 +203,12 @@ rate-limit keys. These safeguards do not authorize a public deployment.
 
 ## Troubleshooting
 
-Question browsing and assessments require migration `0006_real_assessments` and the explicit catalogue
-seed. See [validation/publication and recovery commands](QUESTION_BANK.md).
-Readiness requires `0010_security_budgets`. The browser harness seeds only its freshly created
-disposable database; existing application services are not automatically replaced.
+Question browsing and assessments require migration `0006_real_assessments` and
+the explicit catalogue seed. See
+[validation/publication and recovery commands](QUESTION_BANK.md). Readiness
+requires `0013_better_auth`. The browser harness seeds only its freshly created
+disposable database; existing application services are not automatically
+replaced.
 
 - A stopped Docker daemon: start Docker Desktop and rerun `docker version`.
 - A 503 readiness response: verify PostgreSQL is healthy, credentials/ports match,

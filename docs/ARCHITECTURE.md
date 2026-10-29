@@ -1,9 +1,19 @@
 # Implemented architecture
 
-Verified against the V2 source on 23 October 2026. This guide describes the current
-application; [V2_ARCHITECTURE.md](V2_ARCHITECTURE.md) records the original design
-proposal. [PROJECT_STATUS.md](../PROJECT_STATUS.md) records executed verification
-and release limitations. There is no verified production deployment here.
+The modern source includes Better Auth first-party routes, a restricted auth
+database connection and 60-second RS256 API tokens. FastAPI additionally checks
+active sessions and owner mappings. Account access is disabled in the current
+hosted profile. The [README diagram](../README.md#system-architecture)
+summarizes the current integration; the original design proposal remains
+historical.
+
+Verified against the V2 source on 23 October 2026. This guide describes the
+current application; [V2_ARCHITECTURE.md](V2_ARCHITECTURE.md) records the
+original design proposal. [PROJECT_STATUS.md](../PROJECT_STATUS.md) records
+executed verification and release limitations. For current hosted profile and
+deployment IDs, use the [30 October release result](FINAL_LAUNCH_2026_10_30.md).
+The live site is closed/demo after rollback. The domain/service discussion below
+is retained; structural counts are dated observations.
 
 ## System boundaries
 
@@ -16,7 +26,9 @@ claim or simulated result into validated competence.
 flowchart LR
     B[Browser] --> N[Next.js: public / account / demo]
     N -->|API rewrite| F[FastAPI]
-    J[Trusted Clerk JWKS] --> F
+    J[Better Auth or legacy Clerk JWKS] --> F
+    N -. account profile .-> BA[Better Auth: first-party routes]
+    BA --> P
     F --> S[Domain services]
     S --> E[Pure evidence / adaptive / planning engines]
     S --> P[(PostgreSQL)]
